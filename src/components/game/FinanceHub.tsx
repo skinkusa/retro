@@ -76,7 +76,7 @@ export function FinanceHub() {
             </div>
           </div>
           <div className="pt-4 border-t border-primary/10 italic text-[10px] text-muted-foreground text-center">
-            "THE BOARD IS {(totalIncome - totalExpense) > 0 ? 'SATISFIED' : 'CONCERNED'} WITH CURRENT FINANCIAL PERFORMANCE."
+            &ldquo;THE BOARD IS {(totalIncome - totalExpense) > 0 ? 'SATISFIED' : 'CONCERNED'} WITH CURRENT FINANCIAL PERFORMANCE.&rdquo;
           </div>
         </div>
       </RetroWindow>

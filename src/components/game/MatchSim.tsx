@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/store';
 import { getZoneStrength } from '@/lib/game-engine';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { SquadList } from './SquadList';
 import { TacticsPitch } from './TacticsPitch';
 import { Pause, Play, ChevronRight, AlertTriangle, ShieldAlert, Swords, Trophy, Activity, RefreshCw, Target } from 'lucide-react';
@@ -364,14 +364,14 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             <div className="space-y-1 text-right">
               {homeScorers.map((s, idx) => (
                 <div key={idx} className="text-[13px] font-black text-accent uppercase leading-none">
-                  {state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} ({s.minute}')
+                  {state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} ({s.minute}&#39;)
                 </div>
               ))}
             </div>
             <div className="space-y-1 text-left">
               {awayScorers.map((s, idx) => (
                 <div key={idx} className="text-[13px] font-black text-accent uppercase leading-none">
-                  {state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} ({s.minute}')
+                  {state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} ({s.minute}&#39;)
                 </div>
               ))}
             </div>

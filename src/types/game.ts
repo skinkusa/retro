@@ -122,6 +122,8 @@ export interface Fixture {
     awayGoals: number;
     homePens?: number;
     awayPens?: number;
+    homeChances?: number;
+    awayChances?: number;
     attendance: number;
     events: MatchEvent[];
     ratings: Record<string, number>;

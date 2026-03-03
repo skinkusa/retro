@@ -39,7 +39,7 @@ export function StatsHub({ division }: StatsHubProps) {
     .sort((a, b) => ((b.seasonStats.redCards || 0) * 3 + (b.seasonStats.yellowCards || 0)) - ((a.seasonStats.redCards || 0) * 3 + (a.seasonStats.yellowCards || 0)))
     .slice(0, 20);
 
-  const getTeamName = (clubId: string) => state.teams.find(t => t.id === clubId)?.name || "Unknown";
+  const getTeamName = (clubId: string | null) => state.teams.find(t => t.id === clubId)?.name || "Unknown";
 
   const renderTable = (players: Player[], type: 'scorers' | 'ratings' | 'discipline') => (
     <Table>

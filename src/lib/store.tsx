@@ -247,7 +247,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       return { ...s, fixtures: updatedFixtures, teams: Array.from(updatedTeamsMap.values()) };
     });
-  }, [state.userTeamId, state.manager?.personality, getBest11ForTeam]);
+  }, [getBest11ForTeam]);
 
   const advanceWeek = useCallback(() => {
     let seasonJustEnded = false;
@@ -453,7 +453,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (seasonJustEnded) {
       toast({ title: "SEASON COMPLETE", description: "The campaign has concluded. View the wrap-up report." });
     }
-  }, [prepareSeasonSummary, state.userTeamId, state.manager?.personality, toast]);
+  }, [prepareSeasonSummary, toast]);
 
   const acceptBid = useCallback((bidId: string) => {
     let soldName = '';
@@ -726,7 +726,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     acceptBid, rejectBid,
     updateMidMatchResult, updateSeason: (y: number) => setState(s => ({ ...s, season: y })), updateTeamName, fastForwardSeason,
     startNextSeason
-  }), [state, startGame, simulateWeek, advanceWeek, saveGame, loadGame, buyPlayer, renewContract, toggleShortlist, toggleTransferList, hireStaff, fireStaff, togglePlayerLineup, swapPlayers, updateMidMatchResult, updateTeamName, fastForwardSeason, startNextSeason, acceptBid, rejectBid]);
+  }), [state, startGame, simulateWeek, advanceWeek, saveGame, loadGame, buyPlayer, renewContract, toggleShortlist, toggleTransferList, hireStaff, fireStaff, togglePlayerLineup, swapPlayers, updateMidMatchResult, updateTeamName, fastForwardSeason, startNextSeason, acceptBid, rejectBid, autoPickLineup]);
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
 }

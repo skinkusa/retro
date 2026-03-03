@@ -371,7 +371,7 @@ export function updateLeagueTable(teams: Team[], fixtures: Fixture[], division: 
     .filter((t) => t.division === division)
     .map((t) => ({
       ...t,
-      played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [],
+      played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] as string[],
     }));
 
   fixtures

@@ -186,7 +186,7 @@ function FiredScreen() {
         </div>
         <h1 className="text-5xl font-black text-red-500 uppercase tracking-tighter">Terminated</h1>
         <p className="text-[18px] text-muted-foreground italic px-8 leading-tight font-black">
-          "Results speak louder than words, and yours have been deafeningly poor. You are no longer required at this club."
+          &ldquo;Results speak louder than words, and yours have been deafeningly poor. You are no longer required at this club.&rdquo;
         </p>
         <Button onClick={resetFired} className="w-full bg-red-600 text-white font-black retro-button py-10 text-2xl rounded-2xl">
           RETURN TO MAIN MENU
