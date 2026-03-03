@@ -206,6 +206,59 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [getBestSquadForTeam]);
 
+  const toggleShortlist = useCallback((pId: string) => {
+    setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isShortlisted: !p.isShortlisted } : p) }));
+  }, []);
+
+  const toggleTransferList = useCallback((pId: string) => {
+    setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isListed: !p.isListed } : p) }));
+  }, []);
+
+  const acceptBid = useCallback((bidId: string) => {
+    setState(s => {
+      const bid = s.transferMarket.incomingBids.find(b => b.id === bidId);
+      if (!bid) return s;
+      const p = s.players.find(x => x.id === bid.playerId);
+      if (!p) return s;
+      
+      // Delay toast to next tick to avoid render-phase update
+      setTimeout(() => toast({ title: "TRANSFER COMPLETE", description: `${p.name} sold.` }), 0);
+
+      return { 
+        ...s, 
+        teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget + bid.amount, weeklyWages: t.weeklyWages - p.wage } : t), 
+        players: s.players.map(x => x.id === p.id ? { ...x, clubId: bid.fromTeamId, isListed: false } : x), 
+        transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } 
+      };
+    });
+  }, [toast]);
+
+  const rejectBid = useCallback((bidId: string) => {
+    setState(s => ({ ...s, transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } }));
+    toast({ title: "BID REJECTED", description: "offer declined." });
+  }, [toast]);
+
+  const startNextSeason = useCallback(() => {
+    setState(s => {
+      const yr = s.season + 1;
+      const upTeams = s.teams.map(t => ({ ...t, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] }));
+      const upPlayers = s.players.map(p => ({ ...p, age: p.age + 1, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] }));
+      
+      setTimeout(() => toast({ title: "NEW SEASON", description: `${yr} fixtures generated.` }), 0);
+
+      return { 
+        ...s, 
+        currentWeek: 1, 
+        season: yr, 
+        teams: upTeams, 
+        players: upPlayers, 
+        fixtures: generateFixtures(upTeams, yr), 
+        isSeasonOver: false, 
+        seasonSummary: null 
+      };
+    });
+  }, [toast]);
+
   const simulateWeek = useCallback(() => {
     setState(s => {
       const currentWeekFixtures = s.fixtures.filter(f => f.week === s.currentWeek && !f.result);
@@ -267,89 +320,83 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const nextBids: TransferOffer[] = [];
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
-      if (s.userTeamId && Math.random() < 0.1) {
-        const userP = allPlayers.filter(p => p.clubId === s.userTeamId)[0];
-        if (userP) {
-          const bidder = allTeams.filter(t => t.id !== s.userTeamId)[0];
-          const bidId = `bid-${Date.now()}`;
-          nextBids.push({ id: bidId, playerId: userP.id, fromTeamId: bidder.id, amount: Math.floor(userP.value * 0.9) });
-          nextMessages.unshift({ id: `msg-${bidId}`, title: 'TRANSFER OFFER', content: `${bidder.name} bid ${formatMoney(userP.value)} for ${userP.name}.`, date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', bidId });
+      
+      // Random AI-to-AI Transfer Simulation
+      if (Math.random() < 0.15) {
+        const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
+        const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);
+        if (seller && buyer) {
+          const sellerPlayers = allPlayers.filter(p => p.clubId === seller.id);
+          const p = sellerPlayers[Math.floor(Math.random() * sellerPlayers.length)];
+          if (p && buyer.budget >= p.value) {
+            allPlayers = allPlayers.map(x => x.id === p.id ? { ...x, clubId: buyer.id } : x);
+            nextMessages.unshift({ id: `ai-tr-${Date.now()}`, title: 'TRANSFER BOMBSHELL', content: `${buyer.name} have completed the signing of ${p.name} from ${seller.name} for a fee of ${formatMoney(p.value)}.`, date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER' });
+          }
         }
       }
-      if (nextWeek > 38) { seasonJustEnded = true; return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, isSeasonOver: true, seasonSummary: prepareSeasonSummary({ ...s, teams: allTeams, players: allPlayers }), messages: nextMessages }; }
+
+      if (s.userTeamId && Math.random() < 0.1) {
+        const userPlayers = allPlayers.filter(p => p.clubId === s.userTeamId);
+        const listedPlayers = userPlayers.filter(p => p.isListed);
+        const target = listedPlayers.length > 0 ? listedPlayers[0] : userPlayers[0];
+        if (target) {
+          const bidder = allTeams.filter(t => t.id !== s.userTeamId)[0];
+          const bidId = `bid-${Date.now()}`;
+          nextBids.push({ id: bidId, playerId: target.id, fromTeamId: bidder.id, amount: Math.floor(target.value * 0.95) });
+          nextMessages.unshift({ id: `msg-${bidId}`, title: 'TRANSFER OFFER', content: `${bidder.name} have submitted an official bid of ${formatMoney(target.value)} for ${target.name}.`, date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', bidId });
+        }
+      }
+
+      if (nextWeek > 38) { 
+        seasonJustEnded = true; 
+        const summary = prepareSeasonSummary({ ...s, teams: allTeams, players: allPlayers });
+        return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, isSeasonOver: true, seasonSummary: summary, messages: nextMessages }; 
+      }
       return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, messages: nextMessages, transferMarket: { ...s.transferMarket, incomingBids: [...s.transferMarket.incomingBids, ...nextBids] } };
     });
     if (seasonJustEnded) toast({ title: "SEASON COMPLETE", description: "campaign concluded." });
   }, [prepareSeasonSummary, toast]);
 
-  const toggleShortlist = useCallback((pId: string) => {
-    setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isShortlisted: !p.isShortlisted } : p) }));
-  }, []);
-
-  const toggleTransferList = useCallback((pId: string) => {
-    setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isListed: !p.isListed } : p) }));
-  }, []);
-
-  const acceptBid = useCallback((bidId: string) => {
-    let name = '';
-    setState(s => {
-      const bid = s.transferMarket.incomingBids.find(b => b.id === bidId);
-      if (!bid) return s;
-      const p = s.players.find(x => x.id === bid.playerId);
-      if (!p) return s;
-      name = p.name;
-      return { ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget + bid.amount, weeklyWages: t.weeklyWages - p.wage } : t), players: s.players.map(x => x.id === p.id ? { ...x, clubId: bid.fromTeamId, isListed: false } : x), transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } };
-    });
-    if (name) toast({ title: "TRANSFER ACCEPTED", description: `${name} sold.` });
-  }, [toast]);
-
-  const rejectBid = useCallback((bidId: string) => {
-    setState(s => ({ ...s, transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } }));
-    toast({ title: "BID REJECTED", description: "offer declined." });
-  }, [toast]);
-
-  const startNextSeason = useCallback(() => {
-    setState(s => {
-      const yr = s.season + 1;
-      const upTeams = s.teams.map(t => ({ ...t, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] }));
-      const upPlayers = s.players.map(p => ({ ...p, age: p.age + 1, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] }));
-      return { ...s, currentWeek: 1, season: yr, teams: upTeams, players: upPlayers, fixtures: generateFixtures(upTeams, yr), isSeasonOver: false, seasonSummary: null };
-    });
-    toast({ title: "NEW SEASON", description: "fixtures generated." });
-  }, [toast]);
-
   const buyPlayer = useCallback((pId: string) => {
-    const p = state.players.find(x => x.id === pId);
-    if (!p || !state.userTeamId) return;
-    setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget - p.value, weeklyWages: t.weeklyWages + p.wage } : t), players: s.players.map(x => x.id === pId ? { ...x, clubId: s.userTeamId } : x) }));
-    toast({ title: "TRANSFER COMPLETE", description: `signed ${p.name}.` });
-  }, [state.players, state.userTeamId, toast]);
+    setState(s => {
+      const p = s.players.find(x => x.id === pId);
+      if (!p || !s.userTeamId) return s;
+      setTimeout(() => toast({ title: "TRANSFER COMPLETE", description: `Signed ${p.name}.` }), 0);
+      return { ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget - p.value, weeklyWages: t.weeklyWages + p.wage } : t), players: s.players.map(x => x.id === pId ? { ...x, clubId: s.userTeamId } : x) };
+    });
+  }, [toast]);
 
   const hireStaff = useCallback((stId: string) => {
-    const st = state.availableStaff.find(x => x.id === stId);
-    if (!st || !state.userTeamId) return;
-    setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, staff: [...t.staff, st], weeklyWages: t.weeklyWages + st.wage } : t), availableStaff: s.availableStaff.filter(x => x.id !== stId) }));
-    toast({ title: "STAFF APPOINTED", description: `${st.name} joined.` });
-  }, [state.availableStaff, state.userTeamId, toast]);
+    setState(s => {
+      const st = s.availableStaff.find(x => x.id === stId);
+      if (!st || !s.userTeamId) return s;
+      setTimeout(() => toast({ title: "STAFF APPOINTED", description: `${st.name} joined.` }), 0);
+      return { ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, staff: [...t.staff, st], weeklyWages: t.weeklyWages + st.wage } : t), availableStaff: s.availableStaff.filter(x => x.id !== stId) };
+    });
+  }, [toast]);
 
   const fireStaff = useCallback((stId: string) => {
     setState(s => {
       const t = s.teams.find(x => x.id === s.userTeamId);
       const st = t?.staff.find(x => x.id === stId);
+      setTimeout(() => toast({ title: "STAFF DISMISSED", description: "Contract terminated." }), 0);
       return { ...s, teams: s.teams.map(x => x.id === s.userTeamId ? { ...x, staff: x.staff.filter(y => y.id !== stId), weeklyWages: x.weeklyWages - (st?.wage || 0) } : x) };
     });
-    toast({ title: "STAFF DISMISSED", description: "terminated." });
   }, [toast]);
 
   const contextValue = useMemo(() => ({
     state, startGame, simulateWeek, advanceWeek, saveGame: () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); toast({ title: "SAVED" }); }, loadGame: () => { const sa = localStorage.getItem(STORAGE_KEY); if (sa) setState({ ...JSON.parse(sa), isGameStarted: true }); }, 
     setTactics: (f: string, s: PlayStyle) => setState(p => ({ ...p, teams: p.teams.map(t => t.id === p.userTeamId ? { ...t, formation: f, playStyle: s } : t) })),
-    buyPlayer, sellPlayer: () => {}, renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), toggleShortlist, toggleTransferList, 
-    markMessageRead: (mId: string) => setState(s => ({ ...s, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), hireStaff, fireStaff, 
+    buyPlayer, sellPlayer: () => {}, renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), 
+    toggleShortlist, toggleTransferList, 
+    markMessageRead: (mId: string) => setState(s => ({ ...s, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), 
+    hireStaff, fireStaff, 
     togglePlayerLineup: (pId: string) => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); if (!t) return s; const isS = t.lineup.includes(pId); const l = isS ? t.lineup.filter(x => x !== pId) : (t.lineup.length < 16 ? [...t.lineup, pId] : t.lineup); return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: l } : x) }; }),
     swapPlayers: (p1: string, p2: string) => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); if (!t) return s; let l = [...t.lineup]; const i1 = l.indexOf(p1); const i2 = l.indexOf(p2); if (i1 !== -1 && i2 !== -1) { l[i1] = p2; l[i2] = p1; } else if (i1 !== -1) { l[i1] = p2; } return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: l } : x) }; }), 
-    clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })), autoPickLineup: () => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); return { ...s, teams: s.teams.map(x => x.id === t?.id ? { ...x, lineup: getBestSquadForTeam(x, s.players) } : x) }; }),
-    applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), acceptBid, rejectBid, updateMidMatchResult: (fid: string, min: number) => {}, 
+    clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })), 
+    autoPickLineup: () => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); return { ...s, teams: s.teams.map(x => x.id === t?.id ? { ...x, lineup: getBestSquadForTeam(x, s.players) } : x) }; }),
+    applyForJob: (id: string) => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), 
+    acceptBid, rejectBid, updateMidMatchResult: (fid: string, min: number) => {}, 
     updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason: () => {}, startNextSeason
   }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, startNextSeason, toast, getBestSquadForTeam]);
 

@@ -21,7 +21,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   awayTeam: Team,
   onFinish: () => void 
 }) {
-  const { state, updateMidMatchResult, swapPlayers, setTactics } = useGame();
+  const { state, swapPlayers, setTactics } = useGame();
   const [currentMinute, setCurrentMinute] = useState(0);
   const [showLineups, setShowLineups] = useState(true);
   const [activeAlert, setActiveAlert] = useState<MatchEvent | null>(null);
@@ -90,6 +90,21 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const homeShots = fixture.result ? Math.floor((fixture.result.homeChances || 0) * (currentMinute / 90)) : 0;
   const awayShots = fixture.result ? Math.floor((fixture.result.awayChances || 0) * (currentMinute / 90)) : 0;
 
+  const zones = useMemo(() => ({
+    home: { 
+      DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', state.manager?.personality),
+      MID: getZoneStrength(homeLineup, homeTeam, 'MID', state.manager?.personality),
+      ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', state.manager?.personality)
+    },
+    away: { 
+      DEF: getZoneStrength(awayLineup, awayTeam, 'DEF'),
+      MID: getZoneStrength(awayLineup, awayTeam, 'MID'),
+      ATT: getZoneStrength(awayLineup, awayTeam, 'ATT')
+    }
+  }), [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality]);
+
+  const possession = (zones.home.MID / (zones.home.MID + zones.away.MID || 1)) * 100;
+
   const StrengthBar = ({ value, label, color }: { value: number, label: string, color?: string }) => (
     <div className="flex flex-col items-center gap-1 w-full max-w-[60px]">
       <span className="text-[10px] font-black text-white uppercase">{label}</span>
@@ -99,7 +114,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     </div>
   );
 
-  const LineupColumn = ({ team, players, bench }: { team: Team, players: Player[], bench: Player[] }) => (
+  const LineupColumn = ({ team, players }: { team: Team, players: Player[] }) => (
     <div className="flex-1 flex flex-col gap-1 min-h-0">
       <div className="p-1.5 border-2 border-white/10 text-white font-black text-sm mb-1 rounded-md" style={{ backgroundColor: team.color }}>{team.name.toUpperCase()}</div>
       <div className="bg-black/85 border border-white/10 p-1.5 space-y-0.5 flex-1 overflow-auto rounded-lg">
@@ -126,8 +141,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               <Button onClick={() => setShowLineups(false)} className="bg-accent text-accent-foreground retro-button h-12 px-12 font-black uppercase shadow-xl animate-pulse">Kick Off Match</Button>
             </div>
             <div className="grid grid-cols-2 gap-12 flex-1 min-h-0">
-              <LineupColumn team={homeTeam} players={homeLineup} bench={homeBench} />
-              <LineupColumn team={awayTeam} players={awayLineup} bench={awayBench} />
+              <LineupColumn team={homeTeam} players={homeLineup} />
+              <LineupColumn team={awayTeam} players={awayLineup} />
             </div>
           </div>
         )}
@@ -180,32 +195,67 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
         <div className="relative z-10 p-3 flex flex-col items-center gap-1">
           <div className="bg-primary/90 text-primary-foreground px-6 py-1 text-[10px] font-bold shadow-lg border border-white/20 uppercase tracking-widest rounded-md">{fixture.competition} - {homeTeam.stadium.toUpperCase()}</div>
-          <div className="bg-black/90 backdrop-blur-md px-4 py-1.5 text-sm md:text-base font-black w-full text-center uppercase tracking-tight shadow-xl flex items-center justify-center min-h-[36px] rounded-lg" style={{ color: 'hsl(var(--accent))' }}>{activeEvent?.text}</div>
+          <div className="flex items-center gap-4 w-full">
+            <div className="bg-black/90 backdrop-blur-md px-4 py-1.5 text-sm md:text-base font-black flex-1 text-center uppercase tracking-tight shadow-xl flex items-center justify-center min-h-[36px] rounded-lg" style={{ color: 'hsl(var(--accent))' }}>{activeEvent?.text}</div>
+            <Button onClick={() => setIsPaused(true)} className="h-10 px-6 bg-red-600 hover:bg-red-700 text-white font-black retro-button"><Pause size={18} className="mr-2" /> PAUSE & TACTICS</Button>
+          </div>
         </div>
 
         <div className="relative z-10 flex flex-col items-center px-12 mt-4 gap-4 flex-1">
           <div className="w-full flex items-center justify-between gap-4">
             <div className="flex-1 flex flex-col items-end">
               <div className="w-full h-12 border-4 border-white/20 text-white flex items-center justify-center font-black text-xl shadow-xl rounded-lg" style={{ backgroundColor: homeTeam.color }}>{homeTeam.name.toUpperCase()}</div>
-              <div className="flex items-center gap-4 mt-2"><span className="text-[12px] font-black text-muted-foreground uppercase">Shots: {homeShots}</span><span className="text-5xl font-black text-white tabular-nums">{currentHomeGoals}</span></div>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase">Shots: {homeShots}</span>
+                  <div className="text-[9px] font-black text-accent uppercase text-right leading-tight max-w-[120px]">
+                    {fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
+                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}'</div>
+                    ))}
+                  </div>
+                </div>
+                <span className="text-5xl font-black text-white tabular-nums">{currentHomeGoals}</span>
+              </div>
             </div>
             <div className="bg-black border-4 border-accent/40 p-3 rounded-xl"><div className="text-4xl font-black text-red-600 tabular-nums leading-none tracking-tighter">{currentMinute.toString().padStart(3, '0')}</div></div>
             <div className="flex-1 flex flex-col items-start">
               <div className="w-full h-12 border-4 border-white/20 text-white flex items-center justify-center font-black text-xl shadow-xl rounded-lg" style={{ backgroundColor: awayTeam.color }}>{awayTeam.name.toUpperCase()}</div>
-              <div className="flex items-center gap-4 mt-2"><span className="text-5xl font-black text-white tabular-nums">{currentAwayGoals}</span><span className="text-[12px] font-black text-muted-foreground uppercase">Shots: {awayShots}</span></div>
+              <div className="flex items-center gap-4 mt-2">
+                <span className="text-5xl font-black text-white tabular-nums">{currentAwayGoals}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase">Shots: {awayShots}</span>
+                  <div className="text-[9px] font-black text-accent uppercase text-left leading-tight max-w-[120px]">
+                    {fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
+                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}'</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div className="w-full max-w-2xl mt-4">
-            <div className="h-4 w-full bg-black/40 border-2 border-white/10 rounded-full overflow-hidden flex">
-              <div className="h-full transition-all duration-1000" style={{ width: `50%`, backgroundColor: homeTeam.color }} />
-              <div className="h-full transition-all duration-1000" style={{ width: `50%`, backgroundColor: awayTeam.color }} />
+            <div className="h-4 w-full bg-black/40 border-2 border-white/10 rounded-full overflow-hidden flex shadow-lg">
+              <div className="h-full transition-all duration-1000" style={{ width: `${possession}%`, backgroundColor: homeTeam.color }} />
+              <div className="h-full transition-all duration-1000" style={{ width: `${100-possession}%`, backgroundColor: awayTeam.color }} />
+            </div>
+            <div className="flex justify-between px-2 mt-1 text-[9px] font-black text-muted-foreground uppercase">
+              <span>POSSESSION: {possession.toFixed(0)}%</span>
+              <span>{(100-possession).toFixed(0)}%</span>
             </div>
           </div>
         </div>
 
         <div className="relative z-10 p-6 grid grid-cols-2 gap-8 shrink-0">
-          <div className="flex justify-center w-full gap-4"><StrengthBar value={25} label="DEF" color={homeTeam.color} /><StrengthBar value={25} label="MID" color={homeTeam.color} /><StrengthBar value={25} label="ATT" color={homeTeam.color} /></div>
-          <div className="flex justify-center w-full gap-4"><StrengthBar value={25} label="DEF" color={awayTeam.color} /><StrengthBar value={25} label="MID" color={awayTeam.color} /><StrengthBar value={25} label="ATT" color={awayTeam.color} /></div>
+          <div className="flex justify-center w-full gap-4">
+            <StrengthBar value={zones.home.DEF} label="DEF" color={homeTeam.color} />
+            <StrengthBar value={zones.home.MID} label="MID" color={homeTeam.color} />
+            <StrengthBar value={zones.home.ATT} label="ATT" color={homeTeam.color} />
+          </div>
+          <div className="flex justify-center w-full gap-4">
+            <StrengthBar value={zones.away.DEF} label="DEF" color={awayTeam.color} />
+            <StrengthBar value={zones.away.MID} label="MID" color={awayTeam.color} />
+            <StrengthBar value={zones.away.ATT} label="ATT" color={awayTeam.color} />
+          </div>
         </div>
 
         {(isHalfTime || isFinished) && (
