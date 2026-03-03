@@ -1,0 +1,83 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 16% 10%; /* Dark #1a1e22 */
+    --foreground: 0 0% 98%;
+    --card: 210 16% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 210 16% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 210 50% 50%; /* #4079b0 */
+    --primary-foreground: 210 16% 5%;
+    --secondary: 210 10% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 210 10% 12%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 142 70% 50%; /* Green #26D975 */
+    --accent-foreground: 210 16% 5%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 15%;
+    --input: 210 20% 15%;
+    --ring: 142 70% 50%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply text-foreground font-mono antialiased overflow-x-hidden leading-tight;
+    background-color: hsl(var(--background));
+    background-image: linear-gradient(rgba(26, 30, 34, 0.3), rgba(26, 30, 34, 0.3)), url('https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/as-at-2025-02-21%2F67b8448a39d8995388c42289%2Foutputs%2F0?alt=media&token=c276332d-20c2-4a00-af15-0d322a36d933');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    font-size: 14px;
+  }
+}
+
+@keyframes goal-strobe {
+  0%, 100% { background-color: hsl(var(--accent)); color: white; }
+  50% { background-color: white; color: hsl(var(--accent)); }
+}
+
+.animate-goal-strobe {
+  animation: goal-strobe 0.1s steps(2, start) infinite;
+}
+
+.retro-tile {
+  @apply border border-primary/30 bg-card/40 backdrop-blur-md p-3 shadow-[2px_2px_0px_0px_rgba(64,121,176,0.2)] transition-all active:scale-[0.98] rounded-lg;
+}
+
+.retro-button {
+  @apply transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-[12px] font-bold border border-primary/20 rounded-md;
+}
+
+.nav-item-active {
+  @apply text-accent border-t-2 border-accent bg-accent/5;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+}
+
+.font-mono {
+  font-family: 'Courier New', Courier, monospace;
+}

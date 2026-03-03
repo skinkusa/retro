@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "retro-stadium-bg",
+      "description": "Authentic pixel-art football stadium with floodlights and atmospheric crowd",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/as-at-2025-02-21%2F67b8448a39d8995388c42289%2Foutputs%2F0?alt=media&token=c276332d-20c2-4a00-af15-0d322a36d933",
+      "imageHint": "pixel stadium"
+    },
+    {
+      "id": "match-action-overlay",
+      "description": "Authentic pixel-art football stadium with floodlights and atmospheric crowd",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/firebasestudio.appspot.com/o/as-at-2025-02-21%2F67b8448a39d8995388c42289%2Foutputs%2F0?alt=media&token=c276332d-20c2-4a00-af15-0d322a36d933",
+      "imageHint": "football stadium"
+    }
+  ]
+}
