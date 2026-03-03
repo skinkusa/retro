@@ -23,26 +23,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Toaster } from '@/components/ui/toaster';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { LayoutDashboard, Users, Trophy, PlayCircle, Search, Briefcase, DollarSign, UserCircle, Globe2, History, ListFilter, Save, FileUp, Settings, HelpCircle, Swords, RefreshCw, Info } from 'lucide-react';
 import { Team, Player, PlayStyle, ManagerPersonality } from '@/types/game';
 import { formatMoney, cn } from '@/lib/utils';
+import { STORAGE_KEY } from '@/lib/constants';
 
 function StartMenu() {
-  const { state, startGame, loadGame } = useGame();
+  const { state, startGame, loadGame, updateSeason, updateTeamName } = useGame();
   const [name, setName] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedDiv, setSelectedDiv] = useState<number>(1);
   const [personality, setPersonality] = useState<ManagerPersonality>('Analyst');
   const [hasSave, setHasSave] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [newSeason, setNewSeason] = useState(state.season.toString());
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [tempTeamName, setTempTeamName] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('retro_manager_save_v1.9.3');
+      const saved = localStorage.getItem(STORAGE_KEY);
       setHasSave(!!saved);
     }
   }, []);
+  useEffect(() => {
+    if (showSettings) setNewSeason(state.season.toString());
+  }, [showSettings, state.season]);
+
+  const handleSeasonChange = () => {
+    const year = parseInt(newSeason, 10);
+    if (!isNaN(year) && year >= 1990 && year <= 2100) updateSeason(year);
+  };
+  const startEditingTeam = (teamId: string, currentName: string) => {
+    setEditingTeamId(teamId);
+    setTempTeamName(currentName);
+  };
+  const saveTeamName = () => {
+    if (editingTeamId && tempTeamName.trim()) {
+      updateTeamName(editingTeamId, tempTeamName.trim());
+      setEditingTeamId(null);
+    }
+  };
 
   const getPhilosophyDescription = (p: ManagerPersonality) => {
     switch (p) {
@@ -107,6 +130,56 @@ function StartMenu() {
           </div>
         </div>
       </RetroWindow>
+
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-card border-primary/30">
+          <DialogHeader>
+            <DialogTitle className="text-primary font-black uppercase tracking-tight">Database Editor</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 overflow-auto flex-1 pr-2">
+            <div className="flex items-end gap-4">
+              <div className="flex-1 space-y-2">
+                <label className="text-xs font-bold text-primary uppercase">Starting season year (for new games)</label>
+                <Input type="number" value={newSeason} onChange={(e) => setNewSeason(e.target.value)} className="bg-black/40 border-primary/20 h-10 font-mono" />
+              </div>
+              <Button onClick={handleSeasonChange} className="retro-button bg-accent text-accent-foreground h-10 px-6 font-bold">Update</Button>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-primary uppercase mb-2">Team names (for new games)</h4>
+              <div className="max-h-[300px] overflow-auto border border-primary/20 rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-black/40 border-primary/20">
+                      <TableHead className="text-[11px] uppercase font-bold py-2">Team</TableHead>
+                      <TableHead className="text-right text-[11px] uppercase font-bold py-2">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {state.teams.map((t) => (
+                      <TableRow key={t.id} className="border-primary/10">
+                        <TableCell className="py-2">
+                          {editingTeamId === t.id ? (
+                            <Input value={tempTeamName} onChange={(e) => setTempTeamName(e.target.value)} className="h-8 text-sm bg-black/40" autoFocus onKeyDown={(e) => e.key === 'Enter' && saveTeamName()} />
+                          ) : (
+                            <span className="font-bold text-sm uppercase">{t.name}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right py-2">
+                          {editingTeamId === t.id ? (
+                            <Button onClick={saveTeamName} size="sm" className="h-8 text-xs bg-accent text-accent-foreground">Save</Button>
+                          ) : (
+                            <Button onClick={() => startEditingTeam(t.id, t.name)} variant="outline" size="sm" className="h-8 text-xs">Edit</Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

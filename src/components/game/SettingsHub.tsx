@@ -7,10 +7,10 @@ import { RetroWindow } from './RetroWindow';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Save, History, Edit2, Database, FastForward, ShieldAlert } from 'lucide-react';
+import { Save, History, Edit2, Database, ShieldAlert, FastForward } from 'lucide-react';
 
 export function SettingsHub() {
-  const { state, updateSeason, updateTeamName, fastForwardSeason } = useGame();
+  const { state, updateSeason, updateTeamName, fastForwardSeason, setEnginePreset } = useGame();
   const [newSeason, setNewSeason] = useState(state.season.toString());
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [tempTeamName, setTempTeamName] = useState('');
@@ -43,14 +43,36 @@ export function SettingsHub() {
              <h4 className="text-[12px] font-black uppercase tracking-widest">Advanced Debug Control</h4>
            </div>
            <p className="text-[11px] text-muted-foreground leading-tight italic">
-             Use these tools to verify league movements, player retirement, and youth intake logic.
+             Simulate all remaining fixtures to week 38, then advance week to process results.
            </p>
            <Button 
             onClick={fastForwardSeason} 
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-black retro-button flex items-center justify-center gap-2 shadow-lg"
            >
-             <FastForward size={20} /> INSTANTLY SKIP TO END OF SEASON
+             <FastForward size={20} /> SKIP TO END OF SEASON
            </Button>
+           <div className="pt-3 border-t border-red-900/40">
+             <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-2">Match engine</label>
+             <div className="flex gap-2">
+               <Button
+                 size="sm"
+                 variant={state.enginePreset === 'realistic' ? 'default' : 'outline'}
+                 className="flex-1"
+                 onClick={() => setEnginePreset('realistic')}
+               >
+                 Realistic
+               </Button>
+               <Button
+                 size="sm"
+                 variant={state.enginePreset === 'arcade' ? 'default' : 'outline'}
+                 className="flex-1"
+                 onClick={() => setEnginePreset('arcade')}
+               >
+                 Arcade
+               </Button>
+             </div>
+             <p className="text-[10px] text-muted-foreground mt-1">Realistic = lower scoring, fewer cards. Arcade = more goals & cards.</p>
+           </div>
         </div>
       </RetroWindow>
 

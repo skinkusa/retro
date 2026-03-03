@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlayerProfile } from './PlayerProfile';
-import { Info, Target, Star, ShieldAlert } from 'lucide-react';
+import { BarChart3, Target, Star, ShieldAlert } from 'lucide-react';
 
 interface StatsHubProps {
   division: number;
@@ -39,7 +39,63 @@ export function StatsHub({ division }: StatsHubProps) {
     .sort((a, b) => ((b.seasonStats.redCards || 0) * 3 + (b.seasonStats.yellowCards || 0)) - ((a.seasonStats.redCards || 0) * 3 + (a.seasonStats.yellowCards || 0)))
     .slice(0, 20);
 
+  const seasonStatsList = [...filteredPlayers]
+    .filter(p => p.seasonStats.apps >= 1)
+    .sort((a, b) => b.seasonStats.apps - a.seasonStats.apps)
+    .slice(0, 30);
+
   const getTeamName = (clubId: string | null) => state.teams.find(t => t.id === clubId)?.name || "Unknown";
+
+  const renderSeasonStatsTable = (players: Player[]) => (
+    <Table>
+      <TableHeader>
+        <TableRow className="border-b border-primary/20 bg-muted/30">
+          <TableHead className="w-8 text-[10px] uppercase">#</TableHead>
+          <TableHead className="text-[10px] uppercase">Player</TableHead>
+          <TableHead className="text-[10px] uppercase">Club</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">Apps</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">Goals</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">Shots</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">SOT</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">CS</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">Mins</TableHead>
+          <TableHead className="text-right text-[10px] uppercase">Rating</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {players.map((p, i) => (
+          <TableRow key={p.id} className="hover:bg-primary/5 border-b border-primary/5">
+            <TableCell className="font-mono text-xs">{i + 1}</TableCell>
+            <TableCell className="text-xs font-bold">
+              <button
+                onClick={() => setSelectedPlayer(p)}
+                className="hover:text-accent transition-colors text-left uppercase"
+              >
+                {p.name}
+              </button>
+            </TableCell>
+            <TableCell className="text-xs text-muted-foreground">{getTeamName(p.clubId).toUpperCase()}</TableCell>
+            <TableCell className="text-right font-mono text-xs">{p.seasonStats.apps}</TableCell>
+            <TableCell className="text-right font-mono text-xs text-cyan">{p.seasonStats.goals}</TableCell>
+            <TableCell className="text-right font-mono text-xs">{p.seasonStats.shots ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-xs">{p.seasonStats.shotsOnTarget ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-xs">
+              {p.position === 'GK' ? (p.seasonStats.cleanSheets ?? '—') : '—'}
+            </TableCell>
+            <TableCell className="text-right font-mono text-xs">{p.seasonStats.minutesPlayed ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-xs text-accent font-bold">{p.seasonStats.avgRating.toFixed(2)}</TableCell>
+          </TableRow>
+        ))}
+        {players.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={10} className="text-center py-8 text-muted-foreground text-[10px] uppercase italic">
+              No appearances recorded for this division yet.
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  );
 
   const renderTable = (players: Player[], type: 'scorers' | 'ratings' | 'discipline') => (
     <Table>
@@ -126,6 +182,14 @@ export function StatsHub({ division }: StatsHubProps) {
               </TooltipTrigger>
               <TooltipContent className="font-black">DIRTIEST PLAYERS (Reds weight heavier)</TooltipContent>
             </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="season" className="text-[10px] uppercase py-1 flex items-center gap-2">
+                  <BarChart3 size={14} /> Season Stats
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="font-black">APPS, GOALS, SHOTS, SOT, CLEAN SHEETS, MINS, RATING</TooltipContent>
+            </Tooltip>
           </TabsList>
 
           <TabsContent value="scorers">
@@ -143,6 +207,12 @@ export function StatsHub({ division }: StatsHubProps) {
           <TabsContent value="discipline">
             <RetroWindow title={`DISCIPLINARY TABLE - DIVISION ${division}`}>
               {renderTable(badBoys, 'discipline')}
+            </RetroWindow>
+          </TabsContent>
+
+          <TabsContent value="season">
+            <RetroWindow title={`SEASON STATS (MIN 1 APP) - DIVISION ${division}`}>
+              {renderSeasonStatsTable(seasonStatsList)}
             </RetroWindow>
           </TabsContent>
         </Tabs>

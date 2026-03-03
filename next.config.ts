@@ -5,10 +5,10 @@ const nextConfig: NextConfig = {
   /* Ensure correct dependency tracing when multiple lockfiles exist (e.g. parent dir on Vercel) */
   outputFileTracingRoot: path.join(process.cwd()),
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   images: {
     remotePatterns: [

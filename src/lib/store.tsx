@@ -3,9 +3,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData } from '@/types/game';
 import { generateInitialData, generateFixtures, FIRSTNAME_POOL, SURNAME_POOL } from '@/lib/game-data';
-import { simulateMatch, updateLeagueTable, getFormationRequirements } from '@/lib/game-engine';
+import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes } from '@/lib/game-engine';
+import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
+import { STORAGE_KEY, OVERRIDES_KEY } from '@/lib/constants';
 
 interface GameContextType {
   state: GameState;
@@ -36,12 +38,10 @@ interface GameContextType {
   updateTeamName: (teamId: string, name: string) => void;
   fastForwardSeason: () => void;
   startNextSeason: () => void;
+  setEnginePreset: (preset: 'realistic' | 'arcade') => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'retro_manager_save_v1.9.3';
-const OVERRIDES_KEY = 'retro_manager_team_overrides_v1.9.3';
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
@@ -65,7 +65,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     availableStaff: [],
     jobMarket: [],
     cupEntrants: [],
-    records: { biggestWin: null, biggestLoss: null, transferPaid: null, transferReceived: null }
+    records: { biggestWin: null, biggestLoss: null, transferPaid: null, transferReceived: null },
+    enginePreset: 'realistic'
   });
 
   useEffect(() => {
@@ -163,8 +164,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const upPlayers = s.players.map(p => ({ 
         ...p, 
         age: p.age + 1, 
-        seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, 
-        history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] 
+        seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0 }, 
+        history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] 
       }));
       setTimeout(() => toast({ title: "NEW SEASON", description: `${yr} fixtures generated.` }), 0);
       return { ...s, currentWeek: 1, season: yr, teams: upTeams, players: upPlayers, fixtures: generateFixtures(upTeams, yr), isSeasonOver: false, seasonSummary: null };
@@ -173,7 +174,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const startGame = useCallback((name: string, teamId: string, personality: ManagerPersonality) => {
     const { teams, players, fixtures, availableStaff, cupEntrants } = generateInitialData();
-    const teamsWithBestLineups = teams.map(t => ({ ...t, lineup: getBestSquadForTeam(t, players) }));
+    let finalTeams = [...teams];
+    if (typeof window !== 'undefined') {
+      try {
+        const overridesRaw = localStorage.getItem(OVERRIDES_KEY);
+        if (overridesRaw) {
+          const overrides = JSON.parse(overridesRaw);
+          // Database Editor renames: apply so "for new games" persists with modular team data
+          finalTeams = teams.map(t => overrides[t.id] ? { ...t, name: overrides[t.id] } : t);
+        }
+      } catch (e) {}
+    }
+    const teamsWithBestLineups = finalTeams.map(t => ({ ...t, lineup: getBestSquadForTeam(t, players), isUserTeam: t.id === teamId }));
     const team = teamsWithBestLineups.find(t => t.id === teamId);
     let targetPos = 10; let expectation = 'Finish in mid-table';
     if (team) {
@@ -207,7 +219,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (aTeam.id !== s.userTeamId) aTeam.lineup = getBestSquadForTeam(aTeam, s.players);
         const hStarters = s.players.filter(p => hTeam.lineup.slice(0, 11).includes(p.id));
         const aStarters = s.players.filter(p => aTeam.lineup.slice(0, 11).includes(p.id));
-        const result = simulateMatch(hTeam, aTeam, hStarters, aStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined);
+        const result = simulateMatch(hTeam, aTeam, hStarters, aStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
         const fIdx = updatedFixtures.findIndex(uf => uf.id === f.id);
         updatedFixtures[fIdx] = { ...f, result };
       });
@@ -219,15 +231,29 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState(s => {
       if (s.currentWeek > 38) return s;
       const currentWeekFixtures = s.fixtures.filter(f => f.week === s.currentWeek);
-      const statsToUpdate: Record<string, { apps: number, goals: number, rating: number, fitnessLoss: number }> = {};
+      const statsToUpdate: Record<string, { apps: number, goals: number, rating: number, fitnessLoss: number, yellowCards: number, redCards: number, shots: number, shotsOnTarget: number, cleanSheets: number, minutesPlayed: number }> = {};
+      const newSuspensions: Set<string> = new Set();
+      const newInjuries: Record<string, { type: string; weeks: number }> = {};
       const weeklyFinances: Record<string, { gate: number, merchandise: number, wages: number }> = {};
       s.teams.forEach(t => { weeklyFinances[t.id] = { gate: 0, merchandise: 5000 + (t.reputation * 100), wages: t.weeklyWages * (t.id === s.userTeamId && s.manager?.personality === 'Economist' ? 0.9 : 1.0) }; });
       currentWeekFixtures.forEach(f => {
         if (!f.result) return;
         const hTeam = s.teams.find(t => t.id === f.homeTeamId)!;
         weeklyFinances[hTeam.id].gate += f.result.attendance * (5 - hTeam.division) * 10;
-        Object.keys(f.result.ratings).forEach(pid => { statsToUpdate[pid] = { apps: 1, goals: 0, rating: f.result!.ratings[pid] || 6.0, fitnessLoss: 15 + Math.floor(Math.random() * 10) }; });
+        Object.keys(f.result.ratings).forEach(pid => { statsToUpdate[pid] = { apps: 1, goals: 0, rating: f.result!.ratings[pid] || 6.0, fitnessLoss: 15 + Math.floor(Math.random() * 10), yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 90 }; });
         f.result.scorers.forEach(sc => { if (statsToUpdate[sc.playerId]) statsToUpdate[sc.playerId].goals++; });
+        f.result.shotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shots++; });
+        f.result.sotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shotsOnTarget++; });
+        const homeGkId = s.players.find(p => p.clubId === f.homeTeamId && p.position === 'GK' && f.result!.ratings[p.id] != null)?.id;
+        const awayGkId = s.players.find(p => p.clubId === f.awayTeamId && p.position === 'GK' && f.result!.ratings[p.id] != null)?.id;
+        if (f.result!.awayGoals === 0 && homeGkId && statsToUpdate[homeGkId]) statsToUpdate[homeGkId].cleanSheets = 1;
+        if (f.result!.homeGoals === 0 && awayGkId && statsToUpdate[awayGkId]) statsToUpdate[awayGkId].cleanSheets = 1;
+        f.result.cards.forEach(c => {
+          if (!statsToUpdate[c.playerId]) statsToUpdate[c.playerId] = { apps: 0, goals: 0, rating: 6.0, fitnessLoss: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0 };
+          if (c.type === 'YELLOW') statsToUpdate[c.playerId].yellowCards++;
+          if (c.type === 'RED') { statsToUpdate[c.playerId].redCards++; newSuspensions.add(c.playerId); }
+        });
+        f.result.injuries.forEach(inj => { newInjuries[inj.playerId] = { type: inj.type, weeks: inj.weeks }; });
       });
       let allTeams = s.teams.map(t => {
         const fin = weeklyFinances[t.id]; if (!fin) return t;
@@ -240,8 +266,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           up.fitness = Math.max(0, up.fitness - m.fitnessLoss);
           up.morale = Math.min(100, up.morale + (m.rating > 7 ? 5 : -2));
           const newAvg = parseFloat(((up.seasonStats.avgRating * up.seasonStats.apps + m.rating) / (up.seasonStats.apps + 1)).toFixed(2));
-          up.seasonStats = { ...up.seasonStats, apps: up.seasonStats.apps + 1, goals: up.seasonStats.goals + m.goals, avgRating: newAvg };
+          const prevShots = up.seasonStats.shots ?? 0;
+          const prevSOT = up.seasonStats.shotsOnTarget ?? 0;
+          const prevCS = up.seasonStats.cleanSheets ?? 0;
+          const prevMins = up.seasonStats.minutesPlayed ?? 0;
+          up.seasonStats = {
+            ...up.seasonStats,
+            apps: up.seasonStats.apps + 1,
+            goals: up.seasonStats.goals + m.goals,
+            avgRating: newAvg,
+            yellowCards: (up.seasonStats.yellowCards || 0) + m.yellowCards,
+            redCards: (up.seasonStats.redCards || 0) + m.redCards,
+            shots: prevShots + (m.shots ?? 0),
+            shotsOnTarget: prevSOT + (m.shotsOnTarget ?? 0),
+            cleanSheets: prevCS + (m.cleanSheets ?? 0),
+            minutesPlayed: prevMins + (m.minutesPlayed ?? 90),
+          };
+          if (newSuspensions.has(p.id)) { up.suspensionWeeks = 3; up.status = 'SUSPENDED'; }
         } else { up.fitness = Math.min(100, up.fitness + 15); }
+        if (newInjuries[p.id]) { up.status = 'INJURED'; up.injury = { type: newInjuries[p.id].type, weeksRemaining: newInjuries[p.id].weeks }; }
+        else if (up.injury) {
+          const newWeeks = up.injury.weeksRemaining - 1;
+          if (newWeeks <= 0) up.injury = null; else up.injury = { ...up.injury, weeksRemaining: newWeeks };
+        }
+        if (!newSuspensions.has(p.id) && up.suspensionWeeks > 0) up.suspensionWeeks = up.suspensionWeeks - 1;
+        up.status = up.injury ? 'INJURED' : (up.suspensionWeeks > 0 ? 'SUSPENDED' : 'FIT');
         return up;
       });
       const nextBids: TransferOffer[] = [];
@@ -313,10 +362,73 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, [toast]);
 
+  const fastForwardSeason = useCallback(() => {
+    setState(s => {
+      const fixtures = [...s.fixtures];
+      const teamsMap = new Map(s.teams.map(t => [t.id, { ...t }]));
+      for (let week = s.currentWeek; week <= 38; week++) {
+        const weekFixtures = fixtures.filter(f => f.week === week && !f.result);
+        weekFixtures.forEach(f => {
+          const homeTeam = teamsMap.get(f.homeTeamId)!;
+          const awayTeam = teamsMap.get(f.awayTeamId)!;
+          if (homeTeam.id !== s.userTeamId) homeTeam.lineup = getBestSquadForTeam(homeTeam, s.players).slice(0, 11);
+          if (awayTeam.id !== s.userTeamId) awayTeam.lineup = getBestSquadForTeam(awayTeam, s.players).slice(0, 11);
+          const homeStarters = s.players.filter(p => p.clubId === f.homeTeamId && homeTeam.lineup.includes(p.id));
+          const awayStarters = s.players.filter(p => p.clubId === f.awayTeamId && awayTeam.lineup.includes(p.id));
+          const result = simulateMatch(homeTeam, awayTeam, homeStarters, awayStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
+          const idx = fixtures.findIndex(x => x.id === f.id);
+          if (idx >= 0) fixtures[idx] = { ...f, result };
+        });
+      }
+      setTimeout(() => toast({ title: "Fast-forward complete", description: "All remaining fixtures simulated. Advance week to process results." }), 0);
+      return { ...s, fixtures, teams: Array.from(teamsMap.values()), currentWeek: 38 };
+    });
+  }, [getBestSquadForTeam, toast]);
+
+  const updateMidMatchResult = useCallback((fixtureId: string, currentMinute: number) => {
+    setState(s => {
+      const fIdx = s.fixtures.findIndex(f => f.id === fixtureId);
+      const f = fIdx >= 0 ? s.fixtures[fIdx] : null;
+      const existingResult = f?.result;
+      if (fIdx === -1 || !f || !existingResult) return s;
+      const homeTeam = s.teams.find(t => t.id === f.homeTeamId)!;
+      const awayTeam = s.teams.find(t => t.id === f.awayTeamId)!;
+      const homePlayers = s.players.filter(p => p.clubId === f.homeTeamId && homeTeam.lineup.slice(0, 11).includes(p.id));
+      const awayPlayers = s.players.filter(p => p.clubId === f.awayTeamId && awayTeam.lineup.slice(0, 11).includes(p.id));
+      const res = simulateRemainingMinutes(existingResult, currentMinute, homeTeam, awayTeam, homePlayers, awayPlayers, s.manager?.personality, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
+      const nextFixtures = [...s.fixtures];
+      nextFixtures[fIdx] = { ...f, result: res };
+      return { ...s, fixtures: nextFixtures };
+    });
+  }, []);
+
+  const setEnginePreset = useCallback((preset: 'realistic' | 'arcade') => {
+    setState(s => ({ ...s, enginePreset: preset }));
+  }, []);
+
   const contextValue = useMemo(() => ({
-    state, startGame, simulateWeek, advanceWeek, 
-    saveGame: () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); toast({ title: "SAVED" }); }, 
-    loadGame: () => { const sa = localStorage.getItem(STORAGE_KEY); if (sa) setState({ ...JSON.parse(sa), isGameStarted: true }); }, 
+    state, startGame, simulateWeek, advanceWeek,
+    saveGame: () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const overrides = Object.fromEntries(state.teams.map(t => [t.id, t.name]));
+        localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+        toast({ title: "SAVED" });
+      } catch (e) {
+        toast({ title: "Save failed", description: "Storage full or unavailable." });
+      }
+    },
+    loadGame: () => {
+      try {
+        const sa = localStorage.getItem(STORAGE_KEY);
+        if (!sa) return;
+        const data = JSON.parse(sa);
+        const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
+        setState({ ...data, isGameStarted: true, teams, enginePreset: data.enginePreset ?? 'realistic' });
+      } catch (e) {
+        toast({ title: "Save corrupted", description: "Could not load career." });
+      }
+    }, 
     setTactics: (f: string, s: PlayStyle) => setState(p => ({ ...p, teams: p.teams.map(t => t.id === p.userTeamId ? { ...t, formation: f, playStyle: s } : t) })),
     buyPlayer, sellPlayer: () => {}, 
     renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), 
@@ -328,9 +440,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })), 
     autoPickLineup: () => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); return { ...s, teams: s.teams.map(x => x.id === t?.id ? { ...x, lineup: getBestSquadForTeam(x, s.players) } : x) }; }),
     applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), 
-    acceptBid, rejectBid, updateMidMatchResult: () => {}, 
-    updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason: () => {}, startNextSeason
-  }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, startNextSeason, toast, getBestSquadForTeam]);
+    acceptBid, rejectBid, updateMidMatchResult, 
+    updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason, startNextSeason, setEnginePreset
+  }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, updateMidMatchResult, fastForwardSeason, startNextSeason, setEnginePreset, toast, getBestSquadForTeam]);
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
 }

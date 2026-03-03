@@ -11,6 +11,14 @@ export interface PlayerStats {
   avgRating: number;
   yellowCards: number;
   redCards: number;
+  /** Shots taken (from match engine). */
+  shots?: number;
+  /** Shots on target. */
+  shotsOnTarget?: number;
+  /** Clean sheets (GK only). */
+  cleanSheets?: number;
+  /** Minutes played (apps × 90 for full matches). */
+  minutesPlayed?: number;
 }
 
 export interface Injury {
@@ -58,7 +66,6 @@ export interface Player {
     apps: number;
     goals: number;
     avgRating: number;
-    goalsScored: number;
     clubName: string;
   }>;
 }
@@ -123,10 +130,21 @@ export interface Fixture {
     awayGoals: number;
     homePens?: number;
     awayPens?: number;
+    /** Threat count (attacks into final third). */
     homeChances?: number;
     awayChances?: number;
+    /** Shot count (subset of threats). */
+    homeShots?: number;
+    awayShots?: number;
+    /** Shots on target (subset of shots; goals only from these). */
+    homeShotsOnTarget?: number;
+    awayShotsOnTarget?: number;
     attendance: number;
     events: MatchEvent[];
+    /** Player ID per shot taken (for season stats). */
+    shotTakers?: Array<{ playerId: string; minute: number }>;
+    /** Player ID per shot on target. */
+    sotTakers?: Array<{ playerId: string; minute: number }>;
     ratings: Record<string, number>;
     scorers: Array<{playerId: string, minute: number}>;
     cards: Array<{playerId: string, type: 'YELLOW' | 'RED', minute: number}>;
@@ -222,4 +240,6 @@ export interface GameState {
   jobMarket: string[];
   cupEntrants: string[];
   records: TeamRecords;
+  /** 'arcade' = higher scoring, more cards; default = realistic */
+  enginePreset?: 'realistic' | 'arcade';
 }

@@ -61,6 +61,7 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
       setFeedback("I'VE HAD ENOUGH. WE'LL TALK NEXT WEEK.");
       return;
     }
+    if (!targetWage) return;
 
     const wageGap = (offeredWage - targetWage) / targetWage;
     const yearWeight = (offeredYears - 3) * 0.05;
@@ -205,6 +206,42 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
                     </div>
                   </div>
                 </div>
+
+                {player.seasonStats.apps > 0 && (
+                  <div className="bg-black/60 p-6 border border-primary/20 rounded-xl shadow-inner">
+                    <h4 className="text-[14px] font-black text-primary uppercase border-b border-primary/20 pb-3 mb-4">This season</h4>
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 text-center">
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">Apps</div>
+                        <div className="text-xl font-black text-white">{player.seasonStats.apps}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">Goals</div>
+                        <div className="text-xl font-black text-cyan">{player.seasonStats.goals}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">Shots</div>
+                        <div className="text-xl font-black text-white">{player.seasonStats.shots ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">SOT</div>
+                        <div className="text-xl font-black text-white">{player.seasonStats.shotsOnTarget ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">CS</div>
+                        <div className="text-xl font-black text-white">{player.position === 'GK' ? (player.seasonStats.cleanSheets ?? '—') : '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">Mins</div>
+                        <div className="text-xl font-black text-white">{player.seasonStats.minutesPlayed ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">Rating</div>
+                        <div className="text-xl font-black text-accent">{player.seasonStats.avgRating.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-primary/5 border border-primary/20 p-6 rounded-xl space-y-4">
                   <h4 className="text-[14px] font-black text-primary uppercase border-b border-primary/10 pb-2">Status & Availability</h4>
@@ -407,23 +444,38 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
                   </div>
                 </div>
 
-                {player.history.length > 0 && (
+                {(player.seasonStats.apps > 0 || (player.history?.length ?? 0) > 0) && (
                   <div className="bg-black/60 p-6 border border-primary/20 rounded-xl shadow-inner">
                     <div className="flex items-center gap-2 border-b border-primary/20 pb-3 mb-4">
                       <History size={20} className="text-primary" />
-                      <h4 className="text-[14px] font-black text-primary uppercase tracking-widest">Career History</h4>
+                      <h4 className="text-[14px] font-black text-primary uppercase tracking-widest">Stats</h4>
                     </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] font-black border-b border-white/10 pb-3 mb-3">
+                      <span className="text-muted-foreground uppercase">This season</span>
+                      <span className="text-white">{player.seasonStats.apps} apps</span>
+                      <span className="text-accent">{player.seasonStats.goals} goals</span>
+                      <span className="text-primary">{player.seasonStats.avgRating.toFixed(2)} avg</span>
+                      <span className="text-cyan">{player.seasonStats.shots ?? 0} shots</span>
+                      <span className="text-cyan">{player.seasonStats.shotsOnTarget ?? 0} SOT</span>
+                      {player.position === 'GK' && <span className="text-green-500">{player.seasonStats.cleanSheets ?? 0} CS</span>}
+                      <span className="text-muted-foreground">{player.seasonStats.minutesPlayed ?? 0} mins</span>
+                    </div>
+                {player.history && player.history.length > 0 && (
+                    <>
+                    <div className="text-[11px] font-black text-muted-foreground uppercase mb-2">Career history</div>
                     <div className="space-y-3">
                       {player.history.slice(-6).reverse().map((h, i) => (
                         <div key={i} className="grid grid-cols-[60px_1fr_45px_45px_40px] items-center text-[14px] font-black border-b border-white/5 pb-3 hover:bg-white/5 px-2 tracking-tight">
                           <span className="text-muted-foreground font-mono">{h.season}</span>
                           <span className="text-white truncate pr-2 uppercase">{h.clubName}</span>
                           <span className="text-center">{h.apps}A</span>
-                          <span className="text-accent text-center">{h.goalsScored}G</span>
+                          <span className="text-accent text-center">{h.goals}G</span>
                           <span className="text-primary text-right">{h.avgRating.toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
+                    </>
+                )}
                   </div>
                 )}
               </TabsContent>

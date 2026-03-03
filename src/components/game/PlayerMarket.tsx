@@ -32,11 +32,14 @@ export function PlayerMarket() {
   const scout = userTeam?.staff.find(st => st.role === 'SCOUT');
 
   const filteredPlayers = useMemo(() => {
+    const minA = (() => { const n = parseInt(minAge || '17', 10); return isNaN(n) ? 17 : Math.max(17, Math.min(50, n)); })();
+    const maxA = (() => { const n = parseInt(maxAge || '40', 10); return isNaN(n) ? 40 : Math.max(17, Math.min(50, n)); })();
+    const minS = (() => { const n = parseInt(minSkill || '0', 10); return isNaN(n) ? 0 : Math.max(0, Math.min(20, n)); })();
     return state.players.filter(p => {
       const matchesName = p.name.toLowerCase().includes(search.toLowerCase());
       const matchesPos = posFilter === 'ALL' || p.position === posFilter;
-      const matchesAge = p.age >= parseInt(minAge || '17') && p.age <= parseInt(maxAge || '40');
-      const matchesSkill = scout ? p.attributes.skill >= parseInt(minSkill || '0') : true;
+      const matchesAge = p.age >= minA && p.age <= maxA;
+      const matchesSkill = scout ? p.attributes.skill >= minS : true;
       const isNotUserTeam = p.clubId !== state.userTeamId;
       
       return isNotUserTeam && matchesName && matchesPos && matchesAge && matchesSkill;

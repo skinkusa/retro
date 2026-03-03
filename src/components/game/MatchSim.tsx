@@ -99,8 +99,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
   const currentHomeGoals = fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
   const currentAwayGoals = fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
-  const homeShots = fixture.result ? Math.floor((fixture.result.homeChances || 0) * (currentMinute / 90)) : 0;
-  const awayShots = fixture.result ? Math.floor((fixture.result.awayChances || 0) * (currentMinute / 90)) : 0;
+  const homeShots = fixture.result ? Math.floor((fixture.result.homeShots ?? fixture.result.homeChances ?? 0) * (currentMinute / 90)) : 0;
+  const awayShots = fixture.result ? Math.floor((fixture.result.awayShots ?? fixture.result.awayChances ?? 0) * (currentMinute / 90)) : 0;
 
   const zones = useMemo(() => ({
     home: { 
@@ -349,7 +349,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                   <span className="text-[11px] font-black text-white/60 uppercase">Shots: {homeShots}</span>
                   <div className="text-[10px] font-black text-accent uppercase text-right leading-tight max-w-[140px] mt-1 space-y-0.5">
                     {fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
-                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}'</div>
+                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}&apos;</div>
                     ))}
                   </div>
                 </div>
@@ -369,7 +369,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                   <span className="text-[11px] font-black text-white/60 uppercase">Shots: {awayShots}</span>
                   <div className="text-[10px] font-black text-accent uppercase text-left leading-tight max-w-[140px] mt-1 space-y-0.5">
                     {fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
-                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}'</div>
+                      <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name.split(' ').pop()} {s.minute}&apos;</div>
                     ))}
                   </div>
                 </div>
