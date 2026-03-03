@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
-import { Fixture, Team, Player, MatchEvent } from '@/types/game';
+import { Fixture, Team, Player, MatchEvent, PlayStyle } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/store';
 import { getZoneStrength } from '@/lib/game-engine';
@@ -20,7 +20,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   awayTeam: Team,
   onFinish: () => void 
 }) {
-  const { state, updateMidMatchResult, swapPlayers } = useGame();
+  const { state, updateMidMatchResult, swapPlayers, setTactics } = useGame();
   const [currentMinute, setCurrentMinute] = useState(0);
   const [showLineups, setShowLineups] = useState(true);
   const [activeAlert, setActiveAlert] = useState<MatchEvent | null>(null);
@@ -41,19 +41,23 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const homeLineup = state.players.filter(p => homeTeam.lineup.includes(p.id));
   const awayLineup = state.players.filter(p => awayTeam.lineup.includes(p.id));
 
+  // Determine user team role
+  const isUserHome = homeTeam.id === state.userTeamId;
+  const activeUserTeam = isUserHome ? homeTeam : awayTeam;
+
   const TICK_SPEED = 700; 
 
   const homeStrength = useMemo(() => ({
-    DEF: getZoneStrength(homeLineup, homeTeam, 'DEF'),
-    MID: getZoneStrength(homeLineup, homeTeam, 'MID'),
-    ATT: getZoneStrength(homeLineup, homeTeam, 'ATT')
-  }), [homeLineup, homeTeam]);
+    DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', isUserHome ? state.manager?.personality : undefined),
+    MID: getZoneStrength(homeLineup, homeTeam, 'MID', isUserHome ? state.manager?.personality : undefined),
+    ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', isUserHome ? state.manager?.personality : undefined)
+  }), [homeLineup, homeTeam, isUserHome, state.manager?.personality]);
 
   const awayStrength = useMemo(() => ({
-    DEF: getZoneStrength(awayLineup, awayTeam, 'DEF'),
-    MID: getZoneStrength(awayLineup, awayTeam, 'MID'),
-    ATT: getZoneStrength(awayLineup, awayTeam, 'ATT')
-  }), [awayLineup, awayTeam]);
+    DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', !isUserHome ? state.manager?.personality : undefined),
+    MID: getZoneStrength(awayLineup, awayTeam, 'MID', !isUserHome ? state.manager?.personality : undefined),
+    ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', !isUserHome ? state.manager?.personality : undefined)
+  }), [awayLineup, awayTeam, isUserHome, state.manager?.personality]);
 
   const possession = useMemo(() => {
     const totalMid = homeStrength.MID + awayStrength.MID;
@@ -115,7 +119,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   }, [activeAlert]);
 
   const handleResume = () => {
-    if (homeTeam.lineup.length !== 11) return;
+    if (activeUserTeam.lineup.length !== 11) return;
     updateMidMatchResult(fixture.id, currentMinute);
     setIsPaused(false);
     setSwapSourceId(null);
@@ -281,10 +285,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           </div>
         </div>
 
-        {/* Score & Minutes Bar - Unified Row */}
         <div className="relative z-10 flex flex-col items-center px-4 md:px-12 mt-2 gap-4 flex-1">
           <div className="w-full max-w-4xl flex items-center justify-between gap-4">
-            {/* Home Info */}
             <div className="flex-1 flex flex-col items-end">
               <div className="w-full h-12 border-4 border-white/20 text-white flex items-center justify-center font-black text-base md:text-xl shadow-xl text-center rounded-lg" style={{ backgroundColor: homeTeam.color }}>
                 {homeTeam.name.toUpperCase()}
@@ -304,7 +306,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </div>
             </div>
 
-            {/* Minutes Counter - Level with teams */}
             <div className="flex flex-col items-center justify-center px-4">
               <TooltipProvider>
                 <Tooltip>
@@ -322,7 +323,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </TooltipProvider>
             </div>
 
-            {/* Away Info */}
             <div className="flex-1 flex flex-col items-start">
               <div className="w-full h-12 border-4 border-white/20 text-white flex items-center justify-center font-black text-base md:text-xl shadow-xl text-center rounded-lg" style={{ backgroundColor: awayTeam.color }}>
                 {awayTeam.name.toUpperCase()}
@@ -343,7 +343,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             </div>
           </div>
 
-          {/* Possession Bar - Horizontal / Fluctuating */}
           <div className="w-full max-w-2xl mt-4">
             <TooltipProvider>
               <Tooltip>
@@ -364,7 +363,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             </div>
           </div>
 
-          {/* Scorers List */}
           <div className="grid grid-cols-2 w-full max-w-4xl gap-8 mt-4">
             <div className="space-y-1 text-right">
               {homeScorers.map((s, idx) => (
@@ -462,31 +460,71 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </div>
               <Button 
                 onClick={handleResume} 
-                disabled={homeTeam.lineup.length !== 11}
+                disabled={activeUserTeam.lineup.length !== 11}
                 className="bg-accent text-accent-foreground retro-button h-12 px-12 font-black uppercase text-sm shadow-xl hover:scale-105 transition-transform"
               >
                 Apply Changes & Resume <ChevronRight size={20} className="ml-2" />
               </Button>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10 flex-1 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1.2fr] gap-6 flex-1 overflow-hidden">
               <div className="space-y-6 overflow-auto custom-scrollbar">
                 <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-lg">
+                  <h4 className="text-xs font-black text-primary mb-4 uppercase border-b border-primary/10 pb-2">Formation</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (
+                      <Button 
+                        key={f} 
+                        onClick={() => setTactics(f, activeUserTeam.playStyle)}
+                        className={cn(
+                          "h-10 text-[14px] font-mono retro-button font-black rounded-md",
+                          activeUserTeam.formation === f 
+                            ? "bg-accent text-accent-foreground border-accent" 
+                            : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
+                        )}
+                      >
+                        {f}
+                      </Button>
+                    ))}
+                  </div>
+                  <h4 className="text-xs font-black text-primary mt-6 mb-4 uppercase border-b border-primary/10 pb-2">Play Style</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (
+                      <Button 
+                        key={s} 
+                        onClick={() => setTactics(activeUserTeam.formation, s)}
+                        className={cn(
+                          "h-10 text-[12px] font-mono retro-button font-black uppercase rounded-md",
+                          activeUserTeam.playStyle === s 
+                            ? "bg-accent text-accent-foreground border-accent" 
+                            : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
+                        )}
+                      >
+                        {s}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 overflow-auto custom-scrollbar">
+                <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-lg h-full">
                   <h4 className="text-xs font-black text-primary mb-4 uppercase flex justify-between">
-                    Personnel <span>{homeTeam.lineup.length}/11 SELECTED</span>
+                    Personnel <span>{activeUserTeam.lineup.length}/11 SELECTED</span>
                   </h4>
                   <SquadList 
-                    players={state.players.filter(p => p.clubId === homeTeam.id)} 
+                    players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
                     onPlayerSwap={handleSwapInteraction}
                     activeSwapId={swapSourceId}
                   />
                 </div>
               </div>
+
               <div className="space-y-6 overflow-auto custom-scrollbar">
-                 <div className="bg-card/20 border-2 border-primary/20 p-6 shadow-inner rounded-lg">
+                 <div className="bg-card/20 border-2 border-primary/20 p-6 shadow-inner rounded-lg h-full">
                     <h4 className="text-xs font-black text-primary mb-4 uppercase">Pitch Positioning</h4>
                     <TacticsPitch 
-                      team={homeTeam} 
-                      players={state.players.filter(p => p.clubId === homeTeam.id)} 
+                      team={activeUserTeam} 
+                      players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
                       onPlayerClick={(p) => handleSwapInteraction(p.id)} 
                       onPlayerProfile={(p) => setViewingPlayer(p)}
                       activeSwapId={swapSourceId}
