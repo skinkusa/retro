@@ -22,7 +22,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   awayTeam: Team,
   onFinish: () => void 
 }) {
-  const { state, swapPlayers, setTactics } = useGame();
+  const { state, swapPlayers, setTactics, simulateWeek } = useGame();
   const [currentMinute, setCurrentMinute] = useState(0);
   const [showLineups, setShowLineups] = useState(true);
   const [activeAlert, setActiveAlert] = useState<MatchEvent | null>(null);
@@ -36,6 +36,13 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
   
+  // Ensure we have a result generated if we just started
+  useEffect(() => {
+    if (!fixture.result) {
+      simulateWeek();
+    }
+  }, [fixture.result, simulateWeek]);
+
   const homeLineup = state.players.filter(p => homeTeam.lineup.slice(0, 11).includes(p.id));
   const awayLineup = state.players.filter(p => awayTeam.lineup.slice(0, 11).includes(p.id));
   const isUserHome = homeTeam.id === state.userTeamId;
@@ -43,7 +50,12 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
   // Away Color Logic: If colors clash or just use away color for away team
   const awayKitColor = useMemo(() => {
-    if (homeTeam.color.toLowerCase() === awayTeam.color.toLowerCase()) return awayTeam.awayColor;
+    const hex1 = homeTeam.color.replace('#', '');
+    const hex2 = awayTeam.color.replace('#', '');
+    // Simple clash detection
+    if (hex1.substring(0, 2) === hex2.substring(0, 2) || homeTeam.color.toLowerCase() === awayTeam.color.toLowerCase()) {
+      return awayTeam.awayColor;
+    }
     return awayTeam.color;
   }, [homeTeam.color, awayTeam.color, awayTeam.awayColor]);
 
