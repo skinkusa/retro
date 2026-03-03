@@ -11,7 +11,7 @@ import { SquadList } from './SquadList';
 import { TacticsPitch } from './TacticsPitch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pause, Play, ChevronRight, Swords, RefreshCw, Activity, Settings, UserCircle, ListFilter } from 'lucide-react';
+import { Pause, UserCircle, Briefcase, LayoutDashboard, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlayerProfile } from './PlayerProfile';
 
@@ -35,7 +35,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
   
-  // Ensure we have a result generated if we just started
   useEffect(() => {
     if (!fixture.result) {
       simulateWeek();
@@ -46,8 +45,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const awayLineup = state.players.filter(p => awayTeam.lineup.slice(0, 11).includes(p.id));
   const isUserHome = homeTeam.id === state.userTeamId;
   const activeUserTeam = isUserHome ? homeTeam : awayTeam;
+  const userPlayers = state.players.filter(p => p.clubId === activeUserTeam.id);
 
-  // Away Color Logic
   const awayKitColor = useMemo(() => {
     const hex1 = homeTeam.color.replace('#', '');
     const hex2 = awayTeam.color.replace('#', '');
@@ -86,8 +85,16 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
   const handleResume = () => { setIsPaused(false); setSwapSourceId(null); };
   const handleSwapInteraction = (pId: string) => {
-    if (!swapSourceId) { setSwapSourceId(pId); }
-    else { if (swapSourceId === pId) { setSwapSourceId(null); } else { swapPlayers(swapSourceId, pId); setSwapSourceId(null); } }
+    if (!swapSourceId) {
+      setSwapSourceId(pId);
+    } else {
+      if (swapSourceId === pId) {
+        setSwapSourceId(null);
+      } else {
+        swapPlayers(swapSourceId, pId);
+        setSwapSourceId(null);
+      }
+    }
   };
 
   const currentHomeGoals = fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
@@ -140,9 +147,56 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     </div>
   );
 
+  const BenchList = () => {
+    const benchPlayers = userPlayers.filter(p => activeUserTeam.lineup.slice(11, 16).includes(p.id));
+    return (
+      <div className="bg-black/40 border border-primary/20 rounded-xl overflow-hidden shadow-2xl h-full flex flex-col">
+        <div className="bg-primary/20 px-4 py-2 border-b border-primary/20 flex justify-between items-center">
+          <span className="text-[12px] font-black text-primary uppercase">Substitute Bench</span>
+          <span className="text-[10px] font-black text-primary/60">{benchPlayers.length}/5 SELECTED</span>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <Table>
+            <TableBody>
+              {benchPlayers.map(p => (
+                <TableRow 
+                  key={p.id} 
+                  onClick={() => handleSwapInteraction(p.id)}
+                  className={cn(
+                    "border-b border-white/5 hover:bg-primary/10 cursor-pointer transition-all",
+                    swapSourceId === p.id ? "bg-accent/20 ring-2 ring-accent ring-inset" : ""
+                  )}
+                >
+                  <TableCell className="py-3 px-4">
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-black text-white uppercase truncate">{p.name.split(' ').pop()}</span>
+                      <span className="text-[10px] font-mono text-cyan uppercase">{p.position} ({p.side}) • SKL: {p.attributes.skill}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right py-3 px-4">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={cn("text-[12px] font-black", p.fitness < 80 ? "text-red-500" : "text-accent")}>{p.fitness}% FIT</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-black text-white/40 uppercase">RTG:</span>
+                        <span className="text-[12px] font-mono font-black text-white">{fixture.result?.ratings[p.id]?.toFixed(1) || '0.0'}</span>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {benchPlayers.length === 0 && (
+                <TableRow><TableCell colSpan={2} className="text-center py-12 text-white/20 uppercase font-black italic text-[11px]">No substitutes selected</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-2 md:p-4 font-mono z-[100] backdrop-blur-sm">
-      <div className="max-w-5xl w-full aspect-video bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl">
+      <div className="max-w-6xl w-full aspect-video bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl">
         <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay bg-cover bg-center" style={{ backgroundImage: stadiumOverlay ? `url("${stadiumOverlay}")` : 'none' }} />
 
         {showLineups && (
@@ -185,54 +239,91 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
         {isPaused && (
           <div className="absolute inset-0 z-[400] bg-black/95 backdrop-blur-2xl flex flex-col p-4 overflow-hidden animate-in fade-in duration-300">
-            <div className="flex justify-between items-center mb-6 border-b-4 border-primary pb-4">
-              <h3 className="text-xl font-black text-primary uppercase tracking-tighter">Tactical Command Center</h3>
-              <Button onClick={handleResume} className="bg-accent text-accent-foreground retro-button h-12 px-12 font-black uppercase shadow-xl">Apply & Resume</Button>
+            <div className="flex justify-between items-center mb-4 border-b-4 border-primary pb-3">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/20 p-2 border border-primary/40 rounded-lg"><Briefcase size={24} className="text-primary" /></div>
+                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter italic">Tactical Command Center</h3>
+              </div>
+              <Button onClick={handleResume} className="bg-accent text-accent-foreground retro-button h-12 px-12 font-black uppercase shadow-xl hover:scale-105 transition-all">Apply & Resume Match</Button>
             </div>
-            <Tabs defaultValue="strategy" className="flex-1 flex flex-col min-h-0">
-              <TabsList className="grid w-full grid-cols-3 bg-black/40 h-14 mb-6 border border-primary/20 rounded-xl gap-1 p-1">
-                <TabsTrigger value="strategy" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary">Strategy</TabsTrigger>
-                <TabsTrigger value="squad" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary">Personnel</TabsTrigger>
-                <TabsTrigger value="pitch" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary">Tactics Pitch</TabsTrigger>
+            
+            <Tabs defaultValue="pitch" className="flex-1 flex flex-col min-h-0">
+              <TabsList className="grid w-full grid-cols-3 bg-black/40 h-14 mb-4 border border-primary/20 rounded-xl gap-1 p-1 shadow-inner">
+                <TabsTrigger value="pitch" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><LayoutDashboard size={18} className="mr-2" /> Tactics Pitch</TabsTrigger>
+                <TabsTrigger value="strategy" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><Swords size={18} className="mr-2" /> Match Strategy</TabsTrigger>
+                <TabsTrigger value="personnel" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><UserCircle size={18} className="mr-2" /> Detailed Squad</TabsTrigger>
               </TabsList>
+
               <div className="flex-1 overflow-hidden">
-                <TabsContent value="strategy" className="m-0 h-full overflow-auto p-2">
-                  <div className="max-w-2xl mx-auto space-y-8">
-                    <div className="bg-card/20 border-2 border-primary/20 p-6 rounded-xl">
-                      <h4 className="text-[14px] font-black text-primary mb-6 uppercase border-b border-primary/10 pb-2">Formation</h4>
-                      <div className="grid grid-cols-3 gap-3">
+                <TabsContent value="pitch" className="m-0 h-full p-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 h-full items-start">
+                    <div className="bg-black/20 p-4 border border-primary/20 rounded-2xl shadow-inner h-full flex items-center justify-center">
+                      <TacticsPitch 
+                        team={activeUserTeam} 
+                        players={userPlayers} 
+                        onPlayerClick={(p) => handleSwapInteraction(p.id)} 
+                        onPlayerProfile={(p) => setViewingPlayer(p)} 
+                        activeSwapId={swapSourceId} 
+                      />
+                    </div>
+                    <BenchList />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="strategy" className="m-0 h-full overflow-auto p-4">
+                  <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-card/20 border-2 border-primary/20 p-6 rounded-2xl shadow-xl">
+                      <h4 className="text-[16px] font-black text-primary mb-6 uppercase border-b-2 border-primary/10 pb-2 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" /> Change Formation
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
                         {['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (
-                          <Button key={f} onClick={() => setTactics(f, activeUserTeam.playStyle)} className={cn("h-14 font-mono font-black rounded-lg", activeUserTeam.formation === f ? "bg-accent text-accent-foreground border-accent shadow-lg" : "bg-black/40 text-white border-primary/20")}>{f}</Button>
+                          <Button 
+                            key={f} 
+                            onClick={() => setTactics(f, activeUserTeam.playStyle)} 
+                            className={cn(
+                              "h-12 text-lg font-black rounded-lg transition-all", 
+                              activeUserTeam.formation === f ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.3)]" : "bg-black/40 text-white border-primary/20 hover:bg-primary/10"
+                            )}
+                          >
+                            {f}
+                          </Button>
                         ))}
                       </div>
-                      <h4 className="text-[14px] font-black text-primary mt-10 mb-6 uppercase border-b border-primary/10 pb-2">Style</h4>
+                    </div>
+
+                    <div className="bg-card/20 border-2 border-primary/20 p-6 rounded-2xl shadow-xl">
+                      <h4 className="text-[16px] font-black text-primary mb-6 uppercase border-b-2 border-primary/10 pb-2 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-accent rounded-full animate-pulse" /> Team Mentality
+                      </h4>
                       <div className="grid grid-cols-2 gap-3">
                         {(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (
-                          <Button key={s} onClick={() => setTactics(activeUserTeam.formation, s)} className={cn("h-14 text-[14px] font-mono font-black uppercase rounded-lg", activeUserTeam.playStyle === s ? "bg-accent text-accent-foreground border-accent shadow-lg" : "bg-black/40 text-white border-primary/20")}>{s}</Button>
+                          <Button 
+                            key={s} 
+                            onClick={() => setTactics(activeUserTeam.formation, s)} 
+                            className={cn(
+                              "h-12 text-[13px] font-black uppercase rounded-lg transition-all leading-tight text-center", 
+                              activeUserTeam.playStyle === s ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.3)]" : "bg-black/40 text-white border-primary/20 hover:bg-primary/10"
+                            )}
+                          >
+                            {s}
+                          </Button>
                         ))}
                       </div>
                     </div>
                   </div>
                 </TabsContent>
-                <TabsContent value="squad" className="m-0 h-full overflow-auto">
-                  <div className="bg-card/20 border-2 border-primary/20 p-4 rounded-xl h-full">
+
+                <TabsContent value="personnel" className="m-0 h-full overflow-auto">
+                  <div className="bg-black/20 border border-primary/20 p-4 rounded-2xl h-full shadow-inner">
                     <SquadList 
-                      players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
+                      players={userPlayers} 
                       currentMatchRatings={fixture.result?.ratings} 
                       onPlayerSwap={handleSwapInteraction} 
                       activeSwapId={swapSourceId}
                       hideReserves={true}
                     />
                   </div>
-                </TabsContent>
-                <TabsContent value="pitch" className="m-0 h-full overflow-auto flex flex-col items-center p-4">
-                  <TacticsPitch 
-                    team={activeUserTeam} 
-                    players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
-                    onPlayerClick={(p) => handleSwapInteraction(p.id)} 
-                    onPlayerProfile={(p) => setViewingPlayer(p)} 
-                    activeSwapId={swapSourceId} 
-                  />
                 </TabsContent>
               </div>
             </Tabs>
@@ -245,7 +336,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             <div className="bg-black/90 backdrop-blur-md px-4 py-2 text-[16px] font-black flex-1 text-center uppercase tracking-tight shadow-2xl flex items-center justify-center min-h-[44px] rounded-lg border border-white/10" style={{ color: 'hsl(var(--accent))' }}>
               {activeEvent?.text}
             </div>
-            <Button onClick={() => setIsPaused(true)} className="h-11 px-8 bg-red-600 hover:bg-red-700 text-white font-black retro-button shadow-lg"><Pause size={20} className="mr-2" /> PAUSE & TACTICS</Button>
+            <Button onClick={() => setIsPaused(true)} className="h-11 px-8 bg-red-600 hover:bg-red-700 text-white font-black retro-button shadow-lg transition-all active:scale-95"><Pause size={20} className="mr-2" /> PAUSE & TACTICS</Button>
           </div>
         </div>
 
