@@ -17,3 +17,17 @@ export function formatMoney(amount: number): string {
   }
   return `£${amount}`;
 }
+
+/** Resolve transfer message content from team names (for news/headlines). */
+export function getMessageDisplayContent(
+  m: { content: string; buyerId?: string; sellerId?: string; playerName?: string; transferValue?: number; fromTeamId?: string },
+  getTeamName: (id: string) => string
+): string {
+  if (m.buyerId != null && m.sellerId != null && m.playerName != null && m.transferValue != null) {
+    return `${getTeamName(m.buyerId)} have completed the signing of ${m.playerName} from ${getTeamName(m.sellerId)} for a fee of ${formatMoney(m.transferValue)}.`;
+  }
+  if (m.fromTeamId != null && m.playerName != null && m.transferValue != null) {
+    return `${getTeamName(m.fromTeamId)} have submitted an official bid of ${formatMoney(m.transferValue)} for ${m.playerName}.`;
+  }
+  return m.content;
+}

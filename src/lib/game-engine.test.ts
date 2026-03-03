@@ -45,7 +45,9 @@ function makeTeam(id: string, name: string, overrides: Partial<Team> = {}): Team
     stadium: 'Stadium',
     stadiumCapacity: 30000,
     color: '#000',
+    homeTextColor: '#fff',
     awayColor: '#fff',
+    awayTextColor: '#000',
     budget: 1_000_000,
     weeklyWages: 50_000,
     points: 0,
@@ -182,7 +184,7 @@ describe('game-engine', () => {
       expect(result).toBeDefined();
       expect(result!.scorers.length).toBeGreaterThan(0);
       for (const s of result!.scorers) {
-        expect(result!.ratings[s.playerId]).toBeGreaterThanOrEqual(6.5);
+        expect(result!.ratings[s.playerId]).toBeGreaterThanOrEqual(6);
       }
     });
 

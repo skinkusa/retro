@@ -53,13 +53,13 @@ export interface MatchEngineConfig {
 }
 
 export const DEFAULT_ENGINE_CONFIG: MatchEngineConfig = {
-  chanceProbabilityBase: 0.12,
+  chanceProbabilityBase: 0.35,
   chanceMidScale: 2500,
-  chanceProbabilityMin: 0.04,
-  chanceProbabilityMax: 0.18,
-  conversionMultiplier: 0.95,
+  chanceProbabilityMin: 0.12,
+  chanceProbabilityMax: 0.48,
+  conversionMultiplier: 1.02,
   goalProbabilityMin: 0.08,
-  goalProbabilityMax: 0.48,
+  goalProbabilityMax: 0.30,
   shotProbabilityFromThreat: 0.72,
   sotProbabilityFromShot: 0.38,
 

@@ -19,6 +19,8 @@ export interface PlayerStats {
   cleanSheets?: number;
   /** Minutes played (apps × 90 for full matches). */
   minutesPlayed?: number;
+  /** Man of the Match awards this season. */
+  manOfTheMatch?: number;
 }
 
 export interface Injury {
@@ -86,7 +88,11 @@ export interface Team {
   stadium: string;
   stadiumCapacity: number;
   color: string;
+  /** Text color for home kit (contrast with color). Omit in legacy saves; UI falls back to white. */
+  homeTextColor?: string;
   awayColor: string;
+  /** Text color for away kit (contrast with awayColor). Omit in legacy saves; UI falls back to white. */
+  awayTextColor?: string;
   budget: number;
   weeklyWages: number;
   points: number;
@@ -203,6 +209,12 @@ export interface GameMessage {
   read: boolean;
   type: 'URGENT' | 'INFO' | 'BOARD' | 'TRANSFER' | 'STAFF' | 'FINANCE' | 'CUP' | 'SEASON' | 'BOARD_MEETING';
   bidId?: string;
+  /** Resolve club names at display time from state.teams */
+  buyerId?: string;
+  sellerId?: string;
+  playerName?: string;
+  transferValue?: number;
+  fromTeamId?: string;
 }
 
 export interface SeasonSummaryData {
@@ -242,4 +254,6 @@ export interface GameState {
   records: TeamRecords;
   /** 'arcade' = higher scoring, more cards; default = realistic */
   enginePreset?: 'realistic' | 'arcade';
+  /** When set, the match screen is shown for this fixture (survives remounts). */
+  currentMatchFixtureId?: string | null;
 }

@@ -61,7 +61,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
   };
 
   return (
-    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-2xl rounded-xl overflow-hidden h-full max-h-[600px]">
+    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-2xl rounded-xl overflow-hidden h-full max-h-[55vh] sm:max-h-[450px] md:max-h-[600px]">
       {/* Pitch Markings */}
       <div className="absolute inset-2 border border-white/10 pointer-events-none">
         <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-white/10" />
@@ -104,13 +104,13 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                     )}
                   </div>
                   <div className={cn(
-                    "bg-black/95 px-2 py-1 backdrop-blur-sm border border-white/20 mt-1 rounded-md shadow-2xl min-w-[80px] md:min-w-[90px] text-center",
+                    "bg-black/98 px-2 py-1 backdrop-blur-sm border border-white/20 mt-1 rounded-md shadow-2xl min-w-[80px] md:min-w-[90px] text-center",
                     markerColor === 'bg-red-600' && "border-red-600/50",
                     markerColor === 'bg-yellow-500' && "border-yellow-500/50",
                     isBeingSwapped && "border-accent"
                   )}>
                     <span className="text-[10px] md:text-[12px] uppercase font-black text-white leading-none truncate block">
-                      {player.name.split(' ').pop()}
+                      {player.name}
                     </span>
                     <span className={cn(
                       "text-[8px] md:text-[9px] block font-black mt-0.5 tracking-tight uppercase",
@@ -124,15 +124,15 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                 {onPlayerProfile && (
                   <button 
                     onClick={() => onPlayerProfile(player)}
-                    className="mt-0.5 p-0.5 bg-black/40 hover:bg-black/80 text-white/50 hover:text-white rounded-full transition-colors"
+                    className="mt-0.5 p-0.5 bg-black/70 hover:bg-black/90 text-white/80 hover:text-white rounded-full transition-colors"
                   >
                     <UserCircle size={12} />
                   </button>
                 )}
               </div>
             ) : (
-              <div className="w-10 h-10 border-2 border-dashed border-white/20 flex items-center justify-center rounded-full bg-black/20">
-                <span className="text-[14px] text-white/40 font-black">{slot.label}</span>
+              <div className="w-10 h-10 border-2 border-dashed border-white/20 flex items-center justify-center rounded-full bg-black/50">
+                <span className="text-[14px] text-white/80 font-black">{slot.label}</span>
               </div>
             )}
           </div>
@@ -140,7 +140,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
       })}
 
       {lineupPlayers.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-black/80 backdrop-blur-md rounded-xl">
+        <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-black/95 backdrop-blur-md rounded-xl">
           <p className="text-[18px] uppercase font-black text-primary animate-pulse leading-tight tracking-[0.3em]">
             ASSIGN 11 PLAYERS<br/>IN SQUAD VIEW
           </p>
@@ -149,7 +149,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
 
       {/* HUD Info */}
       <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1.5 z-20">
-        <div className="bg-black/90 px-3 py-1 text-[10px] font-black text-white border border-white/20 uppercase tracking-[0.2em] rounded-lg shadow-xl">
+        <div className="bg-black/98 px-3 py-1 text-[10px] font-black text-white border border-white/20 uppercase tracking-[0.2em] rounded-lg shadow-xl">
           {team.formation} / {team.playStyle}
         </div>
       </div>

@@ -79,25 +79,25 @@ export function PlayerMarket() {
   const renderPlayerTable = (players: Player[], isShortlistTab = false) => (
     <Table>
       <TableHeader>
-        <TableRow className="border-b border-primary/30 bg-muted/40">
-          <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Name</TableHead>
-          <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Club</TableHead>
-          <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Age</TableHead>
-          <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Role</TableHead>
+        <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+          <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Name</TableHead>
+          <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Club</TableHead>
+          <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Age</TableHead>
+          <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Role</TableHead>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Skill</TableHead>
+              <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white cursor-help">Skill</TableHead>
             </TooltipTrigger>
             <TooltipContent className="font-black">OVERALL TECHNICAL PROFICIENCY (1-20)</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Pot</TableHead>
+              <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white cursor-help">Pot</TableHead>
             </TooltipTrigger>
             <TooltipContent className="font-black">SCOUT GRADE FOR FUTURE GROWTH</TooltipContent>
           </Tooltip>
-          <TableHead className="text-right text-[11px] uppercase py-3 font-black tracking-tight">Value</TableHead>
-          <TableHead className="text-right text-[11px] uppercase py-3 font-black tracking-tight">Action</TableHead>
+          <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Value</TableHead>
+          <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -96,11 +96,11 @@ export function ManagerInfo() {
       <RetroWindow title="JOB MARKET: VACANCIES">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-primary/20 bg-muted/30">
-              <TableHead className="text-[10px] uppercase">Club</TableHead>
-              <TableHead className="text-[10px] uppercase">Division</TableHead>
-              <TableHead className="text-center text-[10px] uppercase">Reputation</TableHead>
-              <TableHead className="text-right text-[10px] uppercase">Action</TableHead>
+            <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Club</TableHead>
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Division</TableHead>
+              <TableHead className="text-center text-[12px] uppercase font-black text-white tracking-wide">Reputation</TableHead>
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

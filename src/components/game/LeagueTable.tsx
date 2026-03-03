@@ -38,20 +38,20 @@ export function LeagueTable({ teams, onTeamClick }: LeagueTableProps) {
       <TooltipProvider>
         <Table>
           <TableHeader>
-            <TableRow className="border-b-4 border-primary/30 hover:bg-transparent bg-black/40">
-              <TableHead className="w-[60px] text-[13px] uppercase font-black py-5 text-center">#</TableHead>
-              <TableHead className="text-[13px] uppercase font-black py-5">Club Identity</TableHead>
+            <TableRow className="border-b-4 border-primary/40 hover:bg-transparent bg-primary/25">
+              <TableHead className="w-[60px] text-[14px] uppercase font-black py-5 text-center text-white tracking-wide">#</TableHead>
+              <TableHead className="text-[14px] uppercase font-black py-5 text-white tracking-wide">Club Identity</TableHead>
               {['P', 'W', 'D', 'L', 'GD'].map(h => (
                 <Tooltip key={h}>
-                  <TooltipTrigger asChild><TableHead className="text-center text-[13px] uppercase font-black py-5 cursor-help">{h}</TableHead></TooltipTrigger>
+                  <TooltipTrigger asChild><TableHead className="text-center text-[14px] uppercase font-black py-5 cursor-help text-white tracking-wide">{h}</TableHead></TooltipTrigger>
                   <TooltipPortal><TooltipContent className="font-black">{h === 'P' ? 'PLAYED' : h === 'W' ? 'WINS' : h === 'D' ? 'DRAWS' : h === 'L' ? 'LOSSES' : 'GOAL DIFF'}</TooltipContent></TooltipPortal>
                 </Tooltip>
               ))}
               <Tooltip>
-                <TooltipTrigger asChild><TableHead className="text-center font-black text-[14px] uppercase text-cyan py-5 cursor-help">Pts</TableHead></TooltipTrigger>
+                <TooltipTrigger asChild><TableHead className="text-center font-black text-[15px] uppercase text-cyan py-5 cursor-help tracking-wide">Pts</TableHead></TooltipTrigger>
                 <TooltipPortal><TooltipContent className="font-black">LEAGUE POINTS</TooltipContent></TooltipPortal>
               </Tooltip>
-              <TableHead className="text-right text-[13px] uppercase font-black py-5 pr-6">Recent Form</TableHead>
+              <TableHead className="text-right text-[14px] uppercase font-black py-5 pr-6 text-white tracking-wide">Recent Form</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -74,7 +74,7 @@ export function LeagueTable({ teams, onTeamClick }: LeagueTableProps) {
           </TableBody>
         </Table>
       </TooltipProvider>
-      <div className="flex flex-wrap gap-8 px-6 py-4 text-[12px] uppercase font-black text-muted-foreground border-t-2 border-primary/20 bg-black/40 rounded-b-2xl">
+      <div className="flex flex-wrap gap-8 px-6 py-4 text-[12px] uppercase font-black text-muted-foreground border-t-2 border-primary/20 bg-black/70 rounded-b-2xl">
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-cyan shadow-[0_0_10px_rgba(0,255,255,0.5)]" /> Champions Cup</div>
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-blue-500" /> UEFA Cup</div>
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-green-500" /> Promotion</div>

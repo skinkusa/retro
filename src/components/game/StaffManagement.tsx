@@ -18,12 +18,12 @@ export function StaffManagement() {
       <RetroWindow title="CURRENT BACKROOM STAFF">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-primary/20 bg-muted/30">
-              <TableHead className="text-[10px] uppercase">Name</TableHead>
-              <TableHead className="text-[10px] uppercase">Role</TableHead>
-              <TableHead className="text-center text-[10px] uppercase">Rating</TableHead>
-              <TableHead className="text-right text-[10px] uppercase">Wage</TableHead>
-              <TableHead className="text-right text-[10px] uppercase">Action</TableHead>
+            <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Name</TableHead>
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Role</TableHead>
+              <TableHead className="text-center text-[12px] uppercase font-black text-white tracking-wide">Rating</TableHead>
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Wage</TableHead>
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,12 +60,12 @@ export function StaffManagement() {
       <RetroWindow title="STAFF JOB APPLICANTS">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-primary/20 bg-muted/30">
-              <TableHead className="text-[10px] uppercase">Name</TableHead>
-              <TableHead className="text-[10px] uppercase">Role</TableHead>
-              <TableHead className="text-center text-[10px] uppercase">Rating</TableHead>
-              <TableHead className="text-right text-[10px] uppercase">Wage</TableHead>
-              <TableHead className="text-right text-[10px] uppercase">Action</TableHead>
+            <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Name</TableHead>
+              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Role</TableHead>
+              <TableHead className="text-center text-[12px] uppercase font-black text-white tracking-wide">Rating</TableHead>
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Wage</TableHead>
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

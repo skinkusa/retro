@@ -1,7 +1,8 @@
-import { Player, Team, Position, Side, Fixture, PlayStyle } from '@/types/game';
+import { Player, Team, Position, Side, Fixture, PlayStyle, StaffMember } from '@/types/game';
 import { DIVISIONS } from '@/data/divisions';
 import { FIRSTNAME_POOL, SURNAME_POOL } from '@/data/player-names';
 import { TEAM_DEFINITIONS } from '@/data/teams';
+import { STAFF_ROLES, generateStaffMember } from '@/data/staff-config';
 
 export { FIRSTNAME_POOL, SURNAME_POOL };
 
@@ -25,36 +26,49 @@ export function generateFixtures(teams: Team[], season: number) {
 }
 
 export function generateInitialData() {
-  const teams: Team[] = TEAM_DEFINITIONS.map((def, i) => ({
-    id: `team-${i}`,
-    name: def.name,
-    stadium: def.stadium ?? `${def.name} Grounds`,
-    stadiumCapacity: def.stadiumCapacity,
-    color: def.color,
-    awayColor: def.awayColor,
-    budget: (5 - def.division) * 10000000 + Math.random() * 10000000,
-    weeklyWages: 0,
-    points: 0,
-    played: 0,
-    won: 0,
-    drawn: 0,
-    lost: 0,
-    goalsFor: 0,
-    goalsAgainst: 0,
-    division: def.division,
-    reputation: 90 - (def.division * 15) + Math.floor(Math.random() * 10),
-    formation: def.formation || '4-4-2',
-    playStyle: def.style || 'Pass to Feet',
-    preferredFormation: def.formation || '4-4-2',
-    preferredStyle: def.style || 'Pass to Feet',
-    playedHistory: [],
-    staff: [],
-    lineup: [],
-    finances: { gateReceipts: 0, merchandise: 0, wagesPaid: 0, transfersIn: 0, transfersOut: 0, taxPaid: 0 },
-  }));
+  const teams: Team[] = TEAM_DEFINITIONS.map((def, i) => {
+    const staff: StaffMember[] = [];
+    let staffWages = 0;
+    STAFF_ROLES.forEach(rc => {
+      for (let k = 0; k < rc.defaultPerTeam; k++) {
+        const sm = generateStaffMember(rc.role, `team-${i}`, def.division, k);
+        staff.push(sm);
+        staffWages += sm.wage;
+      }
+    });
+    return {
+      id: `team-${i}`,
+      name: def.name,
+      stadium: def.stadium ?? `${def.name} Grounds`,
+      stadiumCapacity: def.stadiumCapacity,
+      color: def.color,
+      homeTextColor: def.homeTextColor,
+      awayColor: def.awayColor,
+      awayTextColor: def.awayTextColor,
+      budget: (5 - def.division) * 10000000 + Math.random() * 10000000,
+      weeklyWages: staffWages,
+      points: 0,
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      division: def.division,
+      reputation: 90 - (def.division * 15) + Math.floor(Math.random() * 10),
+      formation: def.formation || '4-4-2',
+      playStyle: def.style || 'Pass to Feet',
+      preferredFormation: def.formation || '4-4-2',
+      preferredStyle: def.style || 'Pass to Feet',
+      playedHistory: [],
+      staff,
+      lineup: [],
+      finances: { gateReceipts: 0, merchandise: 0, wagesPaid: 0, transfersIn: 0, transfersOut: 0, taxPaid: 0 },
+    };
+  });
 
   const players: Player[] = [];
-  const sideBias: Side[] = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'L', 'R', 'LC', 'RC']; 
+  const sideBias: Side[] = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'L', 'R', 'LC', 'RC'];
 
   teams.forEach(team => {
     const positions = ['GK', 'GK', 'DF', 'DF', 'DF', 'DF', 'DF', 'DF', 'MF', 'MF', 'MF', 'MF', 'MF', 'MF', 'FW', 'FW', 'FW', 'FW', 'DM', 'DF', 'MF', 'FW'];
@@ -64,13 +78,24 @@ export function generateInitialData() {
       const attrBase = Math.max(5, potential - (35 - age) / 2) - (team.division * 2);
       const attr = () => Math.max(1, Math.floor(Math.random() * 5) + attrBase);
       const player: Player = {
-        id: `p-${team.id}-${i}`, name: `${FIRSTNAME_POOL[Math.floor(Math.random() * FIRSTNAME_POOL.length)]} ${SURNAME_POOL[Math.floor(Math.random() * SURNAME_POOL.length)]}`, age, position: pos as Position, side: pos === 'GK' ? 'C' : sideBias[Math.floor(Math.random() * sideBias.length)], attributes: { pace: attr(), stamina: attr(), skill: attr(), shooting: attr(), passing: attr(), heading: attr(), influence: attr(), goalkeeping: pos === 'GK' ? attr() + 6 : 1, consistency: attr(), dirtiness: Math.floor(Math.random() * 20), injuryProne: Math.floor(Math.random() * 20), temperament: attr(), potential, professionalism: 5 + Math.floor(Math.random() * 15) }, fitness: 90 + Math.floor(Math.random() * 10), morale: 70 + Math.floor(Math.random() * 30), condition: 100, status: 'FIT', value: (5 - team.division) * 1000000 + Math.floor(Math.random() * 1000000), wage: (5 - team.division) * 5000 + Math.floor(Math.random() * 5000), contractYears: 1 + Math.floor(Math.random() * 4), clubId: team.id, isListed: false, suspensionWeeks: 0, injury: null, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0 }, history: []
+        id: `p-${team.id}-${i}`, name: `${FIRSTNAME_POOL[Math.floor(Math.random() * FIRSTNAME_POOL.length)]} ${SURNAME_POOL[Math.floor(Math.random() * SURNAME_POOL.length)]}`, age, position: pos as Position, side: pos === 'GK' ? 'C' : sideBias[Math.floor(Math.random() * sideBias.length)], attributes: { pace: attr(), stamina: attr(), skill: attr(), shooting: attr(), passing: attr(), heading: attr(), influence: attr(), goalkeeping: pos === 'GK' ? attr() + 6 : 1, consistency: attr(), dirtiness: Math.floor(Math.random() * 20), injuryProne: Math.floor(Math.random() * 20), temperament: attr(), potential, professionalism: 5 + Math.floor(Math.random() * 15) }, fitness: 90 + Math.floor(Math.random() * 10), morale: 70 + Math.floor(Math.random() * 30), condition: 100, status: 'FIT', value: (5 - team.division) * 1000000 + Math.floor(Math.random() * 1000000), wage: (5 - team.division) * 5000 + Math.floor(Math.random() * 5000), contractYears: 1 + Math.floor(Math.random() * 4), clubId: team.id, isListed: false, suspensionWeeks: 0, injury: null, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0, manOfTheMatch: 0 }, history: []
       };
       players.push(player);
       if (i < 16) team.lineup.push(player.id);
     });
-    team.weeklyWages = players.filter(p => p.clubId === team.id).reduce((acc, p) => acc + p.wage, 0);
+    team.weeklyWages += players.filter(p => p.clubId === team.id).reduce((acc, p) => acc + p.wage, 0);
   });
 
-  return { teams, players, fixtures: generateFixtures(teams, 1993), availableStaff: [], cupEntrants: teams.slice(0, 32).map(t => t.id) };
+  const availableStaff: StaffMember[] = [];
+  const AVAILABLE_POOL_SIZE = 24;
+  STAFF_ROLES.forEach(rc => {
+    const perRole = Math.ceil(AVAILABLE_POOL_SIZE / STAFF_ROLES.length);
+    for (let k = 0; k < perRole; k++) {
+      const sm = generateStaffMember(rc.role, 'free', 1, k);
+      sm.id = `staff-free-${rc.role}-${k}`;
+      availableStaff.push(sm);
+    }
+  });
+
+  return { teams, players, fixtures: generateFixtures(teams, 1993), availableStaff, cupEntrants: teams.slice(0, 32).map(t => t.id) };
 }

@@ -106,10 +106,10 @@ export function SettingsHub() {
         <div className="max-h-[500px] overflow-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/30 border-b border-primary/20">
-                <TableHead className="text-[11px] uppercase font-bold py-3">Original ID</TableHead>
-                <TableHead className="text-[11px] uppercase font-bold py-3">Team Name</TableHead>
-                <TableHead className="text-right text-[11px] uppercase font-bold py-3">Action</TableHead>
+              <TableRow className="bg-primary/20 border-b-2 border-primary/40">
+                <TableHead className="text-[13px] uppercase font-black py-4 text-white tracking-wide">Original ID</TableHead>
+                <TableHead className="text-[13px] uppercase font-black py-4 text-white tracking-wide">Team Name</TableHead>
+                <TableHead className="text-right text-[13px] uppercase font-black py-4 text-white tracking-wide">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

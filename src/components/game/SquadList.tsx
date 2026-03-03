@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { Trash2, Wand2, ShieldAlert, HeartPulse, Smile, RefreshCw, UserCircle, Info } from 'lucide-react';
 import { PlayerProfile } from './PlayerProfile';
-import { getTacticalAssignments } from '@/lib/game-engine';
+import { getTacticalAssignments, getFormationSlots } from '@/lib/game-engine';
 import { cn } from '@/lib/utils';
 
 interface SquadListProps {
@@ -22,12 +22,23 @@ interface SquadListProps {
 }
 
 export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSwapId, hideReserves = false }: SquadListProps) {
-  const { state, togglePlayerLineup, clearLineup, autoPickLineup } = useGame();
+  const { state, togglePlayerLineup, addPlayerToSlot, clearLineup, autoPickLineup } = useGame();
   const [filter, setFilter] = useState<Position | 'ALL'>('ALL');
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
-  
+  const [pinnedSlotIndex, setPinnedSlotIndex] = useState<number | null>(null);
+
   const userTeam = state.teams.find(t => t.id === state.userTeamId);
   const selectedCount = userTeam?.lineup.length || 0;
+  const lineupLength = userTeam?.lineup.length ?? 0;
+  const emptySlotIndices = useMemo(() => {
+    const out: number[] = [];
+    for (let i = lineupLength; i < 16; i++) out.push(i);
+    return out;
+  }, [lineupLength]);
+
+  const formationSlots = useMemo(() => getFormationSlots(userTeam?.formation ?? '4-4-2'), [userTeam?.formation]);
+  const getEmptySlotLabel = (slotIdx: number) =>
+    slotIdx < 11 ? (formationSlots[slotIdx]?.label ?? `#${slotIdx + 1}`) : `S${slotIdx - 10}`;
 
   const tacticalAssignments = useMemo(() => {
     if (!userTeam) return new Map<string, string>();
@@ -39,15 +50,18 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
   }, [userTeam, players]);
 
   const categorizedPlayers = useMemo(() => {
-    const starters = players.filter(p => userTeam?.lineup.slice(0, 11).includes(p.id));
-    const bench = players.filter(p => userTeam?.lineup.slice(11, 16).includes(p.id));
-    const reserves = players.filter(p => !userTeam?.lineup.includes(p.id));
-    
-    const sortedStarters = (userTeam?.lineup.slice(0, 11) || [])
-      .map(id => starters.find(p => p.id === id))
-      .filter(Boolean) as Player[];
-      
-    return { starters: sortedStarters, bench, reserves };
+    const lineup = userTeam?.lineup ?? [];
+    const starterIds = lineup.slice(0, 11);
+    const benchIds = lineup.slice(11, 16);
+
+    const starters = players.filter(p => starterIds.includes(p.id));
+    const bench = players.filter(p => benchIds.includes(p.id));
+    const reserves = players.filter(p => !lineup.includes(p.id));
+
+    const sortedStarters = starterIds.map(id => starters.find(p => p.id === id)).filter(Boolean) as Player[];
+    const sortedBench = benchIds.map(id => bench.find(p => p.id === id)).filter(Boolean) as Player[];
+
+    return { starters: sortedStarters, bench: sortedBench, reserves };
   }, [players, userTeam]);
 
   const renderPlayerRow = (p: Player, group: 'STARTER' | 'BENCH' | 'RESERVE') => {
@@ -62,18 +76,33 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
     return (
       <TableRow 
         key={p.id} 
-        onClick={() => onPlayerSwap?.(p.id)}
+        onClick={() => {
+          if (!onPlayerSwap) return;
+          if (currentMatchRatings) return;
+          onPlayerSwap(p.id);
+        }}
         className={cn(
-          "hover:bg-primary/10 transition-colors border-b border-primary/5 cursor-pointer",
-          group === 'STARTER' ? 'bg-primary/5' : group === 'BENCH' ? 'bg-accent/5' : '',
-          isBeingSwapped ? 'bg-accent/20 border-accent ring-2 ring-accent ring-inset' : ''
+          "hover:bg-primary/15 transition-colors border-b border-primary/10 cursor-pointer",
+          group === 'STARTER' ? 'bg-primary/15' : group === 'BENCH' ? 'bg-accent/10' : 'bg-black/30',
+          isBeingSwapped ? 'bg-accent/25 border-accent ring-2 ring-accent ring-inset' : ''
         )}
       >
-        <TableCell className="p-2 text-center">
+        <TableCell className="p-2 text-center" onClick={(e) => e.stopPropagation()}>
           <Checkbox 
             checked={isSelected} 
             disabled={(!canPick && !isSelected) || !!currentMatchRatings} 
-            onClick={(e) => { e.stopPropagation(); togglePlayerLineup(p.id); }} 
+            onCheckedChange={(checked: boolean | 'indeterminate') => {
+              if (checked === true) {
+                if (pinnedSlotIndex !== null) {
+                  addPlayerToSlot(p.id, pinnedSlotIndex);
+                  setPinnedSlotIndex(null);
+                } else {
+                  togglePlayerLineup(p.id);
+                }
+              } else {
+                togglePlayerLineup(p.id);
+              }
+            }} 
             className="border-primary/50" 
           />
         </TableCell>
@@ -115,47 +144,74 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 px-3 py-2 bg-muted/50 border border-primary/20 rounded-xl shadow-inner">
-        <div className="flex flex-wrap gap-1">
-          {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
-            <Button key={pos} onClick={() => setFilter(pos)} variant={filter === pos ? "default" : "outline"} className="h-7 text-[10px] px-3 retro-button font-black">{pos}</Button>
-          ))}
+      {activeSwapId && !currentMatchRatings && (
+        <div className="px-3 py-2 text-[11px] font-black bg-accent/15 border border-accent/30 rounded-xl">
+          SWAP MODE: pick a second player to swap, or click the first player again to cancel.
         </div>
-        {!currentMatchRatings && (
-          <div className="flex items-center gap-2">
-            <Button onClick={clearLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-red-500 border-red-500/30 font-black uppercase"><Trash2 size={12} className="mr-1.5" /> CLEAR</Button>
-            <Button onClick={autoPickLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-accent border-accent/30 font-black uppercase"><Wand2 size={12} className="mr-1.5" /> AUTO XI</Button>
-            <div className={cn("text-[11px] font-black px-3 py-1 border-2 rounded-xl shadow-sm", selectedCount >= 11 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
-              {Math.min(11, selectedCount)}/11 XI • {Math.max(0, selectedCount - 11)}/5 SUBS
+      )}
+      <div className="flex flex-col gap-2 px-3 py-2 bg-black/70 border border-primary/20 rounded-xl shadow-inner">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1">
+            {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
+              <Button key={pos} onClick={() => setFilter(pos)} variant={filter === pos ? "default" : "outline"} className="h-7 text-[10px] px-3 retro-button font-black">{pos}</Button>
+            ))}
+          </div>
+          {!currentMatchRatings && (
+            <div className="flex flex-wrap items-center gap-2">
+              <div className={cn("text-[11px] font-black px-3 py-1 border-2 rounded-xl shadow-sm", selectedCount >= 11 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
+                {Math.min(11, selectedCount)}/11 XI
+              </div>
+              <div className={cn("text-[11px] font-black px-3 py-1 border-2 rounded-xl shadow-sm", selectedCount >= 16 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
+                {Math.min(5, Math.max(0, selectedCount - 11))}/5 SUBS
+              </div>
+              <Button onClick={clearLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-red-500 border-red-500/30 font-black uppercase"><Trash2 size={12} className="mr-1.5" /> CLEAR</Button>
+              <Button onClick={autoPickLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-accent border-accent/30 font-black uppercase"><Wand2 size={12} className="mr-1.5" /> AUTO XI</Button>
             </div>
+          )}
+        </div>
+        {!currentMatchRatings && emptySlotIndices.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-primary/10">
+            <span className="text-[9px] font-black text-muted-foreground uppercase">Assign to:</span>
+            {emptySlotIndices.map((slotIdx) => (
+              <label key={slotIdx} className="flex items-center gap-1 cursor-pointer">
+                <Checkbox
+                  checked={pinnedSlotIndex === slotIdx}
+                  onCheckedChange={(checked: boolean | 'indeterminate') => setPinnedSlotIndex(checked === true ? slotIdx : null)}
+                  className="border-primary/50 h-3.5 w-3.5"
+                />
+                <span className="text-[10px] font-black text-white/90">
+                  {getEmptySlotLabel(slotIdx)}
+                </span>
+              </label>
+            ))}
           </div>
         )}
       </div>
 
-      <div className="overflow-auto custom-scrollbar max-h-[65vh] border border-primary/10 rounded-xl bg-black/20 shadow-inner">
+      <div className="overflow-auto custom-scrollbar max-h-[55vh] sm:max-h-[65vh] border border-primary/20 rounded-xl bg-black/65 shadow-inner">
         <TooltipProvider>
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-primary/30 bg-black/40">
-                <TableHead className="w-[45px] text-[10px] font-black uppercase text-primary tracking-widest text-center">PK</TableHead>
-                <TableHead className="w-[110px] text-[10px] font-black uppercase text-primary tracking-widest">TACTICS</TableHead>
-                <TableHead className="text-[10px] font-black uppercase text-primary tracking-widest">IDENTITY</TableHead>
-                <TableHead className="text-center text-[10px] font-black uppercase text-primary tracking-widest">STAT</TableHead>
-                <TableHead className="text-center text-[10px] font-black uppercase text-primary tracking-widest">MORALE</TableHead>
-                <TableHead className="text-center text-[10px] font-black uppercase text-primary tracking-widest">FIT</TableHead>
-                <TableHead className="text-center text-[10px] font-black uppercase text-primary tracking-widest">SKL</TableHead>
+              <TableRow className="border-b-2 border-primary/40 bg-primary/35">
+                <TableHead className="w-[45px] text-[12px] font-black uppercase text-white tracking-widest text-center">PK</TableHead>
+                <TableHead className="w-[110px] text-[12px] font-black uppercase text-white tracking-widest">TACTICS</TableHead>
+                <TableHead className="text-[12px] font-black uppercase text-white tracking-widest">IDENTITY</TableHead>
+                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">STAT</TableHead>
+                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">MORALE</TableHead>
+                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">FIT</TableHead>
+                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">SKL</TableHead>
                 <TableHead className="w-[45px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categorizedPlayers.starters.filter(p => filter === 'ALL' || p.position === filter).map(p => renderPlayerRow(p, 'STARTER'))}
               {categorizedPlayers.bench.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
-                <TableRow className="bg-accent/10 border-y border-accent/20"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-accent uppercase text-center tracking-[0.4em]">Substitute Bench</TableCell></TableRow>
+                <TableRow className="bg-accent/20 border-y border-accent/30"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-accent uppercase text-center tracking-[0.4em]">Substitute Bench</TableCell></TableRow>
               )}
               {categorizedPlayers.bench.filter(p => filter === 'ALL' || p.position === filter).map(p => renderPlayerRow(p, 'BENCH'))}
               
               {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
-                <TableRow className="bg-muted/40 border-y border-primary/20"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.4em]">Reserve Pool</TableCell></TableRow>
+                <TableRow className="bg-black/50 border-y border-primary/25"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.4em]">Reserve Pool</TableCell></TableRow>
               )}
               {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).sort((a, b) => b.attributes.skill - a.attributes.skill).map(p => renderPlayerRow(p, 'RESERVE'))}
             </TableBody>

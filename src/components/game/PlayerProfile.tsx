@@ -16,9 +16,11 @@ import { useMemo, useState, useEffect } from 'react';
 interface PlayerProfileProps {
   player: Player | null;
   onClose: () => void;
+  /** Open profile on this tab (e.g. 'contract'). */
+  defaultTab?: string;
 }
 
-export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
+export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: PlayerProfileProps) {
   const { state, toggleShortlist, toggleTransferList, buyPlayer, renewContract, acceptBid, rejectBid } = useGame();
   
   const userTeam = state.teams.find(t => t.id === state.userTeamId);
@@ -139,7 +141,7 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
 
   return (
     <Dialog open={!!player} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-2xl font-mono rounded-2xl">
+      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-2xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
         <DialogHeader className="bg-primary p-5 shrink-0 rounded-t-xl">
           <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-2xl font-black tracking-tight">
             <div className="flex items-center gap-4">
@@ -161,12 +163,12 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
                  </Tooltip>
                </TooltipProvider>
             </div>
-            <span className="text-[14px] opacity-70 font-mono tracking-[0.2em]">PLAYER DOSSIER V.1993</span>
+            <span className="text-[14px] opacity-70 font-mono tracking-[0.2em]">PLAYER PROFILE V.1993</span>
           </DialogTitle>
           <DialogDescription className="sr-only">Detailed player profile for {player.name}.</DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="overview" className="flex flex-col h-[70vh]">
+        <Tabs defaultValue={defaultTab} className="flex flex-col flex-1 min-h-0">
           <TabsList className="bg-black/40 border-b border-primary/20 h-14 p-1 gap-1 rounded-none shrink-0">
             <TabsTrigger value="overview" className="flex-1 uppercase font-black tracking-widest text-[13px] rounded-lg data-[state=active]:bg-primary">
               <UserCircle size={16} className="mr-2" /> Overview
@@ -238,6 +240,10 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
                       <div>
                         <div className="text-[10px] text-muted-foreground uppercase font-black">Rating</div>
                         <div className="text-xl font-black text-accent">{player.seasonStats.avgRating.toFixed(2)}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-muted-foreground uppercase font-black">MoM</div>
+                        <div className="text-xl font-black text-primary">{player.seasonStats.manOfTheMatch ?? 0}</div>
                       </div>
                     </div>
                   </div>
@@ -459,6 +465,7 @@ export function PlayerProfile({ player, onClose }: PlayerProfileProps) {
                       <span className="text-cyan">{player.seasonStats.shotsOnTarget ?? 0} SOT</span>
                       {player.position === 'GK' && <span className="text-green-500">{player.seasonStats.cleanSheets ?? 0} CS</span>}
                       <span className="text-muted-foreground">{player.seasonStats.minutesPlayed ?? 0} mins</span>
+                      <span className="text-primary">{player.seasonStats.manOfTheMatch ?? 0} MoM</span>
                     </div>
                 {player.history && player.history.length > 0 && (
                     <>

@@ -34,7 +34,7 @@ Review covers all source under `src/` (app, components, lib, types, hooks, ai). 
 | **MatchSim**    | Full match flow: lineups, minute-by-minute tick, commentary/events, pause for tactics/subs, half-time/full-time, zone strength bars, possession. |
 | **LeagueTable** | Division standings (P/W/D/L/GD/Pts), form bubbles, qualification styling; team click opens TeamRoster. |
 | **PlayerMarket** | Transfer market: search, position/age/skill filters, shortlist tab, “scout search” (delay + toast); opens PlayerProfile. |
-| **PlayerProfile** | Player dossier (overview, attributes, contract). Contract renewal (years/wage/patience), transfer list toggle, accept/reject bid, buy player. |
+| **PlayerProfile** | Player profile (overview, attributes, contract). Contract renewal (years/wage/patience), transfer list toggle, accept/reject bid, buy player. |
 | **TeamRoster**  | Dialog listing a team’s squad with position filter, sort by skill; row click opens PlayerProfile. |
 | **FinanceHub**  | Season accounts (gate, merchandise, transfers, wages, tax), net balance, board message. |
 | **StaffManagement** | Current staff and applicants; hire/fire with toasts. |

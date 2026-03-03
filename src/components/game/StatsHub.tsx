@@ -49,17 +49,18 @@ export function StatsHub({ division }: StatsHubProps) {
   const renderSeasonStatsTable = (players: Player[]) => (
     <Table>
       <TableHeader>
-        <TableRow className="border-b border-primary/20 bg-muted/30">
-          <TableHead className="w-8 text-[10px] uppercase">#</TableHead>
-          <TableHead className="text-[10px] uppercase">Player</TableHead>
-          <TableHead className="text-[10px] uppercase">Club</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">Apps</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">Goals</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">Shots</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">SOT</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">CS</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">Mins</TableHead>
-          <TableHead className="text-right text-[10px] uppercase">Rating</TableHead>
+        <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+          <TableHead className="w-8 text-[12px] uppercase font-black text-white tracking-wide">#</TableHead>
+          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Player</TableHead>
+          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Club</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Apps</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Goals</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Shots</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">SOT</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">CS</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Mins</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Rating</TableHead>
+          <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">MoM</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -84,11 +85,12 @@ export function StatsHub({ division }: StatsHubProps) {
             </TableCell>
             <TableCell className="text-right font-mono text-xs">{p.seasonStats.minutesPlayed ?? '—'}</TableCell>
             <TableCell className="text-right font-mono text-xs text-accent font-bold">{p.seasonStats.avgRating.toFixed(2)}</TableCell>
+            <TableCell className="text-right font-mono text-xs text-primary font-bold">{p.seasonStats.manOfTheMatch ?? 0}</TableCell>
           </TableRow>
         ))}
         {players.length === 0 && (
           <TableRow>
-            <TableCell colSpan={10} className="text-center py-8 text-muted-foreground text-[10px] uppercase italic">
+            <TableCell colSpan={11} className="text-center py-8 text-muted-foreground text-[10px] uppercase italic">
               No appearances recorded for this division yet.
             </TableCell>
           </TableRow>
@@ -100,13 +102,13 @@ export function StatsHub({ division }: StatsHubProps) {
   const renderTable = (players: Player[], type: 'scorers' | 'ratings' | 'discipline') => (
     <Table>
       <TableHeader>
-        <TableRow className="border-b border-primary/20 bg-muted/30">
-          <TableHead className="w-8 text-[10px] uppercase">#</TableHead>
-          <TableHead className="text-[10px] uppercase">Player</TableHead>
-          <TableHead className="text-[10px] uppercase">Club</TableHead>
+        <TableRow className="border-b-2 border-primary/40 bg-primary/20">
+          <TableHead className="w-8 text-[12px] uppercase font-black text-white tracking-wide">#</TableHead>
+          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Player</TableHead>
+          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Club</TableHead>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-right text-[10px] uppercase cursor-help">
+              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide cursor-help">
                 {type === 'scorers' ? 'Goals' : type === 'ratings' ? 'Rating' : 'Y / R'}
               </TableHead>
             </TooltipTrigger>

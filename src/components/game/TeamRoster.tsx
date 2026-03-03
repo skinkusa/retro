@@ -32,7 +32,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
 
   return (
     <Dialog open={!!team} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-3xl font-mono rounded-2xl">
+      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-3xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
         <DialogHeader className="bg-primary p-5 shrink-0 rounded-t-xl">
           <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-xl font-black tracking-tight">
             <div className="flex items-center gap-4">
@@ -44,7 +44,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
           <DialogDescription className="sr-only">Roster for {team.name}.</DialogDescription>
         </DialogHeader>
         
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 flex-1 min-h-0 overflow-auto">
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 px-3 py-2 bg-muted/50 border border-primary/10 rounded-xl">
             <div className="flex flex-wrap gap-1">
               {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
@@ -67,14 +67,14 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
             <TooltipProvider>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-primary/20 bg-muted/40 hover:bg-muted/40">
-                    <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Role</TableHead>
-                    <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Player Identity</TableHead>
-                    <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Age</TableHead>
-                    <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Morale</TableHead>
-                    <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Fit</TableHead>
-                    <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Skill</TableHead>
-                    <TableHead className="text-right text-[11px] uppercase py-3 font-black tracking-tight">Value</TableHead>
+                  <TableRow className="border-b-2 border-primary/40 bg-primary/20 hover:bg-primary/20">
+                    <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Role</TableHead>
+                    <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Player Identity</TableHead>
+                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Age</TableHead>
+                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Morale</TableHead>
+                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Fit</TableHead>
+                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Skill</TableHead>
+                    <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Value</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -147,7 +147,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
             onClick={onClose}
             className="w-full bg-primary text-primary-foreground font-black retro-button h-14 uppercase text-[15px] tracking-[0.3em] rounded-xl shadow-lg"
           >
-            DISMISS DOSSIER
+            DISMISS PROFILE
           </Button>
         </div>
       </DialogContent>
