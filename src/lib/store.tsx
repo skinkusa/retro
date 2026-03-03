@@ -1,10 +1,9 @@
-
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData } from '@/types/game';
 import { generateInitialData, generateFixtures, FIRSTNAME_POOL, SURNAME_POOL } from '@/lib/game-data';
-import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes } from '@/lib/game-engine';
+import { simulateMatch, updateLeagueTable, getFormationRequirements } from '@/lib/game-engine';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
 
@@ -41,13 +40,6 @@ interface GameContextType {
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
-const INITIAL_RECORDS: TeamRecords = {
-  biggestWin: null,
-  biggestLoss: null,
-  transferPaid: null,
-  transferReceived: null
-};
-
 const STORAGE_KEY = 'retro_manager_save_v1.9.3';
 const OVERRIDES_KEY = 'retro_manager_team_overrides_v1.9.3';
 
@@ -73,12 +65,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     availableStaff: [],
     jobMarket: [],
     cupEntrants: [],
-    records: INITIAL_RECORDS
+    records: { biggestWin: null, biggestLoss: null, transferPaid: null, transferReceived: null }
   });
 
   useEffect(() => {
     const { teams, players, fixtures, availableStaff, cupEntrants } = generateInitialData();
-    
     let finalTeams = [...teams];
     if (typeof window !== 'undefined') {
       const overridesRaw = localStorage.getItem(OVERRIDES_KEY);
@@ -86,12 +77,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         try {
           const overrides = JSON.parse(overridesRaw);
           finalTeams = teams.map(t => overrides[t.id] ? { ...t, name: overrides[t.id] } : t);
-        } catch (e) {
-          console.error("Failed to parse global team overrides", e);
-        }
+        } catch (e) {}
       }
     }
-
     setState(s => ({ ...s, teams: finalTeams, players, fixtures, availableStaff, cupEntrants }));
   }, []);
 
@@ -99,7 +87,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
     const requirements = getFormationRequirements(team.formation);
     const sortedAvail = [...healthyPlayers].sort((a, b) => b.attributes.skill - a.attributes.skill);
-    
     const picked: string[] = [];
     const used = new Set<string>();
 
@@ -109,75 +96,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         (p.position === 'MF' && pos === 'FW') ||
         (p.position === 'DM' && (pos === 'DF' || pos === 'MF'))
       ) && !used.has(p.id));
-      
-      if (bestMatch) {
-        picked.push(bestMatch.id);
-        used.add(bestMatch.id);
-      }
+      if (bestMatch) { picked.push(bestMatch.id); used.add(bestMatch.id); }
     });
 
-    sortedAvail.forEach(p => {
-      if (picked.length < 11 && !used.has(p.id)) {
-        picked.push(p.id);
-        used.add(p.id);
-      }
-    });
-
-    sortedAvail.forEach(p => {
-      if (picked.length < 16 && !used.has(p.id)) {
-        picked.push(p.id);
-        used.add(p.id);
-      }
-    });
-
+    sortedAvail.forEach(p => { if (picked.length < 16 && !used.has(p.id)) { picked.push(p.id); used.add(p.id); } });
     return picked;
   }, []);
 
   const prepareSeasonSummary = useCallback((currentState: GameState): SeasonSummaryData => {
     const standingsByDiv = [1, 2, 3, 4].map(div => updateLeagueTable(currentState.teams, currentState.fixtures, div));
     const userTeam = currentState.userTeamId ? currentState.teams.find(t => t.id === currentState.userTeamId) : null;
-    
-    let userPos = 0;
-    let userTarget = 0;
-    let targetDivision = 1;
-
+    let userPos = 0; let userTarget = currentState.targetPosition;
     if (userTeam) {
-      targetDivision = userTeam.division;
       const userDivStanding = standingsByDiv[userTeam.division - 1];
-      if (userDivStanding) {
-        userPos = userDivStanding.findIndex(t => t.id === currentState.userTeamId) + 1;
-      }
-      userTarget = currentState.targetPosition;
+      if (userDivStanding) userPos = userDivStanding.findIndex(t => t.id === currentState.userTeamId) + 1;
     }
-
-    const divPlayers = currentState.players.filter(p => {
-      const team = currentState.teams.find(t => t.id === p.clubId);
-      return team?.division === targetDivision;
-    });
-
+    const targetDivision = userTeam?.division || 1;
+    const divPlayers = currentState.players.filter(p => currentState.teams.find(t => t.id === p.clubId)?.division === targetDivision);
     const topScorerPlayer = [...divPlayers].sort((a, b) => (b.seasonStats.goals || 0) - (a.seasonStats.goals || 0))[0];
     const bestRatedPlayer = [...divPlayers].filter(p => p.seasonStats.apps > 5).sort((a, b) => (b.seasonStats.avgRating || 0) - (a.seasonStats.avgRating || 0))[0];
 
     return {
       season: currentState.season,
-      champions: {
-        1: standingsByDiv[0][0]?.name || 'N/A',
-        2: standingsByDiv[1][0]?.name || 'N/A',
-        3: standingsByDiv[2][0]?.name || 'N/A',
-        4: standingsByDiv[3][0]?.name || 'N/A',
-      },
-      promoted: {
-        2: [standingsByDiv[1][0]?.name, standingsByDiv[1][1]?.name, standingsByDiv[1][2]?.name].filter(Boolean) as string[],
-        3: [standingsByDiv[2][0]?.name, standingsByDiv[2][1]?.name, standingsByDiv[2][2]?.name].filter(Boolean) as string[],
-        4: [standingsByDiv[3][0]?.name, standingsByDiv[3][1]?.name].filter(Boolean) as string[],
-      },
-      relegated: {
-        1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[],
-        2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[],
-        3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name].filter(Boolean) as string[],
-      },
-      userPos,
-      userTarget,
+      champions: { 1: standingsByDiv[0][0]?.name || 'N/A', 2: standingsByDiv[1][0]?.name || 'N/A', 3: standingsByDiv[2][0]?.name || 'N/A', 4: standingsByDiv[3][0]?.name || 'N/A' },
+      promoted: { 2: [standingsByDiv[1][0]?.name, standingsByDiv[1][1]?.name, standingsByDiv[1][2]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][0]?.name, standingsByDiv[2][1]?.name, standingsByDiv[2][2]?.name].filter(Boolean) as string[], 4: [standingsByDiv[3][0]?.name, standingsByDiv[3][1]?.name].filter(Boolean) as string[] },
+      relegated: { 1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[], 2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name].filter(Boolean) as string[] },
+      userPos, userTarget,
       topScorer: topScorerPlayer ? { name: topScorerPlayer.name, goals: topScorerPlayer.seasonStats.goals, team: currentState.teams.find(t => t.id === topScorerPlayer.clubId)?.name || 'Unknown' } : null,
       bestPlayer: bestRatedPlayer ? { name: bestRatedPlayer.name, rating: bestRatedPlayer.seasonStats.avgRating, team: currentState.teams.find(t => t.id === bestRatedPlayer.clubId)?.name || 'Unknown' } : null
     };
@@ -220,10 +164,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!bid) return s;
       const p = s.players.find(x => x.id === bid.playerId);
       if (!p) return s;
-      
-      // Delay toast to next tick to avoid render-phase update
       setTimeout(() => toast({ title: "TRANSFER COMPLETE", description: `${p.name} sold.` }), 0);
-
       return { 
         ...s, 
         teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget + bid.amount, weeklyWages: t.weeklyWages - p.wage } : t), 
@@ -235,7 +176,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const rejectBid = useCallback((bidId: string) => {
     setState(s => ({ ...s, transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } }));
-    toast({ title: "BID REJECTED", description: "offer declined." });
+    setTimeout(() => toast({ title: "BID REJECTED", description: "offer declined." }), 0);
   }, [toast]);
 
   const startNextSeason = useCallback(() => {
@@ -243,19 +184,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const yr = s.season + 1;
       const upTeams = s.teams.map(t => ({ ...t, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] }));
       const upPlayers = s.players.map(p => ({ ...p, age: p.age + 1, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] }));
-      
       setTimeout(() => toast({ title: "NEW SEASON", description: `${yr} fixtures generated.` }), 0);
-
-      return { 
-        ...s, 
-        currentWeek: 1, 
-        season: yr, 
-        teams: upTeams, 
-        players: upPlayers, 
-        fixtures: generateFixtures(upTeams, yr), 
-        isSeasonOver: false, 
-        seasonSummary: null 
-      };
+      return { ...s, currentWeek: 1, season: yr, teams: upTeams, players: upPlayers, fixtures: generateFixtures(upTeams, yr), isSeasonOver: false, seasonSummary: null };
     });
   }, [toast]);
 
@@ -278,30 +208,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
       return { ...s, fixtures: updatedFixtures, teams: Array.from(updatedTeamsMap.values()) };
     });
-  }, [state.userTeamId, state.manager?.personality, getBestSquadForTeam]);
+  }, [getBestSquadForTeam]);
 
   const advanceWeek = useCallback(() => {
-    let seasonJustEnded = false;
     setState(s => {
       if (s.currentWeek > 38) return s;
       const currentWeekFixtures = s.fixtures.filter(f => f.week === s.currentWeek);
-      const statsToUpdate: Record<string, { apps: number, goals: number, rating: number, yellows: number, reds: number, fitnessLoss: number }> = {};
+      const statsToUpdate: Record<string, { apps: number, goals: number, rating: number, fitnessLoss: number }> = {};
       const weeklyFinances: Record<string, { gate: number, merchandise: number, wages: number }> = {};
-      s.teams.forEach(t => {
-        weeklyFinances[t.id] = { gate: 0, merchandise: 5000 + (t.reputation * 100), wages: t.weeklyWages * (t.id === s.userTeamId && s.manager?.personality === 'Economist' ? 0.9 : 1.0) };
-      });
+      s.teams.forEach(t => { weeklyFinances[t.id] = { gate: 0, merchandise: 5000 + (t.reputation * 100), wages: t.weeklyWages * (t.id === s.userTeamId && s.manager?.personality === 'Economist' ? 0.9 : 1.0) }; });
       currentWeekFixtures.forEach(f => {
         if (!f.result) return;
         const hTeam = s.teams.find(t => t.id === f.homeTeamId)!;
         weeklyFinances[hTeam.id].gate += f.result.attendance * (5 - hTeam.division) * 10;
-        Object.keys(f.result.ratings).forEach(pid => {
-          statsToUpdate[pid] = { apps: 1, goals: 0, rating: f.result!.ratings[pid] || 6.0, yellows: 0, reds: 0, fitnessLoss: 15 + Math.floor(Math.random() * 10) };
-        });
+        Object.keys(f.result.ratings).forEach(pid => { statsToUpdate[pid] = { apps: 1, goals: 0, rating: f.result!.ratings[pid] || 6.0, fitnessLoss: 15 + Math.floor(Math.random() * 10) }; });
         f.result.scorers.forEach(sc => { if (statsToUpdate[sc.playerId]) statsToUpdate[sc.playerId].goals++; });
       });
       let allTeams = s.teams.map(t => {
-        const fin = weeklyFinances[t.id];
-        if (!fin) return t;
+        const fin = weeklyFinances[t.id]; if (!fin) return t;
         return { ...t, budget: t.budget + fin.gate + fin.merchandise - fin.wages, finances: { ...t.finances, gateReceipts: t.finances.gateReceipts + fin.gate, merchandise: t.finances.merchandise + fin.merchandise, wagesPaid: t.finances.wagesPaid + fin.wages } };
       });
       let allPlayers = s.players.map(p => {
@@ -312,16 +236,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           up.morale = Math.min(100, up.morale + (m.rating > 7 ? 5 : -2));
           const newAvg = parseFloat(((up.seasonStats.avgRating * up.seasonStats.apps + m.rating) / (up.seasonStats.apps + 1)).toFixed(2));
           up.seasonStats = { ...up.seasonStats, apps: up.seasonStats.apps + 1, goals: up.seasonStats.goals + m.goals, avgRating: newAvg };
-        } else {
-          up.fitness = Math.min(100, up.fitness + 15);
-        }
+        } else { up.fitness = Math.min(100, up.fitness + 15); }
         return up;
       });
       const nextBids: TransferOffer[] = [];
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
       
-      // Random AI-to-AI Transfer Simulation
       if (Math.random() < 0.15) {
         const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
         const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);
@@ -347,14 +268,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      if (nextWeek > 38) { 
-        seasonJustEnded = true; 
+      if (nextWeek > 38) {
         const summary = prepareSeasonSummary({ ...s, teams: allTeams, players: allPlayers });
+        setTimeout(() => toast({ title: "SEASON COMPLETE" }), 0);
         return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, isSeasonOver: true, seasonSummary: summary, messages: nextMessages }; 
       }
       return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, messages: nextMessages, transferMarket: { ...s.transferMarket, incomingBids: [...s.transferMarket.incomingBids, ...nextBids] } };
     });
-    if (seasonJustEnded) toast({ title: "SEASON COMPLETE", description: "campaign concluded." });
   }, [prepareSeasonSummary, toast]);
 
   const buyPlayer = useCallback((pId: string) => {
@@ -385,9 +305,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const contextValue = useMemo(() => ({
-    state, startGame, simulateWeek, advanceWeek, saveGame: () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); toast({ title: "SAVED" }); }, loadGame: () => { const sa = localStorage.getItem(STORAGE_KEY); if (sa) setState({ ...JSON.parse(sa), isGameStarted: true }); }, 
+    state, startGame, simulateWeek, advanceWeek, 
+    saveGame: () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); toast({ title: "SAVED" }); }, 
+    loadGame: () => { const sa = localStorage.getItem(STORAGE_KEY); if (sa) setState({ ...JSON.parse(sa), isGameStarted: true }); }, 
     setTactics: (f: string, s: PlayStyle) => setState(p => ({ ...p, teams: p.teams.map(t => t.id === p.userTeamId ? { ...t, formation: f, playStyle: s } : t) })),
-    buyPlayer, sellPlayer: () => {}, renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), 
+    buyPlayer, sellPlayer: () => {}, 
+    renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), 
     toggleShortlist, toggleTransferList, 
     markMessageRead: (mId: string) => setState(s => ({ ...s, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), 
     hireStaff, fireStaff, 
@@ -395,8 +318,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     swapPlayers: (p1: string, p2: string) => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); if (!t) return s; let l = [...t.lineup]; const i1 = l.indexOf(p1); const i2 = l.indexOf(p2); if (i1 !== -1 && i2 !== -1) { l[i1] = p2; l[i2] = p1; } else if (i1 !== -1) { l[i1] = p2; } return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: l } : x) }; }), 
     clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })), 
     autoPickLineup: () => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); return { ...s, teams: s.teams.map(x => x.id === t?.id ? { ...x, lineup: getBestSquadForTeam(x, s.players) } : x) }; }),
-    applyForJob: (id: string) => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), 
-    acceptBid, rejectBid, updateMidMatchResult: (fid: string, min: number) => {}, 
+    applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), 
+    acceptBid, rejectBid, updateMidMatchResult: () => {}, 
     updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason: () => {}, startNextSeason
   }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, startNextSeason, toast, getBestSquadForTeam]);
 
