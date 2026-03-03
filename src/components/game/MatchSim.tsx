@@ -196,7 +196,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-2 md:p-4 font-mono z-[100] backdrop-blur-sm">
-      <div className="max-w-6xl w-full aspect-video bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl">
+      <div className="max-w-6xl w-full bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl min-h-[85vh]">
         <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay bg-cover bg-center" style={{ backgroundImage: stadiumOverlay ? `url("${stadiumOverlay}")` : 'none' }} />
 
         {showLineups && (

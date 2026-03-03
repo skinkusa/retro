@@ -61,7 +61,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
   };
 
   return (
-    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-2xl rounded-xl overflow-hidden">
+    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-2xl rounded-xl overflow-hidden h-full max-h-[600px]">
       {/* Pitch Markings */}
       <div className="absolute inset-2 border border-white/10 pointer-events-none">
         <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-white/10" />
@@ -92,7 +92,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                   )}
                 >
                   <div className={cn(
-                    "w-12 h-12 rounded-full border-2 border-white/50 shadow-xl flex items-center justify-center text-[18px] font-black text-white relative",
+                    "w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white/50 shadow-xl flex items-center justify-center text-[16px] md:text-[18px] font-black text-white relative",
                     markerColor,
                     isBeingSwapped ? "ring-4 ring-accent ring-offset-2 ring-offset-black" : ""
                   )}>
@@ -104,16 +104,16 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                     )}
                   </div>
                   <div className={cn(
-                    "bg-black/95 px-2 py-1 backdrop-blur-sm border border-white/20 mt-1 rounded-md shadow-2xl min-w-[90px] text-center",
+                    "bg-black/95 px-2 py-1 backdrop-blur-sm border border-white/20 mt-1 rounded-md shadow-2xl min-w-[80px] md:min-w-[90px] text-center",
                     markerColor === 'bg-red-600' && "border-red-600/50",
                     markerColor === 'bg-yellow-500' && "border-yellow-500/50",
                     isBeingSwapped && "border-accent"
                   )}>
-                    <span className="text-[12px] uppercase font-black text-white leading-none truncate block">
+                    <span className="text-[10px] md:text-[12px] uppercase font-black text-white leading-none truncate block">
                       {player.name.split(' ').pop()}
                     </span>
                     <span className={cn(
-                      "text-[9px] block font-black mt-0.5 tracking-tight uppercase",
+                      "text-[8px] md:text-[9px] block font-black mt-0.5 tracking-tight uppercase",
                       markerColor === 'bg-red-600' ? "text-red-500" : 
                       markerColor === 'bg-yellow-500' ? "text-yellow-400" : "text-accent"
                     )}>
