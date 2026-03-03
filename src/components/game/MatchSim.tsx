@@ -249,15 +249,15 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             
             <Tabs defaultValue="pitch" className="flex-1 flex flex-col min-h-0">
               <TabsList className="grid w-full grid-cols-3 bg-black/40 h-14 mb-4 border border-primary/20 rounded-xl gap-1 p-1 shadow-inner">
-                <TabsTrigger value="pitch" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><LayoutDashboard size={18} className="mr-2" /> Tactics Pitch</TabsTrigger>
-                <TabsTrigger value="strategy" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><Swords size={18} className="mr-2" /> Match Strategy</TabsTrigger>
-                <TabsTrigger value="personnel" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><UserCircle size={18} className="mr-2" /> Detailed Squad</TabsTrigger>
+                <TabsTrigger value="pitch" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><LayoutDashboard size={18} className="mr-2" /> Tactics</TabsTrigger>
+                <TabsTrigger value="strategy" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><Swords size={18} className="mr-2" /> Strategy</TabsTrigger>
+                <TabsTrigger value="personnel" className="uppercase font-black tracking-widest text-[14px] data-[state=active]:bg-primary"><UserCircle size={18} className="mr-2" /> Personnel</TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-hidden">
-                <TabsContent value="pitch" className="m-0 h-full p-2">
-                  <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 h-full items-start">
-                    <div className="bg-black/20 p-4 border border-primary/20 rounded-2xl shadow-inner h-full flex items-center justify-center">
+                <TabsContent value="pitch" className="m-0 h-full p-2 overflow-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 min-h-full items-start">
+                    <div className="bg-black/20 p-4 border border-primary/20 rounded-2xl shadow-inner h-full flex items-center justify-center min-h-[500px]">
                       <TacticsPitch 
                         team={activeUserTeam} 
                         players={userPlayers} 
