@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
@@ -6,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/store';
 import { getZoneStrength } from '@/lib/game-engine';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { SquadList } from './SquadList';
 import { TacticsPitch } from './TacticsPitch';
-import { Pause, Play, ChevronRight, AlertTriangle, ShieldAlert, Swords, Trophy, Activity, RefreshCw, Target } from 'lucide-react';
+import { Pause, Play, ChevronRight, AlertTriangle, ShieldAlert, Swords, Trophy, Activity, RefreshCw, Target, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PlayerProfile } from './PlayerProfile';
 
 export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: { 
   fixture: Fixture, 
@@ -32,6 +34,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const [isPaused, setIsPaused] = useState(false);
   const [isGoalPaused, setIsGoalPaused] = useState(false);
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
+  const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
   
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
   
@@ -155,7 +158,9 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </div>
             </div>
           </TooltipTrigger>
-          <TooltipContent className="text-[11px] font-black uppercase">{label} ZONE STRENGTH: {value.toFixed(1)}</TooltipContent>
+          <TooltipPortal>
+            <TooltipContent className="text-[11px] font-black uppercase">{label} ZONE STRENGTH: {value.toFixed(1)}</TooltipContent>
+          </TooltipPortal>
         </Tooltip>
       </TooltipProvider>
     );
@@ -423,7 +428,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 min-h-0 overflow-hidden mt-2">
               <LineupColumn team={homeTeam} players={homeLineup} ratings={fixture.result?.ratings} />
-              <LineupColumn team={awayTeam} players={awayLineup} ratings={fixture.result?.ratings} />
+              <LineupColumn team={awayTeam} players={awayLineup} />
             </div>
 
             <div className="mt-4 flex gap-4 shrink-0">
@@ -466,10 +471,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10 flex-1 overflow-hidden">
               <div className="space-y-6 overflow-auto custom-scrollbar">
                 <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-lg">
-                  <h4 className="text-xs font-bold text-primary mb-4 uppercase">Personnel</h4>
+                  <h4 className="text-xs font-black text-primary mb-4 uppercase flex justify-between">
+                    Personnel <span>{homeTeam.lineup.length}/11 SELECTED</span>
+                  </h4>
                   <SquadList 
                     players={state.players.filter(p => p.clubId === homeTeam.id)} 
-                    currentMatchRatings={fixture.result?.ratings} 
                     onPlayerSwap={handleSwapInteraction}
                     activeSwapId={swapSourceId}
                   />
@@ -477,11 +483,12 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </div>
               <div className="space-y-6 overflow-auto custom-scrollbar">
                  <div className="bg-card/20 border-2 border-primary/20 p-6 shadow-inner rounded-lg">
-                    <h4 className="text-xs font-bold text-primary mb-4 uppercase">Positioning</h4>
+                    <h4 className="text-xs font-black text-primary mb-4 uppercase">Pitch Positioning</h4>
                     <TacticsPitch 
                       team={homeTeam} 
-                      players={homeLineup} 
+                      players={state.players.filter(p => p.clubId === homeTeam.id)} 
                       onPlayerClick={(p) => handleSwapInteraction(p.id)} 
+                      onPlayerProfile={(p) => setViewingPlayer(p)}
                       activeSwapId={swapSourceId}
                     />
                  </div>
@@ -489,6 +496,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             </div>
           </div>
         )}
+        <PlayerProfile player={viewingPlayer} onClose={() => setViewingPlayer(null)} />
       </div>
     </div>
   );

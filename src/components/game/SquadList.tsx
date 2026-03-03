@@ -45,9 +45,18 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
   const filteredPlayers = players
     .filter(p => filter === 'ALL' || p.position === filter)
     .sort((a, b) => {
-      const isASelected = userTeam?.lineup.includes(a.id) ? 1 : 0;
-      const isBSelected = userTeam?.lineup.includes(b.id) ? 1 : 0;
-      if (isASelected !== isBSelected) return isBSelected - isASelected;
+      // 1. Order by lineup priority (Starters first in their assigned order)
+      const aIdx = userTeam?.lineup.indexOf(a.id) ?? -1;
+      const bIdx = userTeam?.lineup.indexOf(b.id) ?? -1;
+      
+      const isAIn = aIdx !== -1;
+      const isBIn = bIdx !== -1;
+
+      if (isAIn && isBIn) return aIdx - bIdx;
+      if (isAIn) return -1;
+      if (isBIn) return 1;
+
+      // 2. Subs order by position then skill
       if (posPriority[a.position] !== posPriority[b.position]) {
         return posPriority[a.position] - posPriority[b.position];
       }
@@ -67,14 +76,14 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 px-3 py-2 bg-muted/50 border border-primary/10">
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 px-3 py-2 bg-muted/50 border border-primary/10 rounded-lg">
         <div className="flex flex-wrap gap-1">
           {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
             <Button
               key={pos}
               onClick={() => setFilter(pos)}
               variant={filter === pos ? "default" : "outline"}
-              className="h-7 text-[10px] px-3 retro-button font-bold"
+              className="h-7 text-[10px] px-3 retro-button font-black"
             >
               {pos}
             </Button>
@@ -83,18 +92,18 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
         
         {!currentMatchRatings && (
           <div className="flex items-center gap-2">
-            <Button onClick={clearLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-red-500 border-red-500/20 font-bold">
+            <Button onClick={clearLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-red-500 border-red-500/20 font-black">
               <Trash2 size={12} className="mr-1" /> CLEAR
             </Button>
-            <Button onClick={autoPickLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-accent border-accent/20 font-bold">
+            <Button onClick={autoPickLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-accent border-accent/20 font-black">
               <Wand2 size={12} className="mr-1" /> AUTO PICK
             </Button>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className={cn(
-                    "text-[12px] font-bold px-3 py-1 border cursor-help",
-                    selectedCount === 11 ? 'text-green-500 border-green-500/20' : 'text-red-500 border-red-500/20'
+                    "text-[12px] font-black px-3 py-1 border cursor-help rounded-md",
+                    selectedCount === 11 ? 'text-green-500 border-green-500/20 bg-green-500/5' : 'text-red-500 border-red-500/20 bg-red-500/5'
                   )}>
                     {selectedCount} / 11 SELECTED
                   </div>
@@ -110,43 +119,13 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
         <Table>
           <TableHeader>
             <TableRow className="border-b border-primary/20 hover:bg-transparent">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="w-[45px] text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Pick</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">SELECT FOR MATCH DAY LINEUP</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="w-[120px] text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Tactical Role</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">NATURAL PROFILE & TEAM ASSIGNMENT</TooltipContent>
-              </Tooltip>
-              <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Player Name</TableHead>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Status</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">MATCH READINESS & DISCIPLINE</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Morale</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">CURRENT PSYCHOLOGICAL STATE</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Fit</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">PHYSICAL CONDITION PERCENTAGE</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight cursor-help">Skill</TableHead>
-                </TooltipTrigger>
-                <TooltipContent className="font-black">GLOBAL PERFORMANCE RATING (1-20)</TooltipContent>
-              </Tooltip>
+              <TableHead className="w-[45px] text-[11px] uppercase py-3 font-black tracking-tight">Pick</TableHead>
+              <TableHead className="w-[120px] text-[11px] uppercase py-3 font-black tracking-tight">Assignment</TableHead>
+              <TableHead className="text-[11px] uppercase py-3 font-black tracking-tight">Name</TableHead>
+              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Status</TableHead>
+              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Morale</TableHead>
+              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Fit</TableHead>
+              <TableHead className="text-center text-[11px] uppercase py-3 font-black tracking-tight">Skill</TableHead>
               <TableHead className="w-[45px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -218,10 +197,10 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
                   <TableCell className="text-center py-2">
                     <div className="flex justify-center items-center gap-1">
                       <Smile size={12} className={p.morale > 70 ? "text-green-500" : p.morale > 40 ? "text-yellow-500" : "text-red-500"} />
-                      <span className="text-[14px] font-mono font-bold">{p.morale}%</span>
+                      <span className="text-[14px] font-mono font-black">{p.morale}%</span>
                     </div>
                   </TableCell>
-                  <TableCell className={cn("text-center text-[14px] font-mono font-bold py-2", p.fitness < 80 ? 'text-red-500' : '')}>{p.fitness}%</TableCell>
+                  <TableCell className={cn("text-center text-[14px] font-mono font-black py-2", p.fitness < 80 ? 'text-red-500' : '')}>{p.fitness}%</TableCell>
                   <TableCell className="text-center text-[16px] font-mono text-primary font-black py-2">{p.attributes.skill}</TableCell>
                   <TableCell className="text-right py-2">
                     <Tooltip>
