@@ -8,7 +8,7 @@ This Next.js 15.5.9 project is production-ready for Vercel. Follow these steps t
 2. **Connect the repository in Vercel**
    * Log into [vercel.com](https://vercel.com), create (or select) a team, and click **New Project**.
    * Import the `skinks/retromanager` repo.
-   * Accept the suggested framework detection (Next.js). There is no extra build command needed beyond `npm run build` and `npm run start`.
+   * Accept the suggested framework detection (Next.js). Build command: `npm run build`; output is the default Next.js app (no custom Output Directory). The project sets `outputFileTracingRoot` in `next.config.ts` so dependency tracing uses this repo’s root even when other lockfiles exist (e.g. in a parent directory).
 
 3. **Configure environment & defaults**
    * No special environment variables are required—Retro Manager stores its career save entirely in the visitor’s browser (see `localStorage` keys in `/src/lib/store.tsx`).
