@@ -10,6 +10,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { SquadList } from './SquadList';
 import { TacticsPitch } from './TacticsPitch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Pause, Play, ChevronRight, AlertTriangle, ShieldAlert, Swords, Trophy, Activity, RefreshCw, Target, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlayerProfile } from './PlayerProfile';
@@ -448,10 +449,10 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         )}
 
         {isPaused && (
-          <div className="absolute inset-0 z-[400] bg-black/90 backdrop-blur-2xl flex flex-col p-8 overflow-auto">
-            <div className="flex justify-between items-center mb-8 border-b-4 border-primary pb-4 shrink-0">
+          <div className="absolute inset-0 z-[400] bg-black/95 backdrop-blur-2xl flex flex-col p-4 md:p-8 overflow-hidden">
+            <div className="flex justify-between items-center mb-6 border-b-4 border-primary pb-4 shrink-0">
               <div className="flex flex-col">
-                <h3 className="text-2xl font-black text-primary uppercase tracking-tighter">Tactical Command Center</h3>
+                <h3 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tighter">Tactical Command Center</h3>
                 {swapSourceId && (
                   <div className="text-accent font-black uppercase text-[12px] animate-pulse flex items-center gap-2 mt-1">
                     <RefreshCw size={14} className="animate-spin" /> Swap Mode Active
@@ -461,77 +462,92 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               <Button 
                 onClick={handleResume} 
                 disabled={activeUserTeam.lineup.length !== 11}
-                className="bg-accent text-accent-foreground retro-button h-12 px-12 font-black uppercase text-sm shadow-xl hover:scale-105 transition-transform"
+                className="bg-accent text-accent-foreground retro-button h-10 md:h-12 px-6 md:px-12 font-black uppercase text-xs md:text-sm shadow-xl hover:scale-105 transition-transform"
               >
                 Apply Changes & Resume <ChevronRight size={20} className="ml-2" />
               </Button>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1.2fr] gap-6 flex-1 overflow-hidden">
-              <div className="space-y-6 overflow-auto custom-scrollbar">
-                <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-lg">
-                  <h4 className="text-xs font-black text-primary mb-4 uppercase border-b border-primary/10 pb-2">Formation</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (
-                      <Button 
-                        key={f} 
-                        onClick={() => setTactics(f, activeUserTeam.playStyle)}
-                        className={cn(
-                          "h-10 text-[14px] font-mono retro-button font-black rounded-md",
-                          activeUserTeam.formation === f 
-                            ? "bg-accent text-accent-foreground border-accent" 
-                            : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
-                        )}
-                      >
-                        {f}
-                      </Button>
-                    ))}
-                  </div>
-                  <h4 className="text-xs font-black text-primary mt-6 mb-4 uppercase border-b border-primary/10 pb-2">Play Style</h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    {(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (
-                      <Button 
-                        key={s} 
-                        onClick={() => setTactics(activeUserTeam.formation, s)}
-                        className={cn(
-                          "h-10 text-[12px] font-mono retro-button font-black uppercase rounded-md",
-                          activeUserTeam.playStyle === s 
-                            ? "bg-accent text-accent-foreground border-accent" 
-                            : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
-                        )}
-                      >
-                        {s}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-6 overflow-auto custom-scrollbar">
-                <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-lg h-full">
-                  <h4 className="text-xs font-black text-primary mb-4 uppercase flex justify-between">
-                    Personnel <span>{activeUserTeam.lineup.length}/11 SELECTED</span>
-                  </h4>
-                  <SquadList 
-                    players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
-                    onPlayerSwap={handleSwapInteraction}
-                    activeSwapId={swapSourceId}
-                  />
-                </div>
-              </div>
+            <Tabs defaultValue="strategy" className="flex-1 flex flex-col min-h-0">
+              <TabsList className="grid w-full grid-cols-3 bg-black/40 h-12 mb-6 border border-primary/20 rounded-xl shrink-0">
+                <TabsTrigger value="strategy" className="text-[12px] md:text-[14px] uppercase font-black tracking-widest rounded-lg data-[state=active]:bg-primary">Strategy</TabsTrigger>
+                <TabsTrigger value="squad" className="text-[12px] md:text-[14px] uppercase font-black tracking-widest rounded-lg data-[state=active]:bg-primary">Personnel</TabsTrigger>
+                <TabsTrigger value="pitch" className="text-[12px] md:text-[14px] uppercase font-black tracking-widest rounded-lg data-[state=active]:bg-primary">Tactics Pitch</TabsTrigger>
+              </TabsList>
 
-              <div className="space-y-6 overflow-auto custom-scrollbar">
-                 <div className="bg-card/20 border-2 border-primary/20 p-6 shadow-inner rounded-lg h-full">
-                    <h4 className="text-xs font-black text-primary mb-4 uppercase">Pitch Positioning</h4>
-                    <TacticsPitch 
-                      team={activeUserTeam} 
+              <div className="flex-1 overflow-hidden">
+                <TabsContent value="strategy" className="m-0 h-full overflow-auto custom-scrollbar">
+                  <div className="max-w-2xl mx-auto space-y-8 py-4">
+                    <div className="bg-card/20 border-2 border-primary/20 p-6 shadow-inner rounded-xl">
+                      <h4 className="text-[14px] font-black text-primary mb-6 uppercase border-b border-primary/10 pb-2">Formation Selection</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (
+                          <Button 
+                            key={f} 
+                            onClick={() => setTactics(f, activeUserTeam.playStyle)}
+                            className={cn(
+                              "h-14 text-[18px] font-mono retro-button font-black rounded-lg",
+                              activeUserTeam.formation === f 
+                                ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.4)]" 
+                                : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
+                            )}
+                          >
+                            {f}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      <h4 className="text-[14px] font-black text-primary mt-10 mb-6 uppercase border-b border-primary/10 pb-2">Team Play Style</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (
+                          <Button 
+                            key={s} 
+                            onClick={() => setTactics(activeUserTeam.formation, s)}
+                            className={cn(
+                              "h-14 text-[14px] md:text-[16px] font-mono retro-button font-black uppercase rounded-lg leading-tight",
+                              activeUserTeam.playStyle === s 
+                                ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.4)]" 
+                                : "bg-black/40 text-white border-primary/20 hover:bg-primary/20"
+                            )}
+                          >
+                            {s}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="squad" className="m-0 h-full overflow-auto custom-scrollbar">
+                  <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-xl h-full">
+                    <div className="flex justify-between items-center mb-4 px-2">
+                      <h4 className="text-[14px] font-black text-primary uppercase">Active Personnel</h4>
+                      <span className="text-[12px] font-black text-accent uppercase tracking-widest">{activeUserTeam.lineup.length}/11 SELECTED</span>
+                    </div>
+                    <SquadList 
                       players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
-                      onPlayerClick={(p) => handleSwapInteraction(p.id)} 
-                      onPlayerProfile={(p) => setViewingPlayer(p)}
+                      onPlayerSwap={handleSwapInteraction}
                       activeSwapId={swapSourceId}
                     />
-                 </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="pitch" className="m-0 h-full overflow-auto custom-scrollbar">
+                  <div className="bg-card/20 border-2 border-primary/20 p-4 shadow-inner rounded-xl h-full flex flex-col items-center">
+                    <h4 className="text-[14px] font-black text-primary mb-4 uppercase w-full text-center">Positional Analysis</h4>
+                    <div className="w-full max-w-lg flex-1">
+                      <TacticsPitch 
+                        team={activeUserTeam} 
+                        players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
+                        onPlayerClick={(p) => handleSwapInteraction(p.id)} 
+                        onPlayerProfile={(p) => setViewingPlayer(p)}
+                        activeSwapId={swapSourceId}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
               </div>
-            </div>
+            </Tabs>
           </div>
         )}
         <PlayerProfile player={viewingPlayer} onClose={() => setViewingPlayer(null)} />
