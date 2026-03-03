@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
@@ -120,7 +121,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       season: currentState.season,
       champions: { 1: standingsByDiv[0][0]?.name || 'N/A', 2: standingsByDiv[1][0]?.name || 'N/A', 3: standingsByDiv[2][0]?.name || 'N/A', 4: standingsByDiv[3][0]?.name || 'N/A' },
       promoted: { 2: [standingsByDiv[1][0]?.name, standingsByDiv[1][1]?.name, standingsByDiv[1][2]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][0]?.name, standingsByDiv[2][1]?.name, standingsByDiv[2][2]?.name].filter(Boolean) as string[], 4: [standingsByDiv[3][0]?.name, standingsByDiv[3][1]?.name].filter(Boolean) as string[] },
-      relegated: { 1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[], 2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name].filter(Boolean) as string[] },
+      relegated: { 1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[], 2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name, standingsByDiv[2][17]?.name].filter(Boolean) as string[] },
       userPos, userTarget,
       topScorer: topScorerPlayer ? { name: topScorerPlayer.name, goals: topScorerPlayer.seasonStats.goals, team: currentState.teams.find(t => t.id === topScorerPlayer.clubId)?.name || 'Unknown' } : null,
       bestPlayer: bestRatedPlayer ? { name: bestRatedPlayer.name, rating: bestRatedPlayer.seasonStats.avgRating, team: currentState.teams.find(t => t.id === bestRatedPlayer.clubId)?.name || 'Unknown' } : null
@@ -176,7 +177,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const rejectBid = useCallback((bidId: string) => {
     setState(s => ({ ...s, transferMarket: { ...s.transferMarket, incomingBids: s.transferMarket.incomingBids.filter(b => b.id !== bidId) } }));
-    setTimeout(() => toast({ title: "BID REJECTED", description: "offer declined." }), 0);
+    setTimeout(() => toast({ title: "BID REJECTED", description: "Offer declined." }), 0);
   }, [toast]);
 
   const startNextSeason = useCallback(() => {
@@ -243,6 +244,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
       
+      // AI to AI Transfers
       if (Math.random() < 0.15) {
         const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
         const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);
@@ -256,15 +258,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // User Team Incoming Bids
       if (s.userTeamId && Math.random() < 0.1) {
         const userPlayers = allPlayers.filter(p => p.clubId === s.userTeamId);
         const listedPlayers = userPlayers.filter(p => p.isListed);
-        const target = listedPlayers.length > 0 ? listedPlayers[0] : userPlayers[0];
+        const target = listedPlayers.length > 0 ? listedPlayers[0] : userPlayers[Math.floor(Math.random() * userPlayers.length)];
         if (target) {
-          const bidder = allTeams.filter(t => t.id !== s.userTeamId)[0];
-          const bidId = `bid-${Date.now()}`;
-          nextBids.push({ id: bidId, playerId: target.id, fromTeamId: bidder.id, amount: Math.floor(target.value * 0.95) });
-          nextMessages.unshift({ id: `msg-${bidId}`, title: 'TRANSFER OFFER', content: `${bidder.name} have submitted an official bid of ${formatMoney(target.value)} for ${target.name}.`, date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', bidId });
+          const bidder = allTeams.filter(t => t.id !== s.userTeamId)[Math.floor(Math.random() * allTeams.length)];
+          if (bidder) {
+            const bidId = `bid-${Date.now()}`;
+            nextBids.push({ id: bidId, playerId: target.id, fromTeamId: bidder.id, amount: Math.floor(target.value * 0.95) });
+            nextMessages.unshift({ id: `msg-${bidId}`, title: 'TRANSFER OFFER', content: `${bidder.name} have submitted an official bid of ${formatMoney(target.value)} for ${target.name}.`, date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', bidId });
+          }
         }
       }
 
@@ -312,7 +317,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     buyPlayer, sellPlayer: () => {}, 
     renewContract: (pId: string, yr: number, w: number) => setState(s => ({ ...s, players: s.players.map(x => x.id === pId ? { ...x, contractYears: yr, wage: w } : x) })), 
     toggleShortlist, toggleTransferList, 
-    markMessageRead: (mId: string) => setState(s => ({ ...s, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), 
+    markMessageRead: (mId: string) => setState(s => ({ ...mId, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), 
     hireStaff, fireStaff, 
     togglePlayerLineup: (pId: string) => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); if (!t) return s; const isS = t.lineup.includes(pId); const l = isS ? t.lineup.filter(x => x !== pId) : (t.lineup.length < 16 ? [...t.lineup, pId] : t.lineup); return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: l } : x) }; }),
     swapPlayers: (p1: string, p2: string) => setState(s => { const t = s.teams.find(x => x.id === s.userTeamId); if (!t) return s; let l = [...t.lineup]; const i1 = l.indexOf(p1); const i2 = l.indexOf(p2); if (i1 !== -1 && i2 !== -1) { l[i1] = p2; l[i2] = p1; } else if (i1 !== -1) { l[i1] = p2; } return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: l } : x) }; }), 

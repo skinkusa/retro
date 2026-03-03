@@ -1,3 +1,4 @@
+
 import { Player, Team, Position, Side, Fixture, StaffMember, StaffRole, PlayStyle } from '@/types/game';
 
 const DIVISIONS = [
@@ -11,28 +12,35 @@ export const SURNAME_POOL = ["Smith", "Jones", "Brown", "Taylor", "Wilson", "Dav
 export const FIRSTNAME_POOL = ["David", "James", "Peter", "Alan", "Gary", "Kevin", "Ian", "Paul", "Chris", "Mark", "Steve", "Tony", "Brian", "Lee", "Nigel", "Rob", "Mick", "Dave", "Terry", "Ray"];
 
 const TEAM_DEFINITIONS = [
-  { name: "North London Red", color: "#EF0107", division: 1, capacity: 60000, style: 'Tiki-Taka', formation: '4-3-3' },
-  { name: "North London White", color: "#FFFFFF", division: 1, capacity: 62000, style: 'Pass to Feet', formation: '4-4-2' },
-  { name: "Merseyside Red", color: "#C8102E", division: 1, capacity: 54000, style: 'Pass to Feet', formation: '4-3-3' },
-  { name: "Merseyside Blue", color: "#003399", division: 1, capacity: 40000, style: 'Direct', formation: '4-4-2' },
-  { name: "Manchester Red", color: "#DA291C", division: 1, capacity: 75000, style: 'Direct', formation: '4-4-2' },
-  { name: "Manchester Light Blue", color: "#6CABDD", division: 1, capacity: 53000, style: 'Tiki-Taka', formation: '4-3-3' },
-  { name: "West London Blue", color: "#034694", division: 1, capacity: 41000, style: 'Tiki-Taka', formation: '4-3-3' },
-  { name: "Birmingham Villa", color: "#670E36", division: 1, capacity: 42000, style: 'Direct', formation: '4-4-2' },
-  { name: "Newcastle Black & White", color: "#241F20", division: 1, capacity: 52000, style: 'Long Ball', formation: '4-4-2' },
-  { name: "West Ham Maroon", color: "#7A263A", division: 1, capacity: 60000, style: 'Pass to Feet', formation: '4-4-2' },
-  { name: "Leicester Blue", color: "#003090", division: 1, capacity: 32000, style: 'Counter-Attack', formation: '4-4-2' },
-  { name: "Wolverhampton Gold", color: "#FDB913", division: 1, capacity: 31000, style: 'Direct', formation: '4-3-3' },
-  { name: "Brighton Blue & White", color: "#0057B8", division: 1, capacity: 30000, style: 'Pass to Feet', formation: '4-3-3' },
-  { name: "Crystal Palace Red & Blue", color: "#1B458F", division: 1, capacity: 26000, style: 'Counter-Attack', formation: '4-4-2' },
-  { name: "Southampton Red & White", color: "#D71920", division: 1, capacity: 32000, style: 'Direct', formation: '4-4-2' },
-  { name: "Fulham White", color: "#000000", division: 1, capacity: 25000, style: 'Pass to Feet', formation: '4-3-3' },
-  { name: "Brentford Red & White", color: "#E30613", division: 1, capacity: 17000, style: 'Direct', formation: '4-3-3' },
-  { name: "Leeds White", color: "#FFCD00", division: 1, capacity: 37000, style: 'Direct', formation: '4-4-2' },
-  { name: "Nottingham Forest Red", color: "#DD0000", division: 1, capacity: 30000, style: 'Counter-Attack', formation: '4-5-1' },
-  { name: "Sheffield Red & White", color: "#EE2737", division: 1, capacity: 32000, style: 'Park the Bus', formation: '5-3-2' },
-  // Div 2+ omitted for brevity in generation... same pattern applies.
-  ...Array.from({ length: 60 }).map((_, i) => ({ name: `Club ${i + 21}`, color: "#4079b0", division: i < 20 ? 2 : i < 40 ? 3 : 4, capacity: 15000, style: 'Pass to Feet', formation: '4-4-2' }))
+  { name: "North London Red", color: "#EF0107", awayColor: "#FFFFFF", division: 1, capacity: 60000, style: 'Tiki-Taka', formation: '4-3-3' },
+  { name: "North London White", color: "#FFFFFF", awayColor: "#132257", division: 1, capacity: 62000, style: 'Pass to Feet', formation: '4-4-2' },
+  { name: "Merseyside Red", color: "#C8102E", awayColor: "#FFFFFF", division: 1, capacity: 54000, style: 'Pass to Feet', formation: '4-3-3' },
+  { name: "Merseyside Blue", color: "#003399", awayColor: "#FFFFFF", division: 1, capacity: 40000, style: 'Direct', formation: '4-4-2' },
+  { name: "Manchester Red", color: "#DA291C", awayColor: "#FFFFFF", division: 1, capacity: 75000, style: 'Direct', formation: '4-4-2' },
+  { name: "Manchester Light Blue", color: "#6CABDD", awayColor: "#FFFFFF", division: 1, capacity: 53000, style: 'Tiki-Taka', formation: '4-3-3' },
+  { name: "West London Blue", color: "#034694", awayColor: "#FFFFFF", division: 1, capacity: 41000, style: 'Tiki-Taka', formation: '4-3-3' },
+  { name: "Birmingham Villa", color: "#670E36", awayColor: "#95BFE5", division: 1, capacity: 42000, style: 'Direct', formation: '4-4-2' },
+  { name: "Newcastle Black & White", color: "#241F20", awayColor: "#FFFFFF", division: 1, capacity: 52000, style: 'Long Ball', formation: '4-4-2' },
+  { name: "West Ham Maroon", color: "#7A263A", awayColor: "#1BB1E7", division: 1, capacity: 60000, style: 'Pass to Feet', formation: '4-4-2' },
+  { name: "Leicester Blue", color: "#003090", awayColor: "#FFFFFF", division: 1, capacity: 32000, style: 'Counter-Attack', formation: '4-4-2' },
+  { name: "Wolverhampton Gold", color: "#FDB913", awayColor: "#FFFFFF", division: 1, capacity: 31000, style: 'Direct', formation: '4-3-3' },
+  { name: "Brighton Blue & White", color: "#0057B8", awayColor: "#FFFF00", division: 1, capacity: 30000, style: 'Pass to Feet', formation: '4-3-3' },
+  { name: "Crystal Palace Red & Blue", color: "#1B458F", awayColor: "#FFFFFF", division: 1, capacity: 26000, style: 'Counter-Attack', formation: '4-4-2' },
+  { name: "Southampton Red & White", color: "#D71920", awayColor: "#FFFFFF", division: 1, capacity: 32000, style: 'Direct', formation: '4-4-2' },
+  { name: "Fulham White", color: "#000000", awayColor: "#C0C0C0", division: 1, capacity: 25000, style: 'Pass to Feet', formation: '4-3-3' },
+  { name: "Brentford Red & White", color: "#E30613", awayColor: "#000000", division: 1, capacity: 17000, style: 'Direct', formation: '4-3-3' },
+  { name: "Leeds White", color: "#FFFFFF", awayColor: "#FFCD00", division: 1, capacity: 37000, style: 'Direct', formation: '4-4-2' },
+  { name: "Nottingham Forest Red", color: "#DD0000", awayColor: "#FFFFFF", division: 1, capacity: 30000, style: 'Counter-Attack', formation: '4-5-1' },
+  { name: "Sheffield Red & White", color: "#EE2737", awayColor: "#FFFFFF", division: 1, capacity: 32000, style: 'Park the Bus', formation: '5-3-2' },
+  ...Array.from({ length: 60 }).map((_, i) => ({ 
+    name: `Club ${i + 21}`, 
+    color: i % 2 === 0 ? "#4079b0" : "#26D975", 
+    awayColor: "#FFFFFF",
+    division: i < 20 ? 2 : i < 40 ? 3 : 4, 
+    capacity: 5000 + Math.floor(Math.random() * 15000), 
+    style: 'Pass to Feet', 
+    formation: '4-4-2' 
+  }))
 ];
 
 export function generateFixtures(teams: Team[], season: number) {
@@ -56,11 +64,11 @@ export function generateFixtures(teams: Team[], season: number) {
 
 export function generateInitialData() {
   const teams: Team[] = TEAM_DEFINITIONS.map((def, i) => ({
-    id: `team-${i}`, name: def.name, stadium: `${def.name} Grounds`, stadiumCapacity: def.capacity, color: def.color, budget: (5 - def.division) * 10000000 + Math.random() * 10000000, weeklyWages: 0, points: 0, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, division: def.division, reputation: 90 - (def.division * 15) + Math.floor(Math.random() * 10), formation: def.formation || '4-4-2', playStyle: (def.style as PlayStyle) || 'Pass to Feet', preferredFormation: def.formation || '4-4-2', preferredStyle: (def.style as PlayStyle) || 'Pass to Feet', playedHistory: [], staff: [], lineup: [], finances: { gateReceipts: 0, merchandise: 0, wagesPaid: 0, transfersIn: 0, transfersOut: 0, taxPaid: 0 }
+    id: `team-${i}`, name: def.name, stadium: `${def.name} Grounds`, stadiumCapacity: def.capacity, color: def.color, awayColor: def.awayColor, budget: (5 - def.division) * 10000000 + Math.random() * 10000000, weeklyWages: 0, points: 0, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, division: def.division, reputation: 90 - (def.division * 15) + Math.floor(Math.random() * 10), formation: def.formation || '4-4-2', playStyle: (def.style as PlayStyle) || 'Pass to Feet', preferredFormation: def.formation || '4-4-2', preferredStyle: (def.style as PlayStyle) || 'Pass to Feet', playedHistory: [], staff: [], lineup: [], finances: { gateReceipts: 0, merchandise: 0, wagesPaid: 0, transfersIn: 0, transfersOut: 0, taxPaid: 0 }
   }));
 
   const players: Player[] = [];
-  const sideBias: Side[] = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'L', 'R', 'LC', 'RC']; // Heavily Central bias
+  const sideBias: Side[] = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'L', 'R', 'LC', 'RC']; 
 
   teams.forEach(team => {
     const positions = ['GK', 'GK', 'DF', 'DF', 'DF', 'DF', 'DF', 'DF', 'MF', 'MF', 'MF', 'MF', 'MF', 'MF', 'FW', 'FW', 'FW', 'FW', 'DM', 'DF', 'MF', 'FW'];

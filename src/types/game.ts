@@ -79,6 +79,7 @@ export interface Team {
   stadium: string;
   stadiumCapacity: number;
   color: string;
+  awayColor: string;
   budget: number;
   weeklyWages: number;
   points: number;
