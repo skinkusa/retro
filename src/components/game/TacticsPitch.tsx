@@ -66,7 +66,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
   };
 
   return (
-    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-lg rounded-xl overflow-hidden">
+    <div className="relative w-full aspect-[4/5] bg-green-950 border-2 border-primary/30 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] mx-auto max-w-2xl rounded-xl overflow-hidden">
       {/* Pitch Markings */}
       <div className="absolute inset-2 border border-white/10 pointer-events-none">
         <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-white/10" />

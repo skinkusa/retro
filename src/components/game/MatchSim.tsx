@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
@@ -48,11 +47,10 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const isUserHome = homeTeam.id === state.userTeamId;
   const activeUserTeam = isUserHome ? homeTeam : awayTeam;
 
-  // Away Color Logic: If colors clash or just use away color for away team
+  // Away Color Logic
   const awayKitColor = useMemo(() => {
     const hex1 = homeTeam.color.replace('#', '');
     const hex2 = awayTeam.color.replace('#', '');
-    // Simple clash detection
     if (hex1.substring(0, 2) === hex2.substring(0, 2) || homeTeam.color.toLowerCase() === awayTeam.color.toLowerCase()) {
       return awayTeam.awayColor;
     }
@@ -98,8 +96,16 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const awayShots = fixture.result ? Math.floor((fixture.result.awayChances || 0) * (currentMinute / 90)) : 0;
 
   const zones = useMemo(() => ({
-    home: { DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', state.manager?.personality), MID: getZoneStrength(homeLineup, homeTeam, 'MID', state.manager?.personality), ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', state.manager?.personality) },
-    away: { DEF: getZoneStrength(awayLineup, awayTeam, 'DEF'), MID: getZoneStrength(awayLineup, awayTeam, 'MID'), ATT: getZoneStrength(awayLineup, awayTeam, 'ATT') }
+    home: { 
+      DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
+      MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
+      ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', homeTeam.isUserTeam ? state.manager?.personality : undefined) 
+    },
+    away: { 
+      DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
+      MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
+      ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', awayTeam.isUserTeam ? state.manager?.personality : undefined) 
+    }
   }), [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality]);
 
   const possession = (zones.home.MID / (zones.home.MID + zones.away.MID || 1)) * 100;
@@ -210,11 +216,23 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                 </TabsContent>
                 <TabsContent value="squad" className="m-0 h-full overflow-auto">
                   <div className="bg-card/20 border-2 border-primary/20 p-4 rounded-xl h-full">
-                    <SquadList players={state.players.filter(p => p.clubId === activeUserTeam.id)} currentMatchRatings={fixture.result?.ratings} onPlayerSwap={handleSwapInteraction} activeSwapId={swapSourceId} />
+                    <SquadList 
+                      players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
+                      currentMatchRatings={fixture.result?.ratings} 
+                      onPlayerSwap={handleSwapInteraction} 
+                      activeSwapId={swapSourceId}
+                      hideReserves={true}
+                    />
                   </div>
                 </TabsContent>
                 <TabsContent value="pitch" className="m-0 h-full overflow-auto flex flex-col items-center p-4">
-                  <TacticsPitch team={activeUserTeam} players={state.players.filter(p => p.clubId === activeUserTeam.id)} onPlayerClick={(p) => handleSwapInteraction(p.id)} onPlayerProfile={(p) => setViewingPlayer(p)} activeSwapId={swapSourceId} />
+                  <TacticsPitch 
+                    team={activeUserTeam} 
+                    players={state.players.filter(p => p.clubId === activeUserTeam.id)} 
+                    onPlayerClick={(p) => handleSwapInteraction(p.id)} 
+                    onPlayerProfile={(p) => setViewingPlayer(p)} 
+                    activeSwapId={swapSourceId} 
+                  />
                 </TabsContent>
               </div>
             </Tabs>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
@@ -104,53 +103,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return picked;
   }, []);
 
-  const prepareSeasonSummary = useCallback((currentState: GameState): SeasonSummaryData => {
-    const standingsByDiv = [1, 2, 3, 4].map(div => updateLeagueTable(currentState.teams, currentState.fixtures, div));
-    const userTeam = currentState.userTeamId ? currentState.teams.find(t => t.id === currentState.userTeamId) : null;
-    let userPos = 0; let userTarget = currentState.targetPosition;
-    if (userTeam) {
-      const userDivStanding = standingsByDiv[userTeam.division - 1];
-      if (userDivStanding) userPos = userDivStanding.findIndex(t => t.id === currentState.userTeamId) + 1;
-    }
-    const targetDivision = userTeam?.division || 1;
-    const divPlayers = currentState.players.filter(p => currentState.teams.find(t => t.id === p.clubId)?.division === targetDivision);
-    const topScorerPlayer = [...divPlayers].sort((a, b) => (b.seasonStats.goals || 0) - (a.seasonStats.goals || 0))[0];
-    const bestRatedPlayer = [...divPlayers].filter(p => p.seasonStats.apps > 5).sort((a, b) => (b.seasonStats.avgRating || 0) - (a.seasonStats.avgRating || 0))[0];
-
-    return {
-      season: currentState.season,
-      champions: { 1: standingsByDiv[0][0]?.name || 'N/A', 2: standingsByDiv[1][0]?.name || 'N/A', 3: standingsByDiv[2][0]?.name || 'N/A', 4: standingsByDiv[3][0]?.name || 'N/A' },
-      promoted: { 2: [standingsByDiv[1][0]?.name, standingsByDiv[1][1]?.name, standingsByDiv[1][2]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][0]?.name, standingsByDiv[2][1]?.name, standingsByDiv[2][2]?.name].filter(Boolean) as string[], 4: [standingsByDiv[3][0]?.name, standingsByDiv[3][1]?.name].filter(Boolean) as string[] },
-      relegated: { 1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[], 2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name, standingsByDiv[2][17]?.name].filter(Boolean) as string[] },
-      userPos, userTarget,
-      topScorer: topScorerPlayer ? { name: topScorerPlayer.name, goals: topScorerPlayer.seasonStats.goals, team: currentState.teams.find(t => t.id === topScorerPlayer.clubId)?.name || 'Unknown' } : null,
-      bestPlayer: bestRatedPlayer ? { name: bestRatedPlayer.name, rating: bestRatedPlayer.seasonStats.avgRating, team: currentState.teams.find(t => t.id === bestRatedPlayer.clubId)?.name || 'Unknown' } : null
-    };
-  }, []);
-
-  const startGame = useCallback((name: string, teamId: string, personality: ManagerPersonality) => {
-    const { teams, players, fixtures, availableStaff, cupEntrants } = generateInitialData();
-    const teamsWithBestLineups = teams.map(t => ({ ...t, lineup: getBestSquadForTeam(t, players) }));
-    const team = teamsWithBestLineups.find(t => t.id === teamId);
-    let targetPos = 10; let expectation = 'Finish in mid-table';
-    if (team) {
-      if (team.division === 1) {
-        if (team.reputation >= 85) { targetPos = 1; expectation = 'Win the Premier League'; }
-        else if (team.reputation >= 75) { targetPos = 4; expectation = 'Qualify for Champions Cup'; }
-        else { targetPos = 17; expectation = 'Avoid Relegation'; }
-      } else {
-        if (team.reputation >= 60) { targetPos = 3; expectation = 'Challenge for Promotion'; }
-        else { targetPos = 12; expectation = 'Mid-table stability'; }
-      }
-    }
-    setState(s => ({
-      ...s, currentWeek: 1, season: 1993, userTeamId: teamId, teams: teamsWithBestLineups, players, fixtures, availableStaff, cupEntrants,
-      manager: { name, personality, reputation: personality === 'Celebrity' ? 25 : 10, seasonsManaged: 0, trophies: [], winPercentage: 0, totalGames: 0, totalWins: 0 },
-      isGameStarted: true, isFired: false, isSeasonOver: false, boardConfidence: personality === 'Celebrity' ? 55 : 75, boardExpectation: expectation, targetPosition: targetPos,
-      messages: [{ id: 'welcome', title: 'BOARD WELCOME', content: `Welcome, ${name}. Our expectation is that you ${expectation.toLowerCase()}. Good luck.`, date: Date.now(), week: 1, read: false, type: 'BOARD' }]
-    }));
-  }, [getBestSquadForTeam]);
-
   const toggleShortlist = useCallback((pId: string) => {
     setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isShortlisted: !p.isShortlisted } : p) }));
   }, []);
@@ -180,15 +132,67 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => toast({ title: "BID REJECTED", description: "Offer declined." }), 0);
   }, [toast]);
 
+  const prepareSeasonSummary = useCallback((currentState: GameState): SeasonSummaryData => {
+    const standingsByDiv = [1, 2, 3, 4].map(div => updateLeagueTable(currentState.teams, currentState.fixtures, div));
+    const userTeam = currentState.userTeamId ? currentState.teams.find(t => t.id === currentState.userTeamId) : null;
+    let userPos = 0; let userTarget = currentState.targetPosition;
+    if (userTeam) {
+      const userDivStanding = standingsByDiv[userTeam.division - 1];
+      if (userDivStanding) userPos = userDivStanding.findIndex(t => t.id === currentState.userTeamId) + 1;
+    }
+    const targetDivision = userTeam?.division || 1;
+    const divPlayers = currentState.players.filter(p => currentState.teams.find(t => t.id === p.clubId)?.division === targetDivision);
+    const topScorerPlayer = [...divPlayers].sort((a, b) => (b.seasonStats.goals || 0) - (a.seasonStats.goals || 0))[0];
+    const bestRatedPlayer = [...divPlayers].filter(p => p.seasonStats.apps > 5).sort((a, b) => (b.seasonStats.avgRating || 0) - (a.seasonStats.avgRating || 0))[0];
+
+    return {
+      season: currentState.season,
+      champions: { 1: standingsByDiv[0][0]?.name || 'N/A', 2: standingsByDiv[1][0]?.name || 'N/A', 3: standingsByDiv[2][0]?.name || 'N/A', 4: standingsByDiv[3][0]?.name || 'N/A' },
+      promoted: { 2: [standingsByDiv[1][0]?.name, standingsByDiv[1][1]?.name, standingsByDiv[1][2]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][0]?.name, standingsByDiv[2][1]?.name, standingsByDiv[2][2]?.name].filter(Boolean) as string[], 4: [standingsByDiv[3][0]?.name, standingsByDiv[3][1]?.name].filter(Boolean) as string[] },
+      relegated: { 1: [standingsByDiv[0][19]?.name, standingsByDiv[0][18]?.name, standingsByDiv[0][17]?.name].filter(Boolean) as string[], 2: [standingsByDiv[1][19]?.name, standingsByDiv[1][18]?.name, standingsByDiv[1][17]?.name].filter(Boolean) as string[], 3: [standingsByDiv[2][19]?.name, standingsByDiv[2][18]?.name, standingsByDiv[2][17]?.name].filter(Boolean) as string[] },
+      userPos, userTarget,
+      topScorer: topScorerPlayer ? { name: topScorerPlayer.name, goals: topScorerPlayer.seasonStats.goals, team: currentState.teams.find(t => t.id === topScorerPlayer.clubId)?.name || 'Unknown' } : null,
+      bestPlayer: bestRatedPlayer ? { name: bestRatedPlayer.name, rating: bestRatedPlayer.seasonStats.avgRating, team: currentState.teams.find(t => t.id === bestRatedPlayer.clubId)?.name || 'Unknown' } : null
+    };
+  }, []);
+
   const startNextSeason = useCallback(() => {
     setState(s => {
       const yr = s.season + 1;
       const upTeams = s.teams.map(t => ({ ...t, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] }));
-      const upPlayers = s.players.map(p => ({ ...p, age: p.age + 1, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] }));
+      const upPlayers = s.players.map(p => ({ 
+        ...p, 
+        age: p.age + 1, 
+        seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 }, 
+        history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, goalsScored: p.seasonStats.goals, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] 
+      }));
       setTimeout(() => toast({ title: "NEW SEASON", description: `${yr} fixtures generated.` }), 0);
       return { ...s, currentWeek: 1, season: yr, teams: upTeams, players: upPlayers, fixtures: generateFixtures(upTeams, yr), isSeasonOver: false, seasonSummary: null };
     });
   }, [toast]);
+
+  const startGame = useCallback((name: string, teamId: string, personality: ManagerPersonality) => {
+    const { teams, players, fixtures, availableStaff, cupEntrants } = generateInitialData();
+    const teamsWithBestLineups = teams.map(t => ({ ...t, lineup: getBestSquadForTeam(t, players) }));
+    const team = teamsWithBestLineups.find(t => t.id === teamId);
+    let targetPos = 10; let expectation = 'Finish in mid-table';
+    if (team) {
+      if (team.division === 1) {
+        if (team.reputation >= 85) { targetPos = 1; expectation = 'Win the Premier League'; }
+        else if (team.reputation >= 75) { targetPos = 4; expectation = 'Qualify for Champions Cup'; }
+        else { targetPos = 17; expectation = 'Avoid Relegation'; }
+      } else {
+        if (team.reputation >= 60) { targetPos = 3; expectation = 'Challenge for Promotion'; }
+        else { targetPos = 12; expectation = 'Mid-table stability'; }
+      }
+    }
+    setState(s => ({
+      ...s, currentWeek: 1, season: 1993, userTeamId: teamId, teams: teamsWithBestLineups, players, fixtures, availableStaff, cupEntrants,
+      manager: { name, personality, reputation: personality === 'Celebrity' ? 25 : 10, seasonsManaged: 0, trophies: [], winPercentage: 0, totalGames: 0, totalWins: 0 },
+      isGameStarted: true, isFired: false, isSeasonOver: false, boardConfidence: personality === 'Celebrity' ? 55 : 75, boardExpectation: expectation, targetPosition: targetPos,
+      messages: [{ id: 'welcome', title: 'BOARD WELCOME', content: `Welcome, ${name}. Our expectation is that you ${expectation.toLowerCase()}. Good luck.`, date: Date.now(), week: 1, read: false, type: 'BOARD' }]
+    }));
+  }, [getBestSquadForTeam]);
 
   const simulateWeek = useCallback(() => {
     setState(s => {
@@ -244,7 +248,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
       
-      // AI to AI Transfers
+      // AI Transfer Market Logic
       if (Math.random() < 0.15) {
         const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
         const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);

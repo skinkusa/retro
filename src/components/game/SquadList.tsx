@@ -18,9 +18,10 @@ interface SquadListProps {
   currentMatchRatings?: Record<string, number>;
   onPlayerSwap?: (pId: string) => void;
   activeSwapId?: string | null;
+  hideReserves?: boolean;
 }
 
-export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSwapId }: SquadListProps) {
+export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSwapId, hideReserves = false }: SquadListProps) {
   const { state, togglePlayerLineup, clearLineup, autoPickLineup } = useGame();
   const [filter, setFilter] = useState<Position | 'ALL'>('ALL');
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
@@ -41,7 +42,12 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
     const starters = players.filter(p => userTeam?.lineup.slice(0, 11).includes(p.id));
     const bench = players.filter(p => userTeam?.lineup.slice(11, 16).includes(p.id));
     const reserves = players.filter(p => !userTeam?.lineup.includes(p.id));
-    const sortedStarters = (userTeam?.lineup.slice(0, 11) || []).map(id => starters.find(p => p.id === id)).filter(Boolean) as Player[];
+    
+    // Starters are sorted by their index in the lineup to match pitch positions
+    const sortedStarters = (userTeam?.lineup.slice(0, 11) || [])
+      .map(id => starters.find(p => p.id === id))
+      .filter(Boolean) as Player[];
+      
     return { starters: sortedStarters, bench, reserves };
   }, [players, userTeam]);
 
@@ -65,7 +71,12 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
         )}
       >
         <TableCell className="p-3 text-center">
-          <Checkbox checked={isSelected} disabled={!canPick && !isSelected} onClick={(e) => { e.stopPropagation(); togglePlayerLineup(p.id); }} className="border-primary/50" />
+          <Checkbox 
+            checked={isSelected} 
+            disabled={(!canPick && !isSelected) || !!currentMatchRatings} 
+            onClick={(e) => { e.stopPropagation(); togglePlayerLineup(p.id); }} 
+            className="border-primary/50" 
+          />
         </TableCell>
         <TableCell className="py-3">
           <div className="flex flex-col">
@@ -120,6 +131,11 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
             </div>
           </div>
         )}
+        {currentMatchRatings && (
+          <div className="text-[13px] font-black px-4 py-1.5 border-2 border-primary/20 bg-primary/10 rounded-xl text-primary">
+            MATCH DAY SELECTION (ACTIVE)
+          </div>
+        )}
       </div>
 
       <div className="overflow-auto custom-scrollbar max-h-[65vh] border border-primary/10 rounded-xl bg-black/20 shadow-inner">
@@ -163,10 +179,11 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
                 <TableRow className="bg-accent/10 border-y-2 border-accent/20"><TableCell colSpan={8} className="py-2 text-[11px] font-black text-accent uppercase text-center tracking-[0.6em]">Substitute Bench</TableCell></TableRow>
               )}
               {categorizedPlayers.bench.filter(p => filter === 'ALL' || p.position === filter).map(p => renderPlayerRow(p, 'BENCH'))}
-              {categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
+              
+              {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
                 <TableRow className="bg-muted/40 border-y-2 border-primary/20"><TableCell colSpan={8} className="py-2 text-[11px] font-black text-muted-foreground uppercase text-center tracking-[0.6em]">Reserve Pool</TableCell></TableRow>
               )}
-              {categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).sort((a, b) => b.attributes.skill - a.attributes.skill).map(p => renderPlayerRow(p, 'RESERVE'))}
+              {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).sort((a, b) => b.attributes.skill - a.attributes.skill).map(p => renderPlayerRow(p, 'RESERVE'))}
             </TableBody>
           </Table>
         </TooltipProvider>
