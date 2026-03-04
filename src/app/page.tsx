@@ -7,9 +7,9 @@ export default function LandingPage() {
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: 'url(/retromanager.png)' }}
+      style={{ backgroundImage: 'url(/retromanager.png)', backgroundColor: 'hsl(210 16% 10%)' }}
     >
-      <div className="absolute inset-0 bg-black/50" aria-hidden />
+      <div className="absolute inset-0 bg-black/40" aria-hidden />
       <div className="relative z-10 flex flex-col items-center justify-center gap-8 max-w-2xl w-full">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white uppercase text-center drop-shadow-lg italic">
           Retro Manager

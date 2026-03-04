@@ -2,6 +2,7 @@ import type {NextConfig} from 'next';
 import path from 'path';
 
 const nextConfig: NextConfig = {
+  output: 'export',
   /* Ensure correct dependency tracing when multiple lockfiles exist (e.g. parent dir on Vercel) */
   outputFileTracingRoot: path.join(process.cwd()),
   typescript: {

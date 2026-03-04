@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react';
 
+function isCapacitorNative(): boolean {
+  if (typeof window === 'undefined') return false;
+  const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  return !!cap?.isNativePlatform?.();
+}
+
 export function VisitorCount() {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
+    if (isCapacitorNative()) return;
     fetch('/api/visit')
       .then((res) => res.json())
       .then((data: { count: number }) => setCount(data.count))
