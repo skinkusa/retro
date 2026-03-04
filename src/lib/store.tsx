@@ -42,6 +42,7 @@ interface GameContextType {
   setEnginePreset: (preset: 'realistic' | 'arcade') => void;
   startMatch: (fixtureId: string) => void;
   clearCurrentMatch: () => void;
+  quitToMainMenu: () => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -635,7 +636,8 @@ setState(s => ({
     togglePlayerLineup, swapPlayers, addPlayerToSlot,
     clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })),
     autoPickLineup,
-    applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })), 
+    applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })),
+    quitToMainMenu: () => setState(s => ({ ...s, isGameStarted: false, currentMatchFixtureId: null })),
     acceptBid, rejectBid, updateMidMatchResult, 
     updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch
   }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, updateMidMatchResult, fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch, toast, togglePlayerLineup, swapPlayers, addPlayerToSlot, autoPickLineup]);

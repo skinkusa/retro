@@ -32,6 +32,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const [isGoalPaused, setIsGoalPaused] = useState(false);
   const [pausedForInjury, setPausedForInjury] = useState(false);
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
+  const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
   
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
@@ -59,7 +60,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   }, [homeTeam.color, awayTeam.color, awayTeam.awayColor, awayTeam.awayTextColor, awayTeam.homeTextColor]);
   const awayKitColor = awayKitBg;
 
-  const TICK_SPEED = 700; 
+  const TICK_SPEED_BASE = 700;
+  const tickSpeed = TICK_SPEED_BASE / playbackSpeed;
 
   useEffect(() => {
     if (showLineups || !fixture.result || isHalfTime || isFinished || isPaused || isGoalPaused) return;
@@ -77,9 +79,9 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         }
         return nextMin;
       });
-    }, TICK_SPEED);
+    }, tickSpeed);
     return () => clearInterval(timer); 
-  }, [fixture.result, isHalfTime, isFinished, isPaused, isGoalPaused, showLineups]);
+  }, [fixture.result, isHalfTime, isFinished, isPaused, isGoalPaused, showLineups, tickSpeed]);
 
   useEffect(() => {
     if (!activeAlert) return;
@@ -221,10 +223,23 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     );
   };
 
+  const goalBannerTeamId = activeAlert?.type === 'GOAL' ? activeAlert.teamId : null;
+  const goalBannerColor = goalBannerTeamId === homeTeam.id ? homeTeam.color : goalBannerTeamId === awayTeam.id ? awayKitColor : undefined;
+  const goalScorerName = activeAlert?.type === 'GOAL' && activeAlert.playerId ? state.players.find(p => p.id === activeAlert.playerId)?.name : null;
+
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 md:p-4 font-mono z-[100] backdrop-blur-sm">
       <div className="max-w-6xl w-full max-h-[95vh] bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl min-h-[85vh]">
         <div className="absolute inset-0 opacity-25 pointer-events-none mix-blend-overlay bg-cover bg-center" style={{ backgroundImage: stadiumOverlay ? `url("${stadiumOverlay}")` : 'none' }} />
+
+        {activeAlert?.type === 'GOAL' && (
+          <div className="absolute inset-x-0 top-0 z-[300] flex items-center justify-center py-4 px-4 animate-in zoom-in duration-200" role="alert">
+            <div className="w-full max-w-2xl rounded-2xl border-4 border-white/60 shadow-[0_0_40px_rgba(255,255,255,0.3)] py-5 px-6 text-center animate-pulse" style={{ backgroundColor: goalBannerColor ?? 'var(--accent)', color: goalBannerTeamId === homeTeam.id ? (homeTeam.homeTextColor ?? '#fff') : goalBannerTeamId === awayTeam.id ? awayKitText : '#fff' }}>
+              <div className="text-[11px] sm:text-[12px] font-black uppercase tracking-[0.4em] opacity-90">Goal</div>
+              <div className="text-2xl sm:text-4xl font-black uppercase tracking-tight mt-0.5">{activeAlert.minute}&apos; · {goalScorerName ?? 'Unknown'}</div>
+            </div>
+          </div>
+        )}
 
         {showLineups && (
           <div className="absolute inset-0 z-[600] bg-background/95 backdrop-blur-2xl flex flex-col overflow-y-auto p-4 sm:p-6 animate-in fade-in duration-500">
@@ -364,10 +379,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
         <div className="relative z-10 p-2.5 flex flex-col items-center gap-1 bg-black/85 border-b border-white/5 shrink-0">
           <div className="bg-primary text-primary-foreground px-4 py-0.5 text-[10px] font-black shadow-lg border border-white/20 uppercase tracking-[0.2em] rounded-md">{fixture.competition} - {homeTeam.stadium.toUpperCase()}</div>
-          <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 w-full">
             <div className="bg-black/90 backdrop-blur-md px-4 py-2.5 text-[17px] sm:text-[18px] font-black flex-1 text-center uppercase tracking-tight shadow-2xl flex items-center justify-center min-h-[48px] rounded-lg border border-white/10" style={{ color: commentaryColor }}>
               {activeEvent?.text}
             </div>
+            <Button onClick={() => setPlaybackSpeed(s => s === 1 ? 2 : 1)} className={cn("h-9 px-3 sm:px-4 text-sm font-black retro-button shrink-0 transition-all", playbackSpeed === 2 ? "bg-accent text-accent-foreground border-accent" : "bg-black/70 text-white border-white/30 hover:bg-white/10")} title={playbackSpeed === 2 ? "Switch to 1x speed" : "Play at 2x speed"}>×{playbackSpeed}</Button>
             <Button onClick={() => setIsPaused(true)} className="h-9 px-5 text-sm bg-red-600 hover:bg-red-700 text-white font-black retro-button shadow-lg transition-all active:scale-95 shrink-0"><Pause size={18} className="mr-1" /> PAUSE</Button>
           </div>
         </div>

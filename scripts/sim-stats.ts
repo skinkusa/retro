@@ -1,8 +1,9 @@
 /**
  * Run many match simulations and print aggregate stats (avg score, shots, home/away/draw %, etc.).
+ * Also runs comparison sims to show that strength, formation, and style affect outcomes.
  * Run: npx tsx scripts/sim-stats.ts
  */
-import { simulateMatch } from '../src/lib/game-engine';
+import { simulateMatch, getFormationRequirements } from '../src/lib/game-engine';
 import type { Team, Player } from '../src/types/game';
 
 const defaultAttrs = () => ({
@@ -88,6 +89,41 @@ function makeStartingEleven(prefix: string): Player[] {
     makePlayer(`${prefix}-fc`, 'FW'),
     makePlayer(`${prefix}-fr`, 'FW'),
   ];
+}
+
+function makePlayerWithLevel(id: string, position: string, level: number): Player {
+  const pos = position as 'GK' | 'DF' | 'MF' | 'FW' | 'DM';
+  const attrs = {
+    pace: level, stamina: level, skill: level, shooting: level, passing: level, heading: level,
+    influence: level, goalkeeping: pos === 'GK' ? Math.max(level, 12) : level, consistency: Math.min(20, level + 2),
+    dirtiness: 5, injuryProne: 5, temperament: 10, potential: 12, professionalism: 10,
+  };
+  return {
+    id,
+    name: `Player ${id}`,
+    age: 25,
+    position: pos,
+    side: 'C',
+    attributes: attrs,
+    fitness: 100,
+    morale: 80,
+    value: 500_000,
+    wage: 5000,
+    contractYears: 2,
+    clubId: null,
+    condition: 100,
+    status: 'FIT',
+    isListed: false,
+    suspensionWeeks: 0,
+    injury: null,
+    seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 },
+    history: [],
+  };
+}
+
+function makeSquadWithLevel(prefix: string, level: number, formation: string): Player[] {
+  const positions = getFormationRequirements(formation);
+  return positions.map((pos, i) => makePlayerWithLevel(`${prefix}-${pos}-${i}`, pos, level));
 }
 
 const N = 2000;
@@ -183,3 +219,57 @@ for (let i = 1; i < table.length; i++) {
   console.log(fmtRow(a.replace(/\*\*/g, ''), b, [col0, col1]));
 }
 console.log('');
+
+// --- Mechanics impact: do strength, formation, style affect outcomes? ---
+const N_COMPARE = 500;
+console.log('--- MECHANICS IMPACT (each scenario ' + N_COMPARE + ' games) ---\n');
+
+// 1. Strong vs Weak
+const strongTeam = makeTeam('strong', 'Strong FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+const weakTeam = makeTeam('weak', 'Weak FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+const strongSquad = makeSquadWithLevel('s', 14, '4-3-3');
+const weakSquad = makeSquadWithLevel('w', 6, '4-3-3');
+let strongWins = 0, weakWins = 0, draws = 0, goalDiffSum = 0;
+for (let i = 0; i < N_COMPARE; i++) {
+  const r = simulateMatch(strongTeam, weakTeam, strongSquad, weakSquad)!;
+  goalDiffSum += r.homeGoals - r.awayGoals;
+  if (r.homeGoals > r.awayGoals) strongWins++; else if (r.awayGoals > r.homeGoals) weakWins++; else draws++;
+}
+console.log('1. STRONG (level 14) vs WEAK (level 6) – same formation & style');
+console.log('   Strong win %: ' + (100 * strongWins / N_COMPARE).toFixed(1) + '  |  Weak win %: ' + (100 * weakWins / N_COMPARE).toFixed(1) + '  |  Draw %: ' + (100 * draws / N_COMPARE).toFixed(1));
+console.log('   Avg goal diff (Strong - Weak): ' + (goalDiffSum / N_COMPARE).toFixed(2) + '  (positive = stronger team ahead)\n');
+
+// 2. Formation: 4-3-3 vs 4-5-1 (same player level)
+const team433 = makeTeam('a', '4-3-3 FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+const team451 = makeTeam('b', '4-5-1 FC', { formation: '4-5-1', playStyle: 'Pass to Feet' });
+const squad433 = makeSquadWithLevel('a', 10, '4-3-3');
+const squad451 = makeSquadWithLevel('b', 10, '4-5-1');
+let goals433 = 0, goals451 = 0;
+for (let i = 0; i < N_COMPARE; i++) {
+  const r1 = simulateMatch(team433, team451, squad433, squad451)!;
+  goals433 += r1.homeGoals;
+  goals451 += r1.awayGoals;
+  const r2 = simulateMatch(team451, team433, squad451, squad433)!;
+  goals451 += r2.homeGoals;
+  goals433 += r2.awayGoals;
+}
+const avg433 = goals433 / (N_COMPARE * 2), avg451 = goals451 / (N_COMPARE * 2);
+console.log('2. FORMATION: 4-3-3 vs 4-5-1 (same player level 10)');
+console.log('   Avg goals per game – 4-3-3: ' + avg433.toFixed(2) + '  |  4-5-1: ' + avg451.toFixed(2) + '  (formation changes outcome)\n');
+
+// 3. Style: Tiki-Taka vs Pass to Feet (same squad)
+const tikiTeam = makeTeam('t', 'Tiki FC', { formation: '4-3-3', playStyle: 'Tiki-Taka' });
+const passTeam = makeTeam('p', 'Pass FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+const squad = makeSquadWithLevel('x', 10, '4-3-3');
+let tikiGoals = 0, passGoals = 0;
+for (let i = 0; i < N_COMPARE; i++) {
+  const r1 = simulateMatch(tikiTeam, passTeam, squad, squad)!;
+  tikiGoals += r1.homeGoals;
+  passGoals += r1.awayGoals;
+  const r2 = simulateMatch(passTeam, tikiTeam, squad, squad)!;
+  passGoals += r2.homeGoals;
+  tikiGoals += r2.awayGoals;
+}
+const avgTiki = tikiGoals / (N_COMPARE * 2), avgPass = passGoals / (N_COMPARE * 2);
+console.log('3. STYLE: Tiki-Taka vs Pass to Feet (same squad, level 10)');
+console.log('   Avg goals per game – Tiki-Taka: ' + avgTiki.toFixed(2) + '  |  Pass to Feet: ' + avgPass.toFixed(2) + '  (style affects conversion)\n');

@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Toaster } from '@/components/ui/toaster';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, Trophy, PlayCircle, Search, Briefcase, DollarSign, UserCircle, Globe2, History, ListFilter, Save, FileUp, Settings, HelpCircle, Swords, RefreshCw, Info } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, PlayCircle, Search, Briefcase, DollarSign, UserCircle, Globe2, History, ListFilter, Save, FileUp, Settings, HelpCircle, Swords, RefreshCw, Info, LogOut } from 'lucide-react';
 import { Team, Player, PlayStyle, ManagerPersonality } from '@/types/game';
 import { formatMoney, cn, getMessageDisplayContent } from '@/lib/utils';
 import { STORAGE_KEY } from '@/lib/constants';
@@ -185,7 +185,7 @@ function StartMenu() {
 }
 
 function GameContent() {
-  const { state, simulateWeek, advanceWeek, setTactics, saveGame, swapPlayers, startMatch, clearCurrentMatch } = useGame();
+  const { state, simulateWeek, advanceWeek, setTactics, saveGame, swapPlayers, startMatch, clearCurrentMatch, quitToMainMenu } = useGame();
   const [activeTab, setActiveTab] = useState<'HUB' | 'SQUAD' | 'WORLD' | 'MARKET' | 'CLUB'>('HUB');
   const [clubSubView, setClubSubView] = useState<'OFFICE' | 'STAFF' | 'FINANCE' | 'MANAGER' | 'RECORDS' | 'SETTINGS'>('OFFICE');
   const [worldSubView, setWorldSubView] = useState<'TABLE' | 'STATS' | 'FIXTURES'>('TABLE');
@@ -194,6 +194,7 @@ function GameContent() {
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
   const [openToTab, setOpenToTab] = useState<'overview' | 'contract' | null>(null);
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
+  const [showMatchDayScreen, setShowMatchDayScreen] = useState(false);
 
   useEffect(() => { if (state.userTeamId) { const ut = state.teams.find(t => t.id === state.userTeamId); if (ut) setViewingDiv(ut.division); } }, [state.userTeamId, state.teams]);
 
@@ -217,9 +218,46 @@ function GameContent() {
     );
   }
 
+  const currentWeekFixtures = state.fixtures.filter(f => f.week === state.currentWeek && f.division === userTeam.division).sort((a, b) => a.homeTeamId.localeCompare(b.homeTeamId));
 
   return (
     <div className="flex flex-col min-h-screen h-screen max-w-screen-xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
+      {showMatchDayScreen && (
+        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-black/80 border-4 border-primary/40 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-center">
+              <h2 className="text-lg sm:text-xl font-black uppercase tracking-widest">Match day — Week {state.currentWeek}</h2>
+              <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-9 font-black uppercase" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
+            </div>
+            <div className="p-4 space-y-3 max-h-[60vh] overflow-auto">
+              {currentWeekFixtures.length === 0 ? (
+                <p className="text-center text-muted-foreground font-black uppercase py-8">No fixtures this week</p>
+              ) : (
+                currentWeekFixtures.map(f => {
+                  const home = state.teams.find(t => t.id === f.homeTeamId);
+                  const away = state.teams.find(t => t.id === f.awayTeamId);
+                  const isUserFixture = f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id;
+                  const canPlay = isUserFixture && !f.result && isLineupValid;
+                  return (
+                    <div key={f.id} className={cn("flex items-center gap-3 p-3 rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
+                      <span className="w-10 text-center font-black text-muted-foreground tabular-nums">{f.week}</span>
+                      <span className={cn("flex-1 font-black uppercase text-right truncate", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
+                      <span className="text-center font-black text-lg w-14">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
+                      <span className={cn("flex-1 font-black uppercase text-left truncate", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
+                      {isUserFixture && !f.result && (
+                        <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="h-10 px-4 bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-lg hover:scale-105 transition-transform"><PlayCircle size={18} className="mr-1.5" /> Play</Button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            {!isLineupValid && nextFixture && (
+              <div className="px-4 pb-4 text-center text-amber-400 text-sm font-black uppercase">Pick at least 11 players in Squad before playing.</div>
+            )}
+          </div>
+        </div>
+      )}
       <div className="bg-primary text-primary-foreground py-1.5 px-3 sm:py-2 sm:px-6 flex justify-center items-center shrink-0 border-b-2 border-black/40 shadow-lg z-50">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <span className="text-base sm:text-lg font-black tracking-tighter uppercase leading-none italic drop-shadow-md truncate">Retro Manager</span>
@@ -269,7 +307,7 @@ function GameContent() {
                     <div className="bg-primary/20 px-6 py-2 rounded-xl border-2 border-primary/40 font-black text-primary text-xl">VS</div>
                     <span className="text-3xl font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
                   </div>
-                  <Button onClick={() => nextFixture && startMatch(nextFixture.id)} disabled={!isLineupValid} className="w-full md:w-64 h-16 bg-accent text-accent-foreground retro-button font-black text-2xl rounded-2xl shadow-2xl hover:scale-[1.05] transition-transform animate-pulse"><PlayCircle size={32} className="mr-3" /> PLAY MATCH</Button>
+                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="w-full md:w-64 h-16 bg-accent text-accent-foreground retro-button font-black text-2xl rounded-2xl shadow-2xl hover:scale-[1.05] transition-transform animate-pulse"><PlayCircle size={32} className="mr-3" /> PLAY MATCH</Button>
                 </div>
               ) : <div className="text-xl font-black text-muted-foreground uppercase italic py-8 tracking-[0.3em]">Season Concluded</div>}
             </div>
@@ -296,7 +334,7 @@ function GameContent() {
         {activeTab === 'SQUAD' && (
           <div className="p-4 space-y-6 bg-black/40 rounded-2xl border border-primary/10">
             <Tabs defaultValue="list" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-black/85 h-16 border-2 border-primary/25 rounded-2xl p-1 gap-1"><TabsTrigger value="list" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Squad Selection</TabsTrigger><TabsTrigger value="tactics" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Tactical HUD</TabsTrigger></TabsList>
+              <TabsList className="grid w-full grid-cols-2 bg-black/85 h-16 border-2 border-primary/25 rounded-2xl p-1 gap-1"><TabsTrigger value="list" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Squad Selection</TabsTrigger><TabsTrigger value="tactics" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Tactical Hub</TabsTrigger></TabsList>
               <TabsContent value="list" className="m-0 pt-4"><SquadList players={userPlayers} onPlayerSwap={handlePlayerSwapInteraction} activeSwapId={swapSourceId} /></TabsContent>
               <TabsContent value="tactics" className="m-0 pt-4">
                 <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6">
@@ -320,9 +358,11 @@ function GameContent() {
             {worldSubView === 'STATS' && <StatsHub division={viewingDiv} />}
             {worldSubView === 'FIXTURES' && (
               <RetroWindow title={`DIV ${viewingDiv} FIXTURES`} noPadding className="bg-black/60 rounded-2xl shadow-2xl">
-                <Table><TableHeader><TableRow className="bg-primary/25 border-b-2 border-primary/40"><TableHead className="w-16 text-[13px] font-black uppercase text-white tracking-wide py-4">Wk</TableHead><TableHead className="text-[13px] font-black uppercase text-white tracking-wide py-4">Home</TableHead><TableHead className="text-center text-[13px] font-black uppercase text-white tracking-wide py-4">Res</TableHead><TableHead className="text-right text-[13px] font-black uppercase text-white tracking-wide py-4">Away</TableHead></TableRow></TableHeader><TableBody>{state.fixtures.filter(f => f.division === viewingDiv).sort((a, b) => a.week - b.week).map(f => {
+                <Table><TableHeader><TableRow className="bg-primary/25 border-b-2 border-primary/40"><TableHead className="w-16 text-[13px] font-black uppercase text-white tracking-wide py-4">Wk</TableHead><TableHead className="text-[13px] font-black uppercase text-white tracking-wide py-4">Home</TableHead><TableHead className="text-center text-[13px] font-black uppercase text-white tracking-wide py-4">Res</TableHead><TableHead className="text-right text-[13px] font-black uppercase text-white tracking-wide py-4">Away</TableHead><TableHead className="w-24 text-[13px] font-black uppercase text-white tracking-wide py-4 text-center">Play</TableHead></TableRow></TableHeader><TableBody>{state.fixtures.filter(f => f.division === viewingDiv).sort((a, b) => a.week - b.week).map(f => {
                   const h = state.teams.find(t => t.id === f.homeTeamId); const a = state.teams.find(t => t.id === f.awayTeamId);
-                  return (<TableRow key={f.id} className="border-b border-white/5 hover:bg-white/5"><TableCell className="font-black text-lg tabular-nums opacity-60">{f.week}</TableCell><TableCell className={cn("font-black text-lg uppercase", f.homeTeamId === userTeam.id ? "text-accent" : "text-white")}>{h?.name}</TableCell><TableCell className="text-center font-black text-xl tabular-nums">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</TableCell><TableCell className={cn("text-right font-black text-lg uppercase", f.awayTeamId === userTeam.id ? "text-accent" : "text-white")}>{a?.name}</TableCell></TableRow>);
+                  const isUserFixture = f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id;
+                  const canPlay = isUserFixture && f.week === state.currentWeek && !f.result && isLineupValid;
+                  return (<TableRow key={f.id} className="border-b border-white/5 hover:bg-white/5"><TableCell className="font-black text-lg tabular-nums opacity-60">{f.week}</TableCell><TableCell className={cn("font-black text-lg uppercase", f.homeTeamId === userTeam.id ? "text-accent" : "text-white")}>{h?.name}</TableCell><TableCell className="text-center font-black text-xl tabular-nums">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</TableCell><TableCell className={cn("text-right font-black text-lg uppercase", f.awayTeamId === userTeam.id ? "text-accent" : "text-white")}>{a?.name}</TableCell><TableCell className="text-center">{canPlay ? <Button size="sm" onClick={() => startMatch(f.id)} className="h-8 px-3 bg-accent text-accent-foreground font-black text-xs uppercase rounded-lg"><PlayCircle size={14} className="mr-1" />Play</Button> : null}</TableCell></TableRow>);
                 })}</TableBody></Table>
               </RetroWindow>
             )}
@@ -339,6 +379,7 @@ function GameContent() {
                 <button onClick={() => setClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500" /><span className="text-2xl font-black uppercase text-white">Legacy & Records</span></button>
                 <button onClick={() => setClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground" /><span className="text-2xl font-black uppercase text-white">OS Config</span></button>
                 <button onClick={saveGame} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-4 border-accent/40 bg-accent/5 hover:bg-accent/20 rounded-3xl transition-all shadow-2xl group"><Save size={72} className="text-accent group-hover:animate-bounce" /><span className="text-2xl font-black uppercase text-white">Commit Save</span></button>
+                <button onClick={quitToMainMenu} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/20 hover:bg-red-500/20 bg-black/40 rounded-3xl transition-all shadow-2xl group"><LogOut size={72} className="text-white/80 group-hover:text-red-400 transition-colors" /><span className="text-2xl font-black uppercase text-white">Quit to Main Menu</span></button>
               </div>
             ) : (
               <div className="space-y-6"><Button variant="outline" onClick={() => setClubSubView('OFFICE')} className="h-14 text-lg font-black mb-4 retro-button bg-black/60 px-10 border-2 border-primary/40 rounded-xl hover:bg-primary hover:text-white transition-all uppercase">← Return to Main Office</Button>

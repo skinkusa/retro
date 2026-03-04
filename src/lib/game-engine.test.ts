@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { simulateMatch, simulateRemainingMinutes } from './game-engine';
+import { simulateMatch, simulateRemainingMinutes, getFormationRequirements } from './game-engine';
 import type { Team, Player, Fixture } from '@/types/game';
 
 const defaultAttrs = () => ({
@@ -86,6 +86,45 @@ function makeStartingEleven(prefix: string): Player[] {
     makePlayer(`${prefix}-fc`, 'FW'),
     makePlayer(`${prefix}-fr`, 'FW'),
   ];
+}
+
+/** All attributes set to level (1-20). Use for testing strength impact. */
+function makePlayerWithLevel(id: string, position: 'GK' | 'DF' | 'MF' | 'FW' | 'DM', level: number): Player {
+  const attrs = {
+    pace: level, stamina: level, skill: level, shooting: level, passing: level, heading: level,
+    influence: level, goalkeeping: position === 'GK' ? Math.max(level, 12) : level, consistency: Math.min(20, level + 2),
+    dirtiness: 5, injuryProne: 5, temperament: 10, potential: 12, professionalism: 10,
+  };
+  return {
+    id,
+    name: `Player ${id}`,
+    age: 25,
+    position,
+    side: 'C',
+    attributes: attrs,
+    fitness: 100,
+    morale: 80,
+    value: 500_000,
+    wage: 5000,
+    contractYears: 2,
+    clubId: null,
+    condition: 100,
+    status: 'FIT',
+    isListed: false,
+    suspensionWeeks: 0,
+    injury: null,
+    seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0 },
+    history: [],
+  };
+}
+
+/** Squad with every player at given attribute level, for formation (e.g. 4-3-3, 4-5-1). */
+function makeSquadWithLevel(prefix: string, level: number, formation: string = '4-3-3'): Player[] {
+  const positions = getFormationRequirements(formation);
+  return positions.map((pos, i) => {
+    const p = pos as 'GK' | 'DF' | 'MF' | 'FW' | 'DM';
+    return makePlayerWithLevel(`${prefix}-${p}-${i}`, p, level);
+  });
 }
 
 describe('game-engine', () => {
@@ -275,6 +314,81 @@ describe('game-engine', () => {
       expect(avgYellows).toBeGreaterThanOrEqual(0.3);
       expect(avgYellows).toBeLessThanOrEqual(8);
       expect(avgInjuries).toBeLessThanOrEqual(0.35);
+    });
+  });
+
+  describe('mechanics affect outcomes', () => {
+    const N = 400;
+
+    it('stronger team wins more often and has better goal difference', () => {
+      const strongTeam = makeTeam('strong', 'Strong FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+      const weakTeam = makeTeam('weak', 'Weak FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+      const strongStarters = makeSquadWithLevel('s', 14, '4-3-3');
+      const weakStarters = makeSquadWithLevel('w', 6, '4-3-3');
+
+      let strongWins = 0;
+      let weakWins = 0;
+      let draws = 0;
+      let goalDiffSum = 0;
+
+      for (let i = 0; i < N; i++) {
+        const r = simulateMatch(strongTeam, weakTeam, strongStarters, weakStarters)!;
+        goalDiffSum += r.homeGoals - r.awayGoals;
+        if (r.homeGoals > r.awayGoals) strongWins++;
+        else if (r.awayGoals > r.homeGoals) weakWins++;
+        else draws++;
+      }
+
+      const strongWinPct = strongWins / N;
+      const avgGoalDiff = goalDiffSum / N;
+
+      expect(strongWinPct).toBeGreaterThan(0.5);
+      expect(avgGoalDiff).toBeGreaterThan(0.2);
+    });
+
+    it('formation affects outcomes (4-5-1 vs 4-3-3 produce different goal rates)', () => {
+      const team433 = makeTeam('a', 'Attack FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+      const team451 = makeTeam('b', 'Defense FC', { formation: '4-5-1', playStyle: 'Pass to Feet' });
+      const squad433 = makeSquadWithLevel('a', 10, '4-3-3');
+      const squad451 = makeSquadWithLevel('b', 10, '4-5-1');
+
+      let goals433 = 0;
+      let goals451 = 0;
+
+      for (let i = 0; i < N; i++) {
+        const r1 = simulateMatch(team433, team451, squad433, squad451)!;
+        goals433 += r1.homeGoals;
+        goals451 += r1.awayGoals;
+        const r2 = simulateMatch(team451, team433, squad451, squad433)!;
+        goals451 += r2.homeGoals;
+        goals433 += r2.awayGoals;
+      }
+
+      const avgGoals433 = goals433 / (N * 2);
+      const avgGoals451 = goals451 / (N * 2);
+      expect(Math.abs(avgGoals433 - avgGoals451)).toBeGreaterThan(0.15);
+    });
+
+    it('Tiki-Taka conversion bonus produces more goals than Pass to Feet over many games', () => {
+      const tikiTeam = makeTeam('t', 'Tiki FC', { formation: '4-3-3', playStyle: 'Tiki-Taka' });
+      const passTeam = makeTeam('p', 'Pass FC', { formation: '4-3-3', playStyle: 'Pass to Feet' });
+      const squad = makeSquadWithLevel('x', 10, '4-3-3');
+
+      let tikiGoals = 0;
+      let passGoals = 0;
+
+      for (let i = 0; i < N; i++) {
+        const r1 = simulateMatch(tikiTeam, passTeam, squad, squad)!;
+        tikiGoals += r1.homeGoals;
+        passGoals += r1.awayGoals;
+        const r2 = simulateMatch(passTeam, tikiTeam, squad, squad)!;
+        passGoals += r2.homeGoals;
+        tikiGoals += r2.awayGoals;
+      }
+
+      const avgTiki = tikiGoals / (N * 2);
+      const avgPass = passGoals / (N * 2);
+      expect(avgTiki).toBeGreaterThan(avgPass);
     });
   });
 });
