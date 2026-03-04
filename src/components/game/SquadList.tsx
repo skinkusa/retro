@@ -171,15 +171,15 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
         </div>
         {!currentMatchRatings && emptySlotIndices.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-primary/10">
-            <span className="text-[9px] font-black text-muted-foreground uppercase">Assign to:</span>
+            <span className="text-[11px] font-black text-muted-foreground uppercase">Assign to:</span>
             {emptySlotIndices.map((slotIdx) => (
-              <label key={slotIdx} className="flex items-center gap-1 cursor-pointer">
+              <label key={slotIdx} className="flex items-center gap-1.5 cursor-pointer">
                 <Checkbox
                   checked={pinnedSlotIndex === slotIdx}
                   onCheckedChange={(checked: boolean | 'indeterminate') => setPinnedSlotIndex(checked === true ? slotIdx : null)}
-                  className="border-primary/50 h-3.5 w-3.5"
+                  className="border-primary/50 h-4 w-4"
                 />
-                <span className="text-[10px] font-black text-white/90">
+                <span className="text-[12px] font-black text-white/90">
                   {getEmptySlotLabel(slotIdx)}
                 </span>
               </label>
@@ -213,7 +213,14 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
               {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
                 <TableRow className="bg-black/50 border-y border-primary/25"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.4em]">Reserve Pool</TableCell></TableRow>
               )}
-              {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).sort((a, b) => b.attributes.skill - a.attributes.skill).map(p => renderPlayerRow(p, 'RESERVE'))}
+              {!hideReserves && categorizedPlayers.reserves
+                .filter(p => filter === 'ALL' || p.position === filter)
+                .sort((a, b) => {
+                  const posOrder: Record<Position, number> = { GK: 0, DF: 1, DM: 2, MF: 3, FW: 4 };
+                  const posDiff = (posOrder[a.position] ?? 5) - (posOrder[b.position] ?? 5);
+                  return posDiff !== 0 ? posDiff : b.attributes.skill - a.attributes.skill;
+                })
+                .map(p => renderPlayerRow(p, 'RESERVE'))}
             </TableBody>
           </Table>
         </TooltipProvider>

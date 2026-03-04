@@ -81,7 +81,7 @@ function StartMenu() {
 
   return (
     <div className="start-menu-shell min-h-screen flex items-center justify-center p-4 font-mono">
-      <RetroWindow title="RETRO MANAGER OS v1.0" className="max-w-4xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
+      <RetroWindow title="RETRO MANAGER OS v1.0" className="max-w-5xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 px-8">
           <div className="space-y-8">
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-primary border-b-8 border-primary/20 pb-4 uppercase leading-none italic">Retro Manager</h1>
@@ -133,7 +133,7 @@ function StartMenu() {
       </RetroWindow>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-card border-primary/30">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-card border-primary/30">
           <DialogHeader>
             <DialogTitle className="text-primary font-black uppercase tracking-tight">Database Editor</DialogTitle>
           </DialogHeader>
@@ -222,10 +222,10 @@ function GameContent() {
   const currentWeekFixtures = state.fixtures.filter(f => f.week === state.currentWeek && f.division === userTeam.division).sort((a, b) => a.homeTeamId.localeCompare(b.homeTeamId));
 
   return (
-    <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
+    <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
       {showMatchDayScreen && (
         <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-black/80 border-4 border-primary/40 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="w-full max-w-3xl bg-black/80 border-4 border-primary/40 rounded-2xl shadow-2xl overflow-hidden">
             <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-center">
               <h2 className="text-lg sm:text-xl font-black uppercase tracking-widest">Match day — Week {state.currentWeek}</h2>
               <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-9 font-black uppercase" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
@@ -267,9 +267,9 @@ function GameContent() {
         <Link href="/" className="text-[11px] font-black uppercase text-primary-foreground/80 hover:text-white transition-colors">← Landing</Link>
       </div>
 
-      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 px-4 sm:px-6">
+      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 px-3 sm:px-5">
         {activeTab === 'HUB' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 max-md:px-2">
             <div className="retro-tile flex flex-col bg-black/30 backdrop-blur-xl border-2 border-primary/40 p-4 rounded-2xl shadow-2xl h-fit">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b-2 border-primary/10 pb-3">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -353,9 +353,9 @@ function GameContent() {
           </div>
         )}
         {activeTab === 'WORLD' && (
-          <div className="p-4 space-y-6">
+          <div className="p-4 max-md:px-2 space-y-6">
             <div className="bg-black/70 p-2 border-2 border-primary/20 flex gap-2 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => setViewingDiv(div)} className={cn("flex-1 h-12 text-lg font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
-            <div className="flex gap-3"><Button onClick={() => setWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => setWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => setWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
+            <div className="flex gap-3"><Button onClick={() => setWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => setWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => setWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
             {worldSubView === 'TABLE' && <RetroWindow title={`DIV ${viewingDiv} LEAGUE STANDINGS`} noPadding className="bg-black/60 rounded-2xl shadow-2xl"><LeagueTable teams={state.teams.filter(t => t.division === viewingDiv)} onTeamClick={tId => setViewingTeam(state.teams.find(tx => tx.id === tId) || null)} /></RetroWindow>}
             {worldSubView === 'STATS' && <StatsHub division={viewingDiv} />}
             {worldSubView === 'FIXTURES' && (
@@ -370,11 +370,11 @@ function GameContent() {
             )}
           </div>
         )}
-        {activeTab === 'MARKET' && <div className="p-4 h-full"><RetroWindow title="GLOBAL TRANSFER DATABASE" className="bg-black/20 rounded-2xl shadow-2xl"><PlayerMarket /></RetroWindow></div>}
+        {activeTab === 'MARKET' && <div className="p-4 max-md:px-2 h-full"><RetroWindow title="GLOBAL TRANSFER DATABASE" className="bg-black/20 rounded-2xl shadow-2xl"><PlayerMarket /></RetroWindow></div>}
         {activeTab === 'CLUB' && (
-          <div className="p-4 space-y-6">
+          <div className="p-4 max-md:px-2 space-y-6">
             {clubSubView === 'OFFICE' ? (
-              <div className="grid grid-cols-2 gap-6 auto-rows-fr">
+              <div className="grid grid-cols-2 gap-6 max-md:gap-3 auto-rows-fr">
                 <button onClick={() => setClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Manager Profile</span></button>
                 <button onClick={() => setClubSubView('FINANCE')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-accent/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><DollarSign size={72} className="text-accent group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Financial Hub</span></button>
                 <button onClick={() => setClubSubView('STAFF')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Briefcase size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Staff Management</span></button>
@@ -392,7 +392,7 @@ function GameContent() {
         )}
       </main>
 
-      <nav className="game-nav fixed bottom-0 left-0 right-0 max-w-screen-xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
+      <nav className="game-nav fixed bottom-0 left-0 right-0 max-w-screen-2xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 max-md:h-auto flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
         <TooltipProvider>
           <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('HUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'HUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><LayoutDashboard size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Dashboard</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">HUB & NEWS</TooltipContent></TooltipPortal></Tooltip>
           <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('SQUAD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'SQUAD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Users size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Team</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">SQUAD & TACTICS</TooltipContent></TooltipPortal></Tooltip>

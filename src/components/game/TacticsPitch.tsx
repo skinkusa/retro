@@ -123,7 +123,8 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                 </button>
                 {onPlayerProfile && (
                   <button 
-                    onClick={() => onPlayerProfile(player)}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onPlayerProfile(player); }}
                     className="mt-0.5 p-0.5 bg-black/70 hover:bg-black/90 text-white/80 hover:text-white rounded-full transition-colors"
                   >
                     <UserCircle size={12} />

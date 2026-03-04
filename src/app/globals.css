@@ -35,7 +35,7 @@
   body {
     @apply text-foreground font-mono antialiased overflow-x-hidden leading-tight;
     background-color: hsl(var(--background));
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
@@ -76,6 +76,14 @@
   font-family: 'Courier New', Courier, monospace;
 }
 
+/* Match screen: symmetrical fluid team names (scale with row width, same size both sides) */
+.match-teams-row {
+  container-type: inline-size;
+}
+.match-team-name {
+  font-size: clamp(0.65rem, 2.2cqw, 1.35rem);
+}
+
 /* Phone landscape: keep desktop layout unchanged; only apply when short + landscape */
 @media (orientation: landscape) and (max-height: 500px) {
   .game-app-shell {
@@ -111,5 +119,37 @@
     min-height: 100dvh;
     overflow: auto;
     padding: 0.5rem;
+  }
+}
+
+/* Mobile (narrow viewport): hide top bar, reduce side padding, smaller match team names, compact nav */
+@media (max-width: 768px) {
+  .game-app-shell .game-header {
+    display: none;
+  }
+
+  .game-app-shell main {
+    padding-top: 0.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .match-team-name {
+    font-size: clamp(0.5rem, 2cqw, 1rem);
+  }
+
+  .game-app-shell .game-nav {
+    height: 3.25rem;
+    padding-top: 0.2rem;
+    padding-bottom: max(0.2rem, env(safe-area-inset-bottom, 0));
+  }
+
+  .game-app-shell .game-nav button {
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+    gap: 0.2rem;
+  }
+
+  .game-app-shell .game-nav button span {
+    font-size: 10px;
   }
 }

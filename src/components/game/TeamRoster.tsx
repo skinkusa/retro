@@ -32,7 +32,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
 
   return (
     <Dialog open={!!team} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-3xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
+      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-4xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
         <DialogHeader className="bg-primary p-5 shrink-0 rounded-t-xl">
           <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-xl font-black tracking-tight">
             <div className="flex items-center gap-4">
