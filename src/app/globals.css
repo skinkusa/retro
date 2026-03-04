@@ -75,3 +75,41 @@
 .font-mono {
   font-family: 'Courier New', Courier, monospace;
 }
+
+/* Phone landscape: keep desktop layout unchanged; only apply when short + landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-app-shell {
+    min-height: 100dvh;
+    height: 100dvh;
+  }
+
+  .game-app-shell .game-header {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+  }
+
+  .game-app-shell .game-nav {
+    height: 3.5rem;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .game-app-shell main {
+    padding-bottom: 3.5rem;
+  }
+
+  .game-app-shell .match-day-list {
+    max-height: min(40vh, 220px);
+  }
+
+  .game-app-shell .headlines-scroll {
+    max-height: 25vh;
+  }
+
+  .start-menu-shell {
+    min-height: 100dvh;
+    overflow: auto;
+    padding: 0.5rem;
+  }
+}

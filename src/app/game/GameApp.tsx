@@ -80,7 +80,7 @@ function StartMenu() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-mono">
+    <div className="start-menu-shell min-h-screen flex items-center justify-center p-4 font-mono">
       <RetroWindow title="RETRO MANAGER OS v1.0" className="max-w-4xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 px-8">
           <div className="space-y-8">
@@ -222,7 +222,7 @@ function GameContent() {
   const currentWeekFixtures = state.fixtures.filter(f => f.week === state.currentWeek && f.division === userTeam.division).sort((a, b) => a.homeTeamId.localeCompare(b.homeTeamId));
 
   return (
-    <div className="flex flex-col min-h-screen h-screen max-w-screen-xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
+    <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
       {showMatchDayScreen && (
         <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
           <div className="w-full max-w-2xl bg-black/80 border-4 border-primary/40 rounded-2xl shadow-2xl overflow-hidden">
@@ -230,7 +230,7 @@ function GameContent() {
               <h2 className="text-lg sm:text-xl font-black uppercase tracking-widest">Match day — Week {state.currentWeek}</h2>
               <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-9 font-black uppercase" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
             </div>
-            <div className="p-4 space-y-3 max-h-[60vh] overflow-auto">
+            <div className="match-day-list p-4 space-y-3 max-h-[60vh] overflow-auto">
               {currentWeekFixtures.length === 0 ? (
                 <p className="text-center text-muted-foreground font-black uppercase py-8">No fixtures this week</p>
               ) : (
@@ -259,7 +259,7 @@ function GameContent() {
           </div>
         </div>
       )}
-      <div className="bg-primary text-primary-foreground py-1.5 px-3 sm:py-2 sm:px-6 flex justify-between items-center shrink-0 border-b-2 border-black/40 shadow-lg z-50">
+      <div className="game-header bg-primary text-primary-foreground py-1.5 px-3 sm:py-2 sm:px-6 flex justify-between items-center shrink-0 border-b-2 border-black/40 shadow-lg z-50">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <span className="text-base sm:text-lg font-black tracking-tighter uppercase leading-none italic drop-shadow-md truncate">Retro Manager</span>
           <span className="text-[10px] sm:text-[11px] opacity-90 font-black whitespace-nowrap">STATION OS v1.0</span>
@@ -315,7 +315,7 @@ function GameContent() {
             </div>
             <div className="retro-tile col-span-1 md:col-span-2 bg-black/30 border-2 border-primary/40 p-4 rounded-2xl shadow-2xl">
               <h3 className="text-[14px] font-black text-primary uppercase mb-3 border-b-2 border-primary/10 pb-1.5">Weekly Headlines</h3>
-              <div className="space-y-3 max-h-[220px] overflow-auto custom-scrollbar pr-2">
+              <div className="headlines-scroll space-y-3 max-h-[220px] overflow-auto custom-scrollbar pr-2">
                 {currentWeekNews.length > 0 ? currentWeekNews.map(m => {
                 const bid = m.bidId ? state.transferMarket.incomingBids.find(b => b.id === m.bidId) : null;
                 const offerPlayer = bid ? state.players.find(p => p.id === bid.playerId) : null;
@@ -392,7 +392,7 @@ function GameContent() {
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 max-w-screen-xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
+      <nav className="game-nav fixed bottom-0 left-0 right-0 max-w-screen-xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
         <TooltipProvider>
           <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('HUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'HUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><LayoutDashboard size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Dashboard</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">HUB & NEWS</TooltipContent></TooltipPortal></Tooltip>
           <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('SQUAD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'SQUAD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Users size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Team</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">SQUAD & TACTICS</TooltipContent></TooltipPortal></Tooltip>

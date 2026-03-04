@@ -12,6 +12,7 @@ This Next.js 15.5.9 project is production-ready for Vercel. Follow these steps t
 
 3. **Configure environment & defaults**
    * No special environment variables are required—Retro Manager stores its career save entirely in the visitor’s browser (see `localStorage` keys in `/src/lib/store.tsx`).
+   * **Optional – visitor count:** To show a “X visits” counter in the bottom-right corner, create an [Upstash Redis](https://upstash.com) database, then in Vercel add: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Without these, the counter is hidden.
    * If you change the app’s port or add API routes in the future, make sure the Vercel project is still using the default settings (no custom `vercel.json` is needed yet).
 
 4. **Enable preview deployments**
