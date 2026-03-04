@@ -35,12 +35,6 @@
   body {
     @apply text-foreground font-mono antialiased overflow-x-hidden leading-tight;
     background-color: hsl(var(--background));
-    background-image: linear-gradient(rgba(26, 30, 34, 0.3), rgba(26, 30, 34, 0.3)), url('/retromanager.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    image-rendering: pixelated;
     font-size: 14px;
   }
 }
