@@ -86,14 +86,14 @@ export function getFormationSlots(formation: string): TacticalSlot[] {
   }
 }
 
-export function getTacticalAssignments(formation: string, lineupPlayers: Player[]): Array<{ slot: TacticalSlot; player: Player | null }> {
+export function getTacticalAssignments(formation: string, lineupPlayers: (Player | null)[]): Array<{ slot: TacticalSlot; player: Player | null }> {
   const slots = getFormationSlots(formation);
   // In manual mode, we respect the index of the lineup array.
-  // The first 11 slots match the first 11 players in the team's lineup.
+  // The first 11 slots match the first 11 players in the team's lineup; null = vacant slot.
   const assignments: Array<{ slot: TacticalSlot; player: Player | null }> = [];
 
   slots.forEach((slot, i) => {
-    assignments.push({ slot, player: lineupPlayers[i] || null });
+    assignments.push({ slot, player: lineupPlayers[i] ?? null });
   });
 
   return assignments;

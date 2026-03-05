@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heart, DollarSign, Check, X, FileSearch, TrendingUp, TrendingDown, Clock, UserCircle, Activity, Briefcase, History, Megaphone } from 'lucide-react';
-import { cn, formatMoney } from '@/lib/utils';
+import { cn, formatMoney, getNaturalPositionLabel } from '@/lib/utils';
 import { useMemo, useState, useEffect } from 'react';
 
 interface PlayerProfileProps {
@@ -85,17 +85,6 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
     }
   };
 
-  const getPositionLabel = (pos: Position) => {
-    switch(pos) {
-      case 'GK': return 'GOALKEEPER';
-      case 'DF': return 'DEFENDER';
-      case 'MF': return 'MIDFIELDER';
-      case 'FW': return 'FORWARD';
-      case 'DM': return 'DEF/MID HYBRID';
-      default: return pos;
-    }
-  };
-
   const renderAttribute = (label: string, value: number, tooltip: string) => (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -141,11 +130,11 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
 
   return (
     <Dialog open={!!player} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-3xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
-        <DialogHeader className="bg-primary p-5 shrink-0 rounded-t-xl">
-          <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-2xl font-black tracking-tight">
-            <div className="flex items-center gap-4">
-               <span>{player.name}</span>
+      <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-3xl max-md:max-w-[96vw] max-md:max-h-[95dvh] max-h-[90vh] flex flex-col font-mono rounded-2xl max-md:rounded-lg">
+        <DialogHeader className="bg-primary p-5 max-md:p-2 shrink-0 rounded-t-xl">
+          <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-2xl max-md:text-base font-black tracking-tight">
+            <div className="flex items-center gap-4 max-md:gap-2">
+               <span className="truncate max-md:max-w-[120px]">{player.name}</span>
                <TooltipProvider>
                  <Tooltip>
                   <TooltipTrigger asChild>
@@ -169,40 +158,40 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
         </DialogHeader>
         
         <Tabs defaultValue={defaultTab} className="flex flex-col flex-1 min-h-0">
-          <TabsList className="bg-black/40 border-b border-primary/20 h-14 p-1 gap-1 rounded-none shrink-0">
-            <TabsTrigger value="overview" className="flex-1 uppercase font-black tracking-widest text-[13px] rounded-lg data-[state=active]:bg-primary">
-              <UserCircle size={16} className="mr-2" /> Overview
+          <TabsList className="bg-black/40 border-b border-primary/20 h-14 max-md:h-10 p-1 gap-1 rounded-none shrink-0">
+            <TabsTrigger value="overview" className="flex-1 uppercase font-black tracking-widest text-[13px] max-md:text-[10px] rounded-lg data-[state=active]:bg-primary py-2 max-md:py-1">
+              <UserCircle size={16} className="mr-2 max-md:mr-1 max-md:w-3 max-md:h-3" /> Overview
             </TabsTrigger>
-            <TabsTrigger value="attributes" className="flex-1 uppercase font-black tracking-widest text-[13px] rounded-lg data-[state=active]:bg-primary">
-              <Activity size={16} className="mr-2" /> Attributes
+            <TabsTrigger value="attributes" className="flex-1 uppercase font-black tracking-widest text-[13px] max-md:text-[10px] rounded-lg data-[state=active]:bg-primary py-2 max-md:py-1">
+              <Activity size={16} className="mr-2 max-md:mr-1 max-md:w-3 max-md:h-3" /> Attributes
             </TabsTrigger>
-            <TabsTrigger value="contract" className="flex-1 uppercase font-black tracking-widest text-[13px] rounded-lg data-[state=active]:bg-primary">
-              <Briefcase size={16} className="mr-2" /> Contract
+            <TabsTrigger value="contract" className="flex-1 uppercase font-black tracking-widest text-[13px] max-md:text-[10px] rounded-lg data-[state=active]:bg-primary py-2 max-md:py-1">
+              <Briefcase size={16} className="mr-2 max-md:mr-1 max-md:w-3 max-md:h-3" /> Contract
             </TabsTrigger>
-            <TabsTrigger value="report" className="flex-1 uppercase font-black tracking-widest text-[13px] rounded-lg data-[state=active]:bg-primary">
-              <FileSearch size={16} className="mr-2" /> Report
+            <TabsTrigger value="report" className="flex-1 uppercase font-black tracking-widest text-[13px] max-md:text-[10px] rounded-lg data-[state=active]:bg-primary py-2 max-md:py-1">
+              <FileSearch size={16} className="mr-2 max-md:mr-1 max-md:w-3 max-md:h-3" /> Report
             </TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1">
-            <div className="p-6">
-              <TabsContent value="overview" className="mt-0 space-y-6">
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div className="bg-black/60 p-4 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] text-muted-foreground uppercase font-black mb-1">Age</div>
-                    <div className="text-3xl font-black text-white">{player.age}</div>
+            <div className="p-6 max-md:p-3">
+              <TabsContent value="overview" className="mt-0 space-y-6 max-md:space-y-3">
+                <div className="grid grid-cols-4 gap-4 max-md:gap-2 text-center">
+                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
+                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Age</div>
+                    <div className="text-3xl max-md:text-xl font-black text-white">{player.age}</div>
                   </div>
-                  <div className="bg-black/60 p-4 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] text-muted-foreground uppercase font-black mb-1">Position</div>
+                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
+                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Position</div>
                     <div className="text-[20px] font-black text-cyan leading-tight">{player.position}</div>
                     <div className="text-[10px] opacity-60 font-black">({player.side})</div>
                   </div>
-                  <div className="bg-black/60 p-4 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] text-muted-foreground uppercase font-black mb-1">Value</div>
+                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
+                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Value</div>
                     <div className="text-[20px] font-black text-accent">{formatMoney(player.value)}</div>
                   </div>
-                  <div className="bg-black/60 p-4 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] text-muted-foreground uppercase font-black mb-1">Morale</div>
+                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
+                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Morale</div>
                     <div className={cn("text-[24px] font-black", player.morale > 70 ? "text-green-500" : "text-yellow-500")}>
                       {player.morale}%
                     </div>
@@ -418,7 +407,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                     <div className="text-[13px] text-primary font-black uppercase tracking-widest border-b border-primary/20 w-full text-center pb-2">Scout Conclusion</div>
                     <div className="text-[18px] font-black text-white uppercase italic text-center leading-snug">{getPotentialHint()}</div>
                     <div className="bg-black/40 px-4 py-1.5 text-[12px] font-black text-accent uppercase tracking-tighter border border-accent/20 rounded-md">
-                      Best Role: {getPositionLabel(player.position)}
+                      Best Role: {getNaturalPositionLabel(player.position)}
                     </div>
                   </div>
 
@@ -489,7 +478,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
             </div>
           </ScrollArea>
           
-          <div className="p-4 bg-muted/20 border-t border-primary/20 shrink-0">
+          <div className="p-4 max-md:p-2 bg-muted/20 border-t border-primary/20 shrink-0">
             <Button 
               onClick={onClose}
               className="w-full bg-primary text-primary-foreground font-black retro-button h-14 uppercase text-[16px] tracking-[0.4em] shadow-xl rounded-xl"

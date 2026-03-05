@@ -14,14 +14,14 @@ export function TeamRecords() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="retro-tile flex items-start gap-3 h-full min-h-[80px] cursor-help">
-            <div className={`p-2 bg-muted border border-primary/10 ${color}`}>
-              <Icon size={18} />
+          <div className="retro-tile flex items-start gap-3 max-md:gap-2 h-full min-h-[80px] max-md:min-h-[60px] cursor-help">
+            <div className={`p-2 max-md:p-1.5 bg-muted border border-primary/10 ${color}`}>
+              <Icon size={18} className="max-md:w-4 max-md:h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[8px] text-muted-foreground uppercase font-bold">{title}</div>
-              <div className="text-[10px] font-bold truncate uppercase">{value || 'NO RECORD'}</div>
-              <div className="text-[7px] text-muted-foreground italic truncate uppercase">{sub}</div>
+              <div className="text-[8px] max-md:text-xs text-white uppercase font-bold">{title}</div>
+              <div className="text-[10px] max-md:text-sm font-bold truncate uppercase">{value || 'NO RECORD'}</div>
+              <div className="text-[7px] max-md:text-xs text-white italic truncate uppercase">{sub}</div>
             </div>
           </div>
         </TooltipTrigger>
@@ -31,9 +31,9 @@ export function TeamRecords() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-md:space-y-2">
       <RetroWindow title="CLUB PERFORMANCE RECORDS">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-fr">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-md:gap-2 auto-rows-fr">
           <RecordTile 
             title="Biggest Victory" 
             value={records.biggestWin?.score} 
@@ -70,12 +70,12 @@ export function TeamRecords() {
       </RetroWindow>
 
       <RetroWindow title="MANAGER LEGACY">
-        <div className="space-y-2 py-2">
+        <div className="space-y-2 max-md:space-y-1 py-2 max-md:py-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-muted-foreground font-bold">Total Games Managed</span>
+                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
+                   <span className="text-white font-bold">Total Games Managed</span>
                    <span className="font-bold text-cyan">{state.manager?.totalGames}</span>
                 </div>
               </TooltipTrigger>
@@ -84,8 +84,8 @@ export function TeamRecords() {
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-muted-foreground font-bold">Career Win Rate</span>
+                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
+                   <span className="text-white font-bold">Career Win Rate</span>
                    <span className="font-bold text-accent">{state.manager?.winPercentage.toFixed(1)}%</span>
                 </div>
               </TooltipTrigger>
@@ -94,8 +94,8 @@ export function TeamRecords() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-muted-foreground font-bold">Seasons Completed</span>
+                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
+                   <span className="text-white font-bold">Seasons Completed</span>
                    <span className="font-bold">{state.manager?.seasonsManaged}</span>
                 </div>
               </TooltipTrigger>

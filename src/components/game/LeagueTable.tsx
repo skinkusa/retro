@@ -16,7 +16,7 @@ export function LeagueTable({ teams, onTeamClick }: LeagueTableProps) {
     return (
       <Tooltip key={`form-${index}-${result}`}>
         <TooltipTrigger asChild>
-          <span className={`${colors[result]} text-[11px] px-2 py-1 rounded-sm text-white font-black mr-1 cursor-help shadow-sm`}>{result}</span>
+          <span className={`${colors[result]} text-base max-md:text-xs px-2 max-md:px-1 py-1 max-md:py-0.5 rounded-sm text-white font-black mr-1 max-md:mr-0.5 cursor-help shadow-sm`}>{result}</span>
         </TooltipTrigger>
         <TooltipPortal><TooltipContent className="font-black">MATCH RESULT: {result === 'W' ? 'WIN' : result === 'D' ? 'DRAW' : 'LOSS'}</TooltipContent></TooltipPortal>
       </Tooltip>
@@ -34,47 +34,47 @@ export function LeagueTable({ teams, onTeamClick }: LeagueTableProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-md:space-y-1 league-table-root max-md:[&_th]:leading-none max-md:[&_td]:leading-none max-md:[&_thead_th]:h-auto max-md:[&_thead_th]:py-1 max-md:[&_thead_tr]:border-b-2 max-md:[&_tbody_tr:first-child_td]:pt-0.5">
       <TooltipProvider>
         <Table>
           <TableHeader>
             <TableRow className="border-b-4 border-primary/40 hover:bg-transparent bg-primary/25">
-              <TableHead className="w-[60px] text-[14px] uppercase font-black py-5 text-center text-white tracking-wide">#</TableHead>
-              <TableHead className="text-[14px] uppercase font-black py-5 text-white tracking-wide">Club Identity</TableHead>
+              <TableHead className="w-[60px] max-md:w-6 text-[14px] max-md:text-[9px] uppercase font-black py-5 max-md:py-1 text-center text-white tracking-wide">#</TableHead>
+              <TableHead className="text-[14px] max-md:text-[9px] uppercase font-black py-5 max-md:py-1 text-white tracking-wide">Club</TableHead>
               {['P', 'W', 'D', 'L', 'GD'].map(h => (
                 <Tooltip key={h}>
-                  <TooltipTrigger asChild><TableHead className="text-center text-[14px] uppercase font-black py-5 cursor-help text-white tracking-wide">{h}</TableHead></TooltipTrigger>
+                  <TooltipTrigger asChild><TableHead className="text-center text-[14px] max-md:text-[9px] uppercase font-black py-5 max-md:py-1 cursor-help text-white tracking-wide">{h}</TableHead></TooltipTrigger>
                   <TooltipPortal><TooltipContent className="font-black">{h === 'P' ? 'PLAYED' : h === 'W' ? 'WINS' : h === 'D' ? 'DRAWS' : h === 'L' ? 'LOSSES' : 'GOAL DIFF'}</TooltipContent></TooltipPortal>
                 </Tooltip>
               ))}
               <Tooltip>
-                <TooltipTrigger asChild><TableHead className="text-center font-black text-[15px] uppercase text-cyan py-5 cursor-help tracking-wide">Pts</TableHead></TooltipTrigger>
+                <TooltipTrigger asChild><TableHead className="text-center font-black text-[15px] max-md:text-[9px] uppercase text-cyan py-5 max-md:py-1 cursor-help tracking-wide">Pts</TableHead></TooltipTrigger>
                 <TooltipPortal><TooltipContent className="font-black">LEAGUE POINTS</TooltipContent></TooltipPortal>
               </Tooltip>
-              <TableHead className="text-right text-[14px] uppercase font-black py-5 pr-6 text-white tracking-wide">Recent Form</TableHead>
+              <TableHead className="text-right text-[14px] max-md:text-[9px] uppercase font-black py-5 max-md:py-1 pr-6 max-md:pr-0.5 text-white tracking-wide">Recent Form</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {teams.map((t, i) => (
               <TableRow key={t.id} onClick={() => onTeamClick?.(t.id)} className={cn("hover:bg-primary/15 cursor-pointer border-b-2 border-primary/10 transition-colors", t.isUserTeam ? "bg-primary/20" : "", getQualificationStyle(t))}>
-                <TableCell className="font-black text-xl py-5 text-center tabular-nums text-white/60">{i + 1}</TableCell>
-                <TableCell className="text-lg font-black py-5 flex items-center gap-4">
-                  <div className="w-5 h-5 rounded-full shadow-2xl border-2 border-white/30" style={{ backgroundColor: t.color }} />
-                  <span className="truncate max-w-[220px] tracking-tighter uppercase italic">{t.name}</span>
+                <TableCell className="font-black text-base max-md:text-xs py-5 max-md:py-0.5 text-center tabular-nums text-white/60">{i + 1}</TableCell>
+                <TableCell className="text-base max-md:text-xs font-black py-5 max-md:py-0.5 flex items-center gap-4 max-md:gap-0.5">
+                  <div className="w-5 h-5 max-md:w-2.5 max-md:h-2.5 rounded-full shadow-2xl border-2 border-white/30 shrink-0" style={{ backgroundColor: t.color }} />
+                  <span className="truncate max-w-[220px] max-md:max-w-[70px] tracking-tighter uppercase italic">{t.name}</span>
                 </TableCell>
-                <TableCell className="text-center text-lg font-black py-5 tabular-nums">{t.played}</TableCell>
-                <TableCell className="text-center text-lg font-black py-5 tabular-nums">{t.won}</TableCell>
-                <TableCell className="text-center text-lg font-black py-5 tabular-nums">{t.drawn}</TableCell>
-                <TableCell className="text-center text-lg font-black py-5 tabular-nums">{t.lost}</TableCell>
-                <TableCell className="text-center text-lg font-black py-5 tabular-nums text-white/50">{(t.goalsFor - t.goalsAgainst)}</TableCell>
-                <TableCell className="text-center font-black text-accent text-2xl py-5 tabular-nums">{t.points}</TableCell>
-                <TableCell className="text-right py-5 pr-6"><div className="flex justify-end">{t.playedHistory.map((h, idx) => getFormBubble(h, idx))}</div></TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black py-5 max-md:py-0.5 tabular-nums">{t.played}</TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black py-5 max-md:py-0.5 tabular-nums">{t.won}</TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black py-5 max-md:py-0.5 tabular-nums">{t.drawn}</TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black py-5 max-md:py-0.5 tabular-nums">{t.lost}</TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black py-5 max-md:py-0.5 tabular-nums text-white/50">{(t.goalsFor - t.goalsAgainst)}</TableCell>
+                <TableCell className="text-center text-base max-md:text-xs font-black text-accent py-5 max-md:py-0.5 tabular-nums">{t.points}</TableCell>
+                <TableCell className="text-right py-5 max-md:py-0.5 pr-6 max-md:pr-0.5"><div className="flex justify-end">{t.playedHistory.map((h, idx) => getFormBubble(h, idx))}</div></TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TooltipProvider>
-      <div className="flex flex-wrap gap-8 px-6 py-4 text-[12px] uppercase font-black text-muted-foreground border-t-2 border-primary/20 bg-black/70 rounded-b-2xl">
+      <div className="flex flex-wrap gap-8 max-md:gap-1 px-6 max-md:px-1 py-4 max-md:py-1 text-[12px] max-md:text-[8px] uppercase font-black text-muted-foreground border-t-2 border-primary/20 bg-black/70 rounded-b-2xl">
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-cyan shadow-[0_0_10px_rgba(0,255,255,0.5)]" /> Champions Cup</div>
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-blue-500" /> UEFA Cup</div>
         <div className="flex items-center gap-2"><div className="w-5 h-2 bg-green-500" /> Promotion</div>

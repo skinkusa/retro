@@ -80,95 +80,95 @@ function StartMenu() {
   };
 
   return (
-    <div className="start-menu-shell min-h-screen flex items-center justify-center p-4 font-mono">
-      <RetroWindow title="RETRO MANAGER OS v1.0" titleClassName="text-[8px]" className="max-w-5xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6 px-6 md:py-10 md:px-8">
-          <div className="space-y-6 max-md:space-y-4">
-            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter text-primary border-b-8 border-primary/20 pb-2 md:pb-4 uppercase leading-none italic">Retro Manager</h1>
-            <div className="space-y-6 max-md:space-y-4">
+    <div className="start-menu-shell min-h-screen flex items-center justify-center p-4 max-md:px-0.5 max-md:py-1.5 font-mono">
+      <RetroWindow title="RETRO MANAGER OS v1.0" titleClassName="text-[8px]" contentClassName="p-3 md:p-3 max-md:px-1 max-md:py-1.5" className="max-w-5xl w-full max-md:max-w-[99%] bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
+        <div className="start-menu-grid grid grid-cols-1 md:grid-cols-2 gap-8 max-md:gap-2 py-6 px-6 max-md:py-2 max-md:px-1 md:py-10 md:px-8">
+          <div className="space-y-6 max-md:space-y-1">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter text-primary border-b-8 border-primary/20 pb-2 md:pb-4 uppercase leading-none italic max-md:text-2xl max-md:pb-1">Retro Manager</h1>
+            <div className="space-y-6 max-md:space-y-2">
               {hasSave && (
-                <div className="p-6 bg-accent/10 border-2 border-accent space-y-4 shadow-[8px_8px_0px_0px_rgba(38,217,117,0.3)] rounded-2xl">
-                  <h2 className="text-[18px] font-black text-accent uppercase tracking-widest text-center">Active Career Detected</h2>
-                  <Button onClick={loadGame} className="w-full h-20 bg-accent text-accent-foreground font-black retro-button flex items-center justify-center gap-4 hover:opacity-90 transition-all text-2xl rounded-xl shadow-lg"><FileUp size={32} /> CONTINUE CAREER</Button>
+                <div className="p-6 bg-accent/10 border-2 border-accent space-y-4 shadow-[8px_8px_0px_0px_rgba(38,217,117,0.3)] rounded-2xl max-md:p-3 max-md:space-y-2">
+                  <h2 className="text-[18px] font-black text-accent uppercase tracking-widest text-center max-md:text-sm">Active Career Detected</h2>
+                  <Button onClick={loadGame} className="w-full h-20 bg-accent text-accent-foreground font-black retro-button flex items-center justify-center gap-4 hover:opacity-90 transition-all text-2xl rounded-xl shadow-lg max-md:h-12 max-md:text-base"><FileUp size={32} /> CONTINUE CAREER</Button>
                 </div>
               )}
-              <div className="space-y-4">
-                <Button onClick={() => setShowSettings(true)} variant="outline" className="w-full h-14 border-primary/40 text-primary font-black retro-button flex items-center justify-center gap-2 hover:bg-primary/10 bg-black/20 text-xl rounded-xl uppercase"><Settings size={22} /> Database Editor</Button>
+              <div className="space-y-4 max-md:space-y-1">
+                <Button onClick={() => setShowSettings(true)} variant="outline" className="w-full h-14 border-primary/40 text-primary font-black retro-button flex items-center justify-center gap-2 hover:bg-primary/10 bg-black/20 text-xl rounded-xl uppercase max-md:h-10 max-md:text-sm"><Settings size={22} className="max-md:w-4 max-md:h-4" /> Database Editor</Button>
               </div>
-              <div className="pt-4 md:pt-8 border-t-4 border-primary/10 space-y-6 max-md:space-y-4">
+              <div className="pt-4 max-md:pt-1 md:pt-8 border-t-4 border-primary/10 space-y-6 max-md:space-y-1">
                 <div>
-                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-black/40 border-primary/30 h-12 md:h-16 text-xl md:text-3xl font-black rounded-xl uppercase px-4 md:px-6" placeholder="ENTER MANAGER NAME..." />
+                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-black/40 border-primary/30 h-10 max-md:h-8 md:h-16 text-base max-md:text-xs md:text-3xl font-black rounded-xl uppercase px-3 max-md:px-2 md:px-6 w-full text-left" placeholder="ENTER MANAGER NAME..." />
                 </div>
                 <div>
-                  <label className="text-[16px] uppercase text-muted-foreground block font-black tracking-widest mb-2">Management Philosophy</label>
+                  <label className="text-[16px] max-md:text-xs uppercase text-muted-foreground block font-black tracking-widest mb-2 max-md:mb-1">Management Philosophy</label>
                   <Select value={personality} onValueChange={(v: any) => setPersonality(v)}>
-                    <SelectTrigger className="bg-black/40 border-primary/30 h-16 text-xl font-black rounded-xl uppercase px-6"><SelectValue placeholder="Select Philosophy" /></SelectTrigger>
+                    <SelectTrigger className="bg-black/40 border-primary/30 h-16 max-md:h-10 text-xl max-md:text-sm font-black rounded-xl uppercase px-6 max-md:px-3 w-full justify-start"><SelectValue placeholder="Select Philosophy" /></SelectTrigger>
                     <SelectContent><SelectItem value="Analyst">THE ANALYST (+TACTICS)</SelectItem><SelectItem value="Motivator">THE MOTIVATOR (+MORALE)</SelectItem><SelectItem value="Economist">THE ECONOMIST (-WAGES)</SelectItem><SelectItem value="Maverick">THE MAVERICK (GOALS!)</SelectItem><SelectItem value="Celebrity">THE CELEBRITY (+REP)</SelectItem></SelectContent>
                   </Select>
-                  <div className="mt-4 p-5 bg-primary/10 border-2 border-primary/20 rounded-2xl shadow-inner"><p className="text-[18px] text-primary leading-tight font-black italic">* {getPhilosophyDescription(personality)}</p></div>
+                  <div className="mt-4 p-5 bg-primary/10 border-2 border-primary/20 rounded-2xl shadow-inner max-md:mt-2 max-md:p-2 max-md:rounded-lg"><p className="text-[18px] max-md:text-xs text-primary leading-tight font-black italic">* {getPhilosophyDescription(personality)}</p></div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="space-y-6">
-            <div className="flex justify-between items-end border-b-4 border-primary/10 pb-3">
-              <h2 className="text-xl font-black uppercase text-primary tracking-widest">Select Club</h2>
+          <div className="space-y-6 max-md:space-y-2">
+            <div className="flex justify-between items-end border-b-4 border-primary/10 pb-3 max-md:pb-1">
+              <h2 className="text-xl max-md:text-sm font-black uppercase text-primary tracking-widest">Select Club</h2>
               <Select value={selectedDiv.toString()} onValueChange={(v) => { setSelectedDiv(parseInt(v)); setSelectedTeam(null); }}>
-                <SelectTrigger className="h-12 w-48 text-[18px] font-black bg-black/40 border-primary/30 rounded-xl"><SelectValue placeholder="Division" /></SelectTrigger>
+                <SelectTrigger className="h-12 max-md:h-9 w-48 max-md:w-28 text-[18px] max-md:text-xs font-black bg-black/40 border-primary/30 rounded-xl"><SelectValue placeholder="Division" /></SelectTrigger>
                 <SelectContent><SelectItem value="1">DIVISION 1</SelectItem><SelectItem value="2">DIVISION 2</SelectItem><SelectItem value="3">DIVISION 3</SelectItem><SelectItem value="4">DIVISION 4</SelectItem></SelectContent>
               </Select>
             </div>
-            <div className="max-h-[450px] overflow-auto border-4 border-primary/20 p-2 space-y-0.5 md:space-y-1 bg-black/40 backdrop-blur-sm rounded-2xl shadow-inner custom-scrollbar">
+            <div className="max-h-[450px] max-md:max-h-[35vh] overflow-auto border-4 border-primary/20 p-2 max-md:p-0.5 space-y-0 md:space-y-1 bg-black/40 backdrop-blur-sm rounded-2xl shadow-inner custom-scrollbar">
               {state.teams.filter(t => t.division === selectedDiv).map(t => (
-                <button key={t.id} onClick={() => setSelectedTeam(t.id)} className={`w-full text-left px-3 md:px-6 py-2 md:py-4 text-base md:text-xl border-4 border-transparent hover:bg-primary/20 transition-all flex justify-between items-center rounded-xl shadow-sm ${selectedTeam === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-black/20'}`}>
-                  <span className="font-black uppercase tracking-tight">{t.name}</span>
-                  <span className="opacity-60 text-[14px] md:text-[16px] font-mono font-black">REP: {t.reputation}</span>
+                <button key={t.id} onClick={() => setSelectedTeam(t.id)} className={`w-full text-left px-3 md:px-6 py-1 max-md:py-0.5 md:py-4 text-base max-md:text-sm md:text-xl border-4 border-transparent hover:bg-primary/20 transition-all flex justify-between items-center rounded-lg max-md:rounded shadow-sm ${selectedTeam === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-black/20'}`}>
+                  <span className="font-black uppercase tracking-tight truncate min-w-0">{t.name}</span>
+                  <span className="opacity-60 text-[14px] max-md:text-[10px] md:text-[16px] font-mono font-black shrink-0">REP: {t.reputation}</span>
                 </button>
               ))}
             </div>
-            <Button disabled={!name || !selectedTeam} onClick={() => startGame(name, selectedTeam!, personality)} className="w-full h-20 bg-primary text-primary-foreground font-black retro-button mt-6 uppercase tracking-[0.3em] text-3xl shadow-2xl hover:scale-[1.03] transition-transform rounded-2xl">INITIALIZE CAREER</Button>
+            <Button disabled={!name || !selectedTeam} onClick={() => startGame(name, selectedTeam!, personality)} className="w-full h-20 max-md:h-10 max-md:mt-1 max-md:text-sm bg-primary text-primary-foreground font-black retro-button mt-6 uppercase tracking-[0.3em] text-3xl max-md:text-base shadow-2xl hover:scale-[1.03] transition-transform rounded-2xl">INITIALIZE CAREER</Button>
           </div>
         </div>
       </RetroWindow>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-card border-primary/30">
-          <DialogHeader>
-            <DialogTitle className="text-primary font-black uppercase tracking-tight">Database Editor</DialogTitle>
+        <DialogContent className="max-w-3xl max-md:max-w-[98vw] max-md:max-h-[95dvh] max-md:p-2 max-md:px-2 max-md:py-1.5 max-h-[90vh] overflow-hidden flex flex-col bg-card border-primary/30">
+          <DialogHeader className="max-md:pb-0.5 shrink-0">
+            <DialogTitle className="text-primary font-black uppercase tracking-tight max-md:text-xs">Database Editor</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 overflow-auto flex-1 pr-2">
-            <div className="flex items-end gap-4">
-              <div className="flex-1 space-y-2">
-                <label className="text-xs font-bold text-primary uppercase">Starting season year (for new games)</label>
-                <Input type="number" value={newSeason} onChange={(e) => setNewSeason(e.target.value)} className="bg-black/40 border-primary/20 h-10 font-mono" />
+          <div className="space-y-4 max-md:space-y-1.5 overflow-auto flex-1 pr-1 max-md:pr-0.5 min-h-0">
+            <div className="flex items-end gap-4 max-md:gap-2">
+              <div className="flex-1 min-w-0 space-y-1 max-md:space-y-0.5">
+                <label className="text-xs max-md:text-[10px] font-bold text-primary uppercase">Starting season year (for new games)</label>
+                <Input type="number" value={newSeason} onChange={(e) => setNewSeason(e.target.value)} className="bg-black/40 border-primary/20 h-10 max-md:h-8 max-md:text-sm font-mono" />
               </div>
-              <Button onClick={handleSeasonChange} className="retro-button bg-accent text-accent-foreground h-10 px-6 font-bold">Update</Button>
+              <Button onClick={handleSeasonChange} className="retro-button bg-accent text-accent-foreground h-10 max-md:h-8 px-6 max-md:px-3 font-bold max-md:text-xs shrink-0">Update</Button>
             </div>
             <div>
-              <h4 className="text-xs font-bold text-primary uppercase mb-2">Team names (for new games)</h4>
-              <div className="max-h-[300px] overflow-auto border border-primary/20 rounded-lg">
+              <h4 className="text-xs max-md:text-[10px] font-bold text-primary uppercase mb-2 max-md:mb-1">Team names (for new games)</h4>
+              <div className="max-h-[300px] max-md:max-h-[45vh] overflow-auto border border-primary/20 rounded-lg">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-primary/20 border-b-2 border-primary/40">
-                      <TableHead className="text-[13px] uppercase font-black py-3 text-white tracking-wide">Team</TableHead>
-                      <TableHead className="text-right text-[13px] uppercase font-black py-3 text-white tracking-wide">Action</TableHead>
+                      <TableHead className="text-[13px] max-md:text-[10px] uppercase font-black py-3 max-md:py-1 text-white tracking-wide">Team</TableHead>
+                      <TableHead className="text-right text-[13px] max-md:text-[10px] uppercase font-black py-3 max-md:py-1 text-white tracking-wide">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {state.teams.map((t) => (
                       <TableRow key={t.id} className="border-primary/10">
-                        <TableCell className="py-2">
+                        <TableCell className="py-2 max-md:py-0.5 max-md:text-xs">
                           {editingTeamId === t.id ? (
-                            <Input value={tempTeamName} onChange={(e) => setTempTeamName(e.target.value)} className="h-8 text-sm bg-black/40" autoFocus onKeyDown={(e) => e.key === 'Enter' && saveTeamName()} />
+                            <Input value={tempTeamName} onChange={(e) => setTempTeamName(e.target.value)} className="h-8 max-md:h-7 max-md:text-xs bg-black/40" autoFocus onKeyDown={(e) => e.key === 'Enter' && saveTeamName()} />
                           ) : (
-                            <span className="font-bold text-sm uppercase">{t.name}</span>
+                            <span className="font-bold text-sm max-md:text-xs uppercase truncate block">{t.name}</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right py-2">
+                        <TableCell className="text-right py-2 max-md:py-0.5">
                           {editingTeamId === t.id ? (
-                            <Button onClick={saveTeamName} size="sm" className="h-8 text-xs bg-accent text-accent-foreground">Save</Button>
+                            <Button onClick={saveTeamName} size="sm" className="h-8 max-md:h-7 text-xs bg-accent text-accent-foreground">Save</Button>
                           ) : (
-                            <Button onClick={() => startEditingTeam(t.id, t.name)} variant="outline" size="sm" className="h-8 text-xs">Edit</Button>
+                            <Button onClick={() => startEditingTeam(t.id, t.name)} variant="outline" size="sm" className="h-8 max-md:h-7 text-xs">Edit</Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -238,7 +238,7 @@ function GameContent() {
   const userTeam = state.teams.find(t => t.id === state.userTeamId)!;
   const userPlayers = state.players.filter(p => p.clubId === state.userTeamId);
   const nextFixture = state.fixtures.find(f => f.week === state.currentWeek && (f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id));
-  const isLineupValid = userTeam.lineup.length >= 11;
+  const isLineupValid = userTeam.lineup.filter((id): id is string => id != null && id !== '').length >= 11;
   const matchFixture = state.currentMatchFixtureId ? state.fixtures.find(f => f.id === state.currentMatchFixtureId) : null;
 
   if (matchFixture) {
@@ -254,15 +254,15 @@ function GameContent() {
   return (
     <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
       {showMatchDayScreen && (
-        <div className="match-day-overlay fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-stretch p-0 animate-in fade-in duration-200">
-          <div className="match-day-modal w-full max-w-3xl max-h-[100vh] flex flex-col bg-black/80 border-2 sm:border-4 border-primary/40 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden mx-auto sm:my-auto">
-            <div className="bg-primary text-primary-foreground px-2 sm:px-4 py-1 sm:py-0.5 flex justify-between items-center shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem]">
-              <h2 className="text-base sm:text-xl font-black uppercase tracking-widest truncate">Match day — Week {state.currentWeek}</h2>
-              <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-7 sm:h-9 font-black uppercase shrink-0 text-xs sm:text-sm px-2 sm:px-3" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
+        <div className="match-day-overlay fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-stretch justify-stretch p-0 animate-in fade-in duration-200 min-h-[100dvh]">
+          <div className="match-day-modal w-full max-w-3xl max-md:max-w-none max-md:w-full max-md:min-h-[100dvh] max-md:h-full max-h-[100vh] flex flex-col bg-black/80 border-2 sm:border-4 border-primary/40 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden mx-auto sm:my-auto max-md:mx-0 max-md:my-0 max-md:flex-1">
+            <div className="match-day-back-row bg-primary text-primary-foreground px-2 max-md:px-1.5 sm:px-4 py-1 sm:py-0.5 flex justify-between items-center gap-2 shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem] flex-nowrap">
+              <h2 className="match-day-title text-base max-md:text-xs sm:text-xl font-black uppercase tracking-widest truncate min-w-0">Match day — Week {state.currentWeek}</h2>
+              <Button variant="outline" size="sm" className="match-day-back-btn border-white/50 text-white hover:bg-white/20 h-7 max-md:h-5 sm:h-9 font-black uppercase shrink-0 min-w-[2.5rem] text-[10px] max-md:text-[9px] sm:text-sm px-2 sm:px-3" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
             </div>
-            <div className="match-day-list py-0 px-2 sm:py-1 sm:px-4 space-y-1 sm:space-y-2 flex-1 min-h-0 overflow-auto">
+            <div className="match-day-list py-0 px-2 max-md:px-1 sm:py-1 sm:px-4 space-y-1 max-md:space-y-0.5 sm:space-y-2 flex-1 min-h-0 overflow-auto">
               {currentWeekFixtures.length === 0 ? (
-                <p className="text-center text-muted-foreground font-black uppercase py-2 sm:py-4 text-sm">No fixtures this week</p>
+                <p className="text-center text-muted-foreground font-black uppercase py-2 sm:py-4 text-sm max-md:text-xs">No fixtures this week</p>
               ) : (
                 currentWeekFixtures.map(f => {
                   const home = state.teams.find(t => t.id === f.homeTeamId);
@@ -270,13 +270,13 @@ function GameContent() {
                   const isUserFixture = f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id;
                   const canPlay = isUserFixture && !f.result && isLineupValid;
                   return (
-                    <div key={f.id} className={cn("flex items-center gap-1 sm:gap-3 p-1.5 sm:p-3 rounded-md sm:rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
-                      <span className="w-10 text-center font-black text-muted-foreground tabular-nums">{f.week}</span>
-                      <span className={cn("flex-1 font-black uppercase text-right truncate text-sm sm:text-base", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
-                      <span className="text-center font-black text-base sm:text-lg w-10 sm:w-14 shrink-0">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
-                      <span className={cn("flex-1 font-black uppercase text-left truncate text-sm sm:text-base", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
+                    <div key={f.id} className={cn("match-day-fixture-row flex items-center gap-1 max-md:gap-0.5 sm:gap-3 p-1.5 max-md:p-1 sm:p-3 rounded-md sm:rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
+                      <span className="match-day-wk w-10 max-md:w-7 text-center font-black text-muted-foreground tabular-nums text-sm max-md:text-[10px]">{f.week}</span>
+                      <span className={cn("match-day-team flex-1 font-black uppercase text-right truncate text-sm max-md:text-xs sm:text-base", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
+                      <span className="match-day-score text-center font-black text-base max-md:text-xs sm:text-lg w-10 sm:w-14 shrink-0">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
+                      <span className={cn("match-day-team flex-1 font-black uppercase text-left truncate text-sm max-md:text-xs sm:text-base", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
                       {isUserFixture && !f.result && (
-                        <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-base bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-md sm:rounded-lg hover:scale-105 transition-transform"><PlayCircle size={14} className="mr-1 sm:mr-1.5 w-3.5 h-3.5 sm:w-[18px] sm:h-[18px]" /> Play</Button>
+                        <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="match-day-play-btn h-8 max-md:h-6 sm:h-10 px-2 max-md:px-1.5 sm:px-4 text-xs max-md:text-[10px] sm:text-base bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-md sm:rounded-lg hover:scale-105 transition-transform"><PlayCircle size={14} className="mr-1 max-md:w-2.5 max-md:h-2.5 sm:mr-1.5 sm:w-[18px] sm:h-[18px]" /> Play</Button>
                       )}
                     </div>
                   );
@@ -284,7 +284,7 @@ function GameContent() {
               )}
             </div>
             {!isLineupValid && nextFixture && (
-              <div className="px-2 sm:px-4 py-0.5 shrink-0 text-center text-amber-400 text-[11px] sm:text-sm font-black uppercase">Pick at least 11 players in Squad before playing.</div>
+              <div className="match-day-pick11 px-2 max-md:px-1 sm:px-4 py-0.5 max-md:py-0 shrink-0 text-center text-amber-400 text-[11px] max-md:text-[9px] sm:text-sm font-black uppercase">Pick at least 11 players in Squad before playing.</div>
             )}
           </div>
         </div>
@@ -297,86 +297,86 @@ function GameContent() {
         <Link href="/" className="text-[11px] font-black uppercase text-primary-foreground/80 hover:text-white transition-colors">← Landing</Link>
       </div>
 
-      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 px-2 md:px-5">
+      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 max-md:pt-2 max-md:px-1 px-2 md:px-5">
         {activeTab === 'HUB' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1 py-3 md:p-4">
-            <div className="hub-identity-card retro-tile flex flex-col bg-black/30 backdrop-blur-xl border-2 border-primary/40 p-4 rounded-2xl shadow-2xl h-fit">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b-2 border-primary/10 pb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-md:gap-2 px-1 py-3 max-md:py-2 md:p-4">
+            <div className="hub-identity-card retro-tile flex flex-col bg-black/30 backdrop-blur-xl border-2 border-primary/40 p-4 max-md:p-2 rounded-2xl shadow-2xl h-fit">
+              <div className="flex flex-wrap items-center justify-between gap-2 max-md:gap-1 mb-3 max-md:mb-2 border-b-2 border-primary/10 pb-3 max-md:pb-2">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <h3 className="text-[12px] sm:text-[14px] font-black text-primary uppercase shrink-0">Team Identity:</h3>
-                  <span className="text-lg sm:text-xl font-black text-white uppercase tracking-tight italic truncate">{userTeam.name}</span>
+                  <h3 className="text-[12px] sm:text-[14px] font-black text-primary uppercase shrink-0">Info:</h3>
+                  <span className="text-lg sm:text-xl max-md:text-base font-black text-white uppercase tracking-tight italic truncate">{userTeam.name}</span>
                 </div>
                 <span className="text-[11px] bg-black/60 px-3 py-1 rounded-full font-black border border-white/10 uppercase shrink-0">Season {state.season}</span>
               </div>
-              <div className="hub-stats-grid grid grid-cols-2 lg:grid-cols-4 gap-2 min-w-0">
+              <div className="hub-stats-grid grid grid-cols-2 lg:grid-cols-4 gap-2 max-md:gap-1 min-w-0">
                 <TooltipProvider>
-                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Week</div><div className="text-lg sm:text-xl font-black text-accent tabular-nums">{state.currentWeek}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">CURRENT MATCH WEEK (38 TOTAL)</TooltipContent></TooltipPortal></Tooltip>
+                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 max-md:p-1.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] max-md:text-xs font-black text-white uppercase mb-0.5">Week</div><div className="text-lg sm:text-xl font-black text-accent tabular-nums">{state.currentWeek}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">CURRENT MATCH WEEK (38 TOTAL)</TooltipContent></TooltipPortal></Tooltip>
                 </TooltipProvider>
-                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Board Confidence</div><div className={`text-lg sm:text-xl font-black ${state.boardConfidence > 50 ? 'text-green-500' : 'text-red-500'}`}>{state.boardConfidence}%</div></div>
-                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">League Points</div><div className="text-lg sm:text-xl font-black text-accent">{userTeam.points} PTS</div></div>
+                <div className="bg-black/40 p-2.5 max-md:p-1.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] max-md:text-xs font-black text-white uppercase mb-0.5">Board Confidence</div><div className={`text-lg sm:text-xl font-black ${state.boardConfidence > 50 ? 'text-green-500' : 'text-red-500'}`}>{state.boardConfidence}%</div></div>
+                <div className="bg-black/40 p-2.5 max-md:p-1.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] max-md:text-xs font-black text-white uppercase mb-0.5">League Points</div><div className="text-lg sm:text-xl font-black text-accent">{userTeam.points} PTS</div></div>
                 <TooltipProvider>
-                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Balance</div><div className="text-base sm:text-lg font-black text-white tabular-nums truncate">{formatMoney(userTeam.budget)}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">TOTAL CLUB CAPITAL</TooltipContent></TooltipPortal></Tooltip>
+                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 max-md:p-1.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] max-md:text-xs font-black text-white uppercase mb-0.5">Balance</div><div className="text-base sm:text-lg font-black text-white tabular-nums truncate">{formatMoney(userTeam.budget)}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">TOTAL CLUB CAPITAL</TooltipContent></TooltipPortal></Tooltip>
                 </TooltipProvider>
               </div>
             </div>
-            <div className="hub-division-card retro-tile bg-black/30 border-2 border-primary/40 p-3 rounded-2xl shadow-2xl">
-              <h3 className="text-[13px] font-black text-primary uppercase mb-2 border-b-2 border-primary/10 pb-1.5">Division {userTeam.division} Snapshot</h3>
-              <div className="space-y-2">
+            <div className="hub-division-card retro-tile bg-black/30 border-2 border-primary/40 p-3 max-md:p-2 rounded-2xl shadow-2xl">
+              <h3 className="text-[13px] max-md:text-sm font-black text-primary uppercase mb-2 max-md:mb-1 border-b-2 border-primary/10 pb-1.5 max-md:pb-1">Division {userTeam.division} Snapshot</h3>
+              <div className="space-y-2 max-md:space-y-1">
                 {state.teams.filter(t => t.division === userTeam.division).slice(0, 3).map((t, i) => (
-                  <div key={t.id} className={`flex justify-between items-center py-2 px-4 rounded-xl border ${t.id === userTeam.id ? 'bg-accent/10 border-accent text-accent font-black' : 'bg-black/20 border-white/5'}`}>
-                    <span className="text-[16px] uppercase font-black truncate">{i + 1}. {t.name}</span><span className="font-black text-[16px]">{t.points} PTS</span>
+                  <div key={t.id} className={`flex justify-between items-center py-2 max-md:py-1 px-4 max-md:px-2 rounded-xl border ${t.id === userTeam.id ? 'bg-accent/10 border-accent text-accent font-black' : 'bg-black/20 border-white/5'}`}>
+                    <span className="text-[16px] max-md:text-sm uppercase font-black truncate">{i + 1}. {t.name}</span><span className="font-black text-[16px] max-md:text-sm">{t.points} PTS</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="retro-tile col-span-1 md:col-span-2 bg-primary/5 border-2 border-primary/40 p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex flex-col items-center">
-              <div className="w-full flex justify-between items-center mb-2 sm:mb-4 border-b border-primary/30 pb-1.5 sm:pb-2">
+            <div className="retro-tile col-span-1 md:col-span-2 bg-primary/5 border-2 border-primary/40 p-2 max-md:p-1.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex flex-col items-center">
+              <div className="w-full flex justify-between items-center mb-2 max-md:mb-1 sm:mb-4 border-b border-primary/30 pb-1.5 max-md:pb-1 sm:pb-2">
                 <h3 className="text-xs sm:text-[14px] font-black text-primary uppercase tracking-widest">Next Fixture Intel</h3>
-                <span className="text-[10px] sm:text-[12px] font-black text-muted-foreground tabular-nums">WEEK {state.currentWeek}</span>
+                <span className="text-[10px] sm:text-[12px] max-md:text-sm font-black text-white tabular-nums">WEEK {state.currentWeek}</span>
               </div>
               {nextFixture ? (
-                <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 md:gap-10">
-                  <div className="flex-1 flex justify-center items-center gap-2 sm:gap-4 md:gap-12 min-w-0 py-1">
-                    <span className="text-base sm:text-lg md:text-3xl font-black uppercase text-white truncate text-right flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
-                    <div className="bg-primary/20 px-2 py-0.5 sm:px-3 sm:py-1 md:px-6 md:py-2 rounded-md sm:rounded-lg md:rounded-xl border border-primary/40 sm:border-2 font-black text-primary text-xs sm:text-sm md:text-xl shrink-0">VS</div>
-                    <span className="text-base sm:text-lg md:text-3xl font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
+                <div className="next-fixture-intel-row w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-lg:gap-1 sm:gap-4 md:gap-10">
+                  <div className="flex-1 flex justify-center items-center gap-2 max-lg:gap-0.5 sm:gap-4 md:gap-12 min-w-0 py-1 max-lg:py-0">
+                    <span className="team-name-fixture text-base sm:text-lg md:text-3xl max-lg:text-sm font-black uppercase text-white truncate text-right flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
+                    <div className="vs-box bg-primary/20 px-2 py-0.5 sm:px-3 sm:py-1 md:px-6 md:py-2 max-lg:px-1 max-lg:py-0.5 rounded-md sm:rounded-lg md:rounded-xl border border-primary/40 sm:border-2 font-black text-primary text-[10px] max-lg:text-xs sm:text-sm md:text-xl shrink-0">VS</div>
+                    <span className="team-name-fixture text-base sm:text-lg md:text-3xl max-lg:text-sm font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
                   </div>
-                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="w-full sm:w-auto sm:max-w-[25%] md:w-64 md:max-w-none h-10 sm:h-9 md:h-16 bg-accent text-accent-foreground retro-button font-black text-sm md:text-2xl rounded-lg md:rounded-2xl shadow-xl md:shadow-2xl hover:scale-[1.05] transition-transform animate-pulse shrink-0 px-3 md:px-6"><PlayCircle size={20} className="mr-1.5 md:mr-3 w-5 h-5 md:w-8 md:h-8 shrink-0 sm:inline-block md:block" /> PLAY MATCH</Button>
+                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="play-match-btn w-full sm:w-auto sm:max-w-[25%] md:w-64 md:max-w-none h-10 max-lg:h-8 sm:h-9 md:h-16 bg-accent text-accent-foreground retro-button font-black text-sm max-lg:text-xs md:text-2xl rounded-lg md:rounded-2xl shadow-xl md:shadow-2xl hover:scale-[1.05] transition-transform animate-pulse shrink-0 px-3 max-lg:px-1.5 md:px-6 max-lg:py-0"><PlayCircle size={20} className="mr-1.5 max-lg:mr-0.5 md:mr-3 w-5 h-5 max-lg:w-3 max-lg:h-3 md:w-8 md:h-8 shrink-0 sm:inline-block md:block" /> PLAY MATCH</Button>
                 </div>
-              ) : <div className="text-base sm:text-xl font-black text-muted-foreground uppercase italic py-4 sm:py-8 tracking-[0.3em]">Season Concluded</div>}
+              ) : <div className="text-base sm:text-xl max-md:text-sm font-black text-white uppercase italic py-4 sm:py-8 tracking-[0.3em]">Season Concluded</div>}
             </div>
-            <div className="retro-tile col-span-1 md:col-span-2 bg-black/30 border-2 border-primary/40 p-4 rounded-2xl shadow-2xl">
-              <h3 className="text-[14px] font-black text-primary uppercase mb-3 border-b-2 border-primary/10 pb-1.5">Weekly Headlines</h3>
-              <div className="headlines-scroll space-y-3 max-h-[220px] overflow-auto custom-scrollbar pr-2">
+            <div className="retro-tile col-span-1 md:col-span-2 bg-black/30 border-2 border-primary/40 p-4 max-md:p-2 rounded-2xl shadow-2xl">
+              <h3 className="text-[14px] max-md:text-sm font-black text-primary uppercase mb-3 max-md:mb-2 border-b-2 border-primary/10 pb-1.5 max-md:pb-1">Weekly Headlines</h3>
+              <div className="headlines-scroll space-y-3 max-md:space-y-2 max-h-[220px] overflow-auto custom-scrollbar pr-2 max-md:pr-1">
                 {currentWeekNews.length > 0 ? currentWeekNews.map(m => {
                 const bid = m.bidId ? state.transferMarket.incomingBids.find(b => b.id === m.bidId) : null;
                 const offerPlayer = bid ? state.players.find(p => p.id === bid.playerId) : null;
                 return (
-                  <div key={m.id} className="p-4 border-l-8 border-primary bg-primary/10 rounded-r-2xl">
-                    <span className="font-black block text-primary uppercase mb-1 text-[18px] italic underline">{m.title}</span>
-                    <span className="text-white text-[16px] font-bold leading-tight line-clamp-3">{getMessageDisplayContent(m, id => state.teams.find(t => t.id === id)?.name ?? 'Unknown')}</span>
+                  <div key={m.id} className="p-4 max-md:p-2 border-l-8 border-primary bg-primary/10 rounded-r-2xl">
+                    <span className="font-black block text-primary uppercase mb-1 text-[18px] max-md:text-base italic underline">{m.title}</span>
+                    <span className="text-white text-[16px] max-md:text-sm font-bold leading-tight line-clamp-3">{getMessageDisplayContent(m, id => state.teams.find(t => t.id === id)?.name ?? 'Unknown')}</span>
                     {offerPlayer && (
-                      <Button onClick={(e) => { e.stopPropagation(); setViewingPlayer(offerPlayer); setOpenToTab('contract'); }} variant="outline" size="sm" className="mt-2 h-9 text-[11px] font-black uppercase border-primary/50 bg-primary/10 hover:bg-primary/30 text-primary rounded-lg">View contract</Button>
+                      <Button onClick={(e) => { e.stopPropagation(); setViewingPlayer(offerPlayer); setOpenToTab('contract'); }} variant="outline" size="sm" className="mt-2 h-9 max-md:h-8 text-[11px] max-md:text-xs font-black uppercase border-primary/50 bg-primary/10 hover:bg-primary/30 text-primary rounded-lg">View contract</Button>
                     )}
                   </div>
                 );
-              }) : <div className="text-center py-12 text-muted-foreground uppercase font-black opacity-40 italic tracking-[0.2em]">Silent week in the football world.</div>}
+              }) : <div className="text-center py-12 text-white uppercase font-black italic tracking-[0.2em]">Silent week in the football world.</div>}
               </div>
             </div>
           </div>
         )}
         {activeTab === 'SQUAD' && (
-          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6 bg-black/40 rounded-2xl border border-primary/10">
+          <div className="squad-tab-container p-4 max-md:px-1 max-md:py-2 space-y-6 max-md:space-y-2 bg-black/40 rounded-2xl border border-primary/10">
             <Tabs defaultValue="list" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-black/85 h-16 border-2 border-primary/25 rounded-2xl p-1 gap-1"><TabsTrigger value="list" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Squad Selection</TabsTrigger><TabsTrigger value="tactics" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Tactical Hub</TabsTrigger></TabsList>
-              <TabsContent value="list" className="m-0 pt-4"><SquadList players={userPlayers} onPlayerSwap={handlePlayerSwapInteraction} activeSwapId={swapSourceId} /></TabsContent>
-              <TabsContent value="tactics" className="m-0 pt-4">
-                <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6">
-                  <RetroWindow title="PITCH COMMAND" className="rounded-2xl shadow-2xl bg-black/60"><div className="flex justify-center py-6"><TacticsPitch team={userTeam} players={userPlayers} onPlayerClick={(p) => handlePlayerSwapInteraction(p.id)} onPlayerProfile={(p) => setViewingPlayer(p)} activeSwapId={swapSourceId} /></div></RetroWindow>
-                  <RetroWindow title="STRATEGY ENGINE" className="rounded-2xl shadow-2xl bg-black/60">
-                    <div className="space-y-10 py-6 px-4">
-                      <div className="space-y-4"><h4 className="text-[16px] font-black text-primary uppercase border-b-2 border-primary/20 pb-2">Core Formation</h4><div className="grid grid-cols-2 gap-3">{['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (<Button key={f} onClick={() => setTactics(f, userTeam.playStyle)} className={cn("h-16 text-2xl font-black rounded-xl", userTeam.formation === f ? "bg-accent text-accent-foreground border-accent shadow-xl" : "bg-black/70 text-white border-primary/20")}>{f}</Button>))}</div></div>
-                      <div className="space-y-4"><h4 className="text-[16px] font-black text-primary uppercase border-b-2 border-primary/20 pb-2">Team Mentality</h4><div className="grid grid-cols-2 gap-3">{(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (<Button key={s} onClick={() => setTactics(userTeam.formation, s)} className={cn("h-16 text-[16px] font-black uppercase rounded-xl leading-tight px-2 text-center", userTeam.playStyle === s ? "bg-accent text-accent-foreground border-accent shadow-xl" : "bg-black/70 text-white border-primary/20")}>{s}</Button>))}</div></div>
+              <TabsList className="squad-tabs-list grid w-full grid-cols-2 bg-black/85 h-16 max-md:h-10 border-2 border-primary/25 rounded-2xl p-1 gap-1"><TabsTrigger value="list" className="text-lg max-md:text-xs uppercase font-black rounded-xl data-[state=active]:bg-primary">Squad Selection</TabsTrigger><TabsTrigger value="tactics" className="text-lg max-md:text-xs uppercase font-black rounded-xl data-[state=active]:bg-primary">Tactical Hub</TabsTrigger></TabsList>
+              <TabsContent value="list" className="m-0 pt-3 max-md:pt-1.5"><SquadList players={userPlayers} onPlayerSwap={handlePlayerSwapInteraction} activeSwapId={swapSourceId} /></TabsContent>
+              <TabsContent value="tactics" className="m-0 pt-3 max-md:pt-1.5">
+                <div className="squad-tactics-grid grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6 max-md:gap-2">
+                  <RetroWindow title="PITCH COMMAND" hideTitle className="rounded-2xl shadow-2xl bg-black/60" contentClassName="p-3 max-md:p-1.5 pt-0 max-md:pt-0"><div className="flex justify-center pt-0 pb-4 max-md:pb-1"><TacticsPitch team={userTeam} players={userPlayers} onPlayerClick={(p) => handlePlayerSwapInteraction(p.id)} onPlayerProfile={(p) => setViewingPlayer(p)} activeSwapId={swapSourceId} /></div></RetroWindow>
+                  <RetroWindow title="STRATEGY ENGINE" className="rounded-2xl shadow-2xl bg-black/60" contentClassName="p-4 max-md:p-1.5">
+                    <div className="space-y-10 max-md:space-y-2 py-6 max-md:py-1 px-4 max-md:px-1">
+                      <div className="space-y-4 max-md:space-y-1"><h4 className="text-[16px] max-md:text-[10px] font-black text-primary uppercase border-b-2 border-primary/20 pb-2 max-md:pb-0.5">Core Formation</h4><div className="grid grid-cols-2 gap-3 max-md:gap-1">{['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (<Button key={f} onClick={() => setTactics(f, userTeam.playStyle)} className={cn("h-16 max-md:h-8 text-2xl max-md:text-sm font-black rounded-xl", userTeam.formation === f ? "bg-accent text-accent-foreground border-accent shadow-xl" : "bg-black/70 text-white border-primary/20")}>{f}</Button>))}</div></div>
+                      <div className="space-y-4 max-md:space-y-1"><h4 className="text-[16px] max-md:text-[10px] font-black text-primary uppercase border-b-2 border-primary/20 pb-2 max-md:pb-0.5">Team Mentality</h4><div className="grid grid-cols-2 gap-3 max-md:gap-1">{(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (<Button key={s} onClick={() => setTactics(userTeam.formation, s)} className={cn("h-16 max-md:h-8 text-[16px] max-md:text-[10px] font-black uppercase rounded-xl leading-tight px-2 text-center", userTeam.playStyle === s ? "bg-accent text-accent-foreground border-accent shadow-xl" : "bg-black/70 text-white border-primary/20")}>{s}</Button>))}</div></div>
                     </div>
                   </RetroWindow>
                 </div>
@@ -385,18 +385,18 @@ function GameContent() {
           </div>
         )}
         {activeTab === 'WORLD' && (
-          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
-            <div className="bg-black/70 p-2 border-2 border-primary/20 flex gap-2 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => goToViewingDiv(div)} className={cn("flex-1 h-12 text-lg font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
-            <div className="flex gap-3"><Button onClick={() => goToWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => goToWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => goToWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
-            {worldSubView === 'TABLE' && <RetroWindow title={`DIV ${viewingDiv} LEAGUE STANDINGS`} noPadding className="bg-black/60 rounded-2xl shadow-2xl"><LeagueTable teams={state.teams.filter(t => t.division === viewingDiv)} onTeamClick={tId => setViewingTeam(state.teams.find(tx => tx.id === tId) || null)} /></RetroWindow>}
+          <div className="world-tab-container p-4 max-md:px-1 max-md:py-2 space-y-6 max-md:space-y-2">
+            <div className="world-div-buttons bg-black/70 p-2 max-md:p-1 border-2 border-primary/20 flex gap-2 max-md:gap-0.5 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => goToViewingDiv(div)} className={cn("flex-1 h-12 max-md:h-8 text-lg max-md:text-xs font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
+            <div className="world-sub-buttons flex gap-3 max-md:gap-1"><Button onClick={() => goToWorldSubView('TABLE')} className={cn("h-14 max-md:h-9 text-lg max-md:text-[10px] font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => goToWorldSubView('STATS')} className={cn("h-14 max-md:h-9 text-lg max-md:text-[10px] font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => goToWorldSubView('FIXTURES')} className={cn("h-14 max-md:h-9 text-lg max-md:text-[10px] font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
+            {worldSubView === 'TABLE' && <RetroWindow title={`DIV ${viewingDiv} LEAGUE STANDINGS`} noPadding className="bg-black/60 rounded-2xl shadow-2xl league-standings-window"><LeagueTable teams={state.teams.filter(t => t.division === viewingDiv)} onTeamClick={tId => setViewingTeam(state.teams.find(tx => tx.id === tId) || null)} /></RetroWindow>}
             {worldSubView === 'STATS' && <StatsHub division={viewingDiv} />}
             {worldSubView === 'FIXTURES' && (
               <RetroWindow title={`DIV ${viewingDiv} FIXTURES`} noPadding className="bg-black/60 rounded-2xl shadow-2xl">
-                <Table><TableHeader><TableRow className="bg-primary/25 border-b-2 border-primary/40"><TableHead className="w-16 text-[13px] font-black uppercase text-white tracking-wide py-4">Wk</TableHead><TableHead className="text-[13px] font-black uppercase text-white tracking-wide py-4">Home</TableHead><TableHead className="text-center text-[13px] font-black uppercase text-white tracking-wide py-4">Res</TableHead><TableHead className="text-right text-[13px] font-black uppercase text-white tracking-wide py-4">Away</TableHead><TableHead className="w-24 text-[13px] font-black uppercase text-white tracking-wide py-4 text-center">Play</TableHead></TableRow></TableHeader><TableBody>{state.fixtures.filter(f => f.division === viewingDiv).sort((a, b) => a.week - b.week).map(f => {
+                <Table><TableHeader><TableRow className="bg-primary/25 border-b-2 border-primary/40"><TableHead className="w-16 max-md:w-8 text-[13px] max-md:text-[9px] font-black uppercase text-white tracking-wide py-4 max-md:py-1">Wk</TableHead><TableHead className="text-[13px] max-md:text-[9px] font-black uppercase text-white tracking-wide py-4 max-md:py-1">Home</TableHead><TableHead className="text-center text-[13px] max-md:text-[9px] font-black uppercase text-white tracking-wide py-4 max-md:py-1">Res</TableHead><TableHead className="text-[13px] max-md:text-[9px] font-black uppercase text-white tracking-wide py-4 max-md:py-1">Away</TableHead><TableHead className="w-24 max-md:w-12 text-[13px] max-md:text-[9px] font-black uppercase text-white tracking-wide py-4 max-md:py-1 text-center">Play</TableHead></TableRow></TableHeader><TableBody>{state.fixtures.filter(f => f.division === viewingDiv).sort((a, b) => a.week - b.week).map(f => {
                   const h = state.teams.find(t => t.id === f.homeTeamId); const a = state.teams.find(t => t.id === f.awayTeamId);
                   const isUserFixture = f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id;
                   const canPlay = isUserFixture && f.week === state.currentWeek && !f.result && isLineupValid;
-                  return (<TableRow key={f.id} className="border-b border-white/5 hover:bg-white/5"><TableCell className="font-black text-lg tabular-nums opacity-60">{f.week}</TableCell><TableCell className={cn("font-black text-lg uppercase", f.homeTeamId === userTeam.id ? "text-accent" : "text-white")}>{h?.name}</TableCell><TableCell className="text-center font-black text-xl tabular-nums">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</TableCell><TableCell className={cn("text-right font-black text-lg uppercase", f.awayTeamId === userTeam.id ? "text-accent" : "text-white")}>{a?.name}</TableCell><TableCell className="text-center">{canPlay ? <Button size="sm" onClick={() => startMatch(f.id)} className="h-8 px-3 bg-accent text-accent-foreground font-black text-xs uppercase rounded-lg"><PlayCircle size={14} className="mr-1" />Play</Button> : null}</TableCell></TableRow>);
+                  return (<TableRow key={f.id} className="border-b border-white/5 hover:bg-white/5"><TableCell className="font-black text-lg max-md:text-[10px] tabular-nums opacity-60 py-2 max-md:py-0.5">{f.week}</TableCell><TableCell className={cn("font-black text-lg max-md:text-[10px] uppercase py-2 max-md:py-0.5 truncate max-w-[80px]", f.homeTeamId === userTeam.id ? "text-accent" : "text-white")}>{h?.name}</TableCell><TableCell className="text-center font-black text-xl max-md:text-xs tabular-nums py-2 max-md:py-0.5">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</TableCell><TableCell className={cn("font-black text-lg max-md:text-[10px] uppercase py-2 max-md:py-0.5 truncate max-w-[80px]", f.awayTeamId === userTeam.id ? "text-accent" : "text-white")}>{a?.name}</TableCell><TableCell className="text-center py-2 max-md:py-0.5">{canPlay ? <Button size="sm" onClick={() => startMatch(f.id)} className="h-8 max-md:h-5 px-3 max-md:px-1.5 bg-accent text-accent-foreground font-black text-[10px] uppercase rounded-lg"><PlayCircle size={12} className="mr-0.5 max-md:w-2.5 max-md:h-2.5" />Play</Button> : null}</TableCell></TableRow>);
                 })}</TableBody></Table>
               </RetroWindow>
             )}
@@ -404,19 +404,19 @@ function GameContent() {
         )}
         {activeTab === 'MARKET' && <div className="p-4 max-md:px-1 max-md:py-3 h-full"><RetroWindow title="GLOBAL TRANSFER DATABASE" className="bg-black/20 rounded-2xl shadow-2xl"><PlayerMarket /></RetroWindow></div>}
         {activeTab === 'CLUB' && (
-          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
+          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6 max-md:space-y-3">
             {clubSubView === 'OFFICE' ? (
-              <div className="grid grid-cols-2 gap-6 max-md:gap-3 auto-rows-fr">
-                <button onClick={() => goToClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Manager Profile</span></button>
-                <button onClick={() => goToClubSubView('FINANCE')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-accent/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><DollarSign size={72} className="text-accent group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Financial Hub</span></button>
-                <button onClick={() => goToClubSubView('STAFF')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Briefcase size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Staff Management</span></button>
-                <button onClick={() => goToClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500" /><span className="text-2xl font-black uppercase text-white">Legacy & Records</span></button>
-                <button onClick={() => goToClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground" /><span className="text-2xl font-black uppercase text-white">OS Config</span></button>
-                <button onClick={saveGame} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-4 border-accent/40 bg-accent/5 hover:bg-accent/20 rounded-3xl transition-all shadow-2xl group"><Save size={72} className="text-accent group-hover:animate-bounce" /><span className="text-2xl font-black uppercase text-white">Commit Save</span></button>
-                <button onClick={quitToMainMenu} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/20 hover:bg-red-500/20 bg-black/40 rounded-3xl transition-all shadow-2xl group"><LogOut size={72} className="text-white/80 group-hover:text-red-400 transition-colors" /><span className="text-2xl font-black uppercase text-white">Quit to Main Menu</span></button>
+              <div className="grid grid-cols-2 gap-6 max-md:gap-2 auto-rows-fr">
+                <button onClick={() => goToClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary max-md:w-12 max-md:h-12 group-hover:scale-110 transition-transform" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Manager Profile</span></button>
+                <button onClick={() => goToClubSubView('FINANCE')} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 hover:bg-accent/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><DollarSign size={72} className="text-accent max-md:w-12 max-md:h-12 group-hover:scale-110 transition-transform" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Financial Hub</span></button>
+                <button onClick={() => goToClubSubView('STAFF')} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Briefcase size={72} className="text-primary max-md:w-12 max-md:h-12 group-hover:scale-110 transition-transform" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Staff Management</span></button>
+                <button onClick={() => goToClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500 max-md:w-12 max-md:h-12" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Legacy & Records</span></button>
+                <button onClick={() => goToClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground max-md:w-12 max-md:h-12" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">OS Config</span></button>
+                <button onClick={saveGame} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 border-4 border-accent/40 bg-accent/5 hover:bg-accent/20 rounded-3xl transition-all shadow-2xl group"><Save size={72} className="text-accent max-md:w-12 max-md:h-12 group-hover:animate-bounce" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Commit Save</span></button>
+                <button onClick={quitToMainMenu} className="retro-tile flex flex-col items-center justify-center gap-6 max-md:gap-2 py-16 max-md:py-6 border-2 border-white/20 hover:bg-red-500/20 bg-black/40 rounded-3xl transition-all shadow-2xl group"><LogOut size={72} className="text-white/80 max-md:w-12 max-md:h-12 group-hover:text-red-400 transition-colors" /><span className="text-2xl max-md:text-sm font-black uppercase text-white">Quit to Main Menu</span></button>
               </div>
             ) : (
-              <div className="space-y-6"><Button variant="outline" onClick={() => goToClubSubView('OFFICE')} className="h-14 text-lg font-black mb-4 retro-button bg-black/60 px-10 border-2 border-primary/40 rounded-xl hover:bg-primary hover:text-white transition-all uppercase">← Return to Main Office</Button>
+              <div className="space-y-6 max-md:space-y-3"><Button variant="outline" onClick={() => goToClubSubView('OFFICE')} className="h-14 max-md:h-10 text-lg max-md:text-sm font-black mb-4 max-md:mb-2 retro-button bg-black/60 px-10 max-md:px-4 border-2 border-primary/40 rounded-xl hover:bg-primary hover:text-white transition-all uppercase">← Return to Main Office</Button>
                 {clubSubView === 'MANAGER' && <ManagerInfo />} {clubSubView === 'FINANCE' && <FinanceHub />} {clubSubView === 'STAFF' && <StaffManagement />} {clubSubView === 'RECORDS' && <TeamRecords />} {clubSubView === 'SETTINGS' && <SettingsHub />}
               </div>
             )}

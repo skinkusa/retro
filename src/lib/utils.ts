@@ -1,6 +1,21 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/** Position type for natural position label (avoids circular dep on full game types). */
+type Position = 'GK' | 'DF' | 'MF' | 'FW' | 'DM';
+
+/** Single source of truth: player's natural position as short display label (GK, D, M, F, D/M). */
+export function getNaturalPositionLabel(position: Position | string): string {
+  switch (position) {
+    case 'GK': return 'GK';
+    case 'DF': return 'D';
+    case 'MF': return 'M';
+    case 'FW': return 'F';
+    case 'DM': return 'D/M';
+    default: return typeof position === 'string' ? position : '—';
+  }
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

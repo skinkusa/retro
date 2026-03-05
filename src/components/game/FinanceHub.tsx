@@ -29,7 +29,7 @@ export function FinanceHub() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-md:gap-2">
       <RetroWindow title="SEASON ACCOUNTS">
         <Table>
           <TableBody>
@@ -37,11 +37,11 @@ export function FinanceHub() {
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
                   <TableRow className="border-b border-primary/5 cursor-help">
-                    <TableCell className="text-xs uppercase text-muted-foreground flex items-center gap-1">
+                    <TableCell className="text-xs max-md:text-sm uppercase text-white flex items-center gap-1 py-2.5 max-md:py-0.5">
                       {acc.label}
-                      <Info size={10} className="opacity-30" />
+                      <Info size={10} className="text-white opacity-60" />
                     </TableCell>
-                    <TableCell className={`text-right font-mono text-xs ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                    <TableCell className={`text-right font-mono text-xs max-md:text-sm py-2.5 max-md:py-0.5 ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
                       {acc.type === 'income' ? '+' : '-'} £{formatCurrency(acc.value)}
                     </TableCell>
                   </TableRow>
@@ -50,8 +50,8 @@ export function FinanceHub() {
               </Tooltip>
             ))}
             <TableRow className="bg-muted/50 font-bold">
-              <TableCell className="text-xs uppercase text-primary">NET BALANCE</TableCell>
-              <TableCell className={`text-right font-mono text-sm ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'}`}>
+              <TableCell className="text-xs max-md:text-sm uppercase text-primary py-2.5 max-md:py-0.5">NET BALANCE</TableCell>
+              <TableCell className={`text-right font-mono text-sm max-md:text-sm py-2.5 max-md:py-0.5 ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'}`}>
                 £{formatCurrency(totalIncome - totalExpense)}
               </TableCell>
             </TableRow>
@@ -60,22 +60,22 @@ export function FinanceHub() {
       </RetroWindow>
 
       <RetroWindow title="FINANCIAL STATUS">
-        <div className="space-y-4">
-          <div className="p-4 bg-muted border border-primary/20 text-center">
-            <div className="text-[10px] uppercase text-muted-foreground mb-1">Total Bank Balance</div>
-            <div className="text-2xl font-mono text-cyan">£{formatCurrency(userTeam.budget)}</div>
+        <div className="space-y-4 max-md:space-y-2">
+          <div className="p-4 max-md:p-2 bg-muted border border-primary/20 text-center">
+            <div className="text-[10px] max-md:text-sm uppercase text-white mb-1">Total Bank Balance</div>
+            <div className="text-2xl max-md:text-2xl font-mono text-cyan">£{formatCurrency(userTeam.budget)}</div>
           </div>
-          <div className="text-[10px] text-muted-foreground uppercase space-y-2">
+          <div className="text-[10px] max-md:text-sm text-white uppercase space-y-2 max-md:space-y-1">
             <div className="flex justify-between">
               <span>Weekly Wage Bill:</span>
-              <span className="text-foreground">£{formatCurrency(userTeam.weeklyWages)}</span>
+              <span className="text-white">£{formatCurrency(userTeam.weeklyWages)}</span>
             </div>
             <div className="flex justify-between">
               <span>Projected Annual Profit:</span>
-              <span className="text-foreground">£{formatCurrency(totalIncome - totalExpense)}</span>
+              <span className="text-white">£{formatCurrency(totalIncome - totalExpense)}</span>
             </div>
           </div>
-          <div className="pt-4 border-t border-primary/10 italic text-[10px] text-muted-foreground text-center">
+          <div className="pt-4 border-t border-primary/10 italic text-[10px] max-md:text-sm text-white text-center">
             &ldquo;THE BOARD IS {(totalIncome - totalExpense) > 0 ? 'SATISFIED' : 'CONCERNED'} WITH CURRENT FINANCIAL PERFORMANCE.&rdquo;
           </div>
         </div>

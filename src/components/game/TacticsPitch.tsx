@@ -1,9 +1,9 @@
 "use client"
 
 import { Team, Player, Position } from '@/types/game';
-import { cn } from '@/lib/utils';
+import { cn, getNaturalPositionLabel } from '@/lib/utils';
 import { useMemo } from 'react';
-import { ShieldAlert, UserCircle } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { getTacticalAssignments } from '@/lib/game-engine';
 
 interface TacticsPitchProps {
@@ -16,7 +16,9 @@ interface TacticsPitchProps {
 
 export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, activeSwapId }: TacticsPitchProps) {
   const lineupPlayers = useMemo(() => {
-    return team.lineup.slice(0, 11).map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
+    return (team.lineup.slice(0, 11) as (string | null)[]).map(id =>
+      id ? (players.find(p => p.id === id) ?? null) : null
+    );
   }, [players, team.lineup]);
 
   const assignedSlots = useMemo(() => {
@@ -47,17 +49,6 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
     if (!isRoleMatch) return 'bg-red-600'; 
     if (!isSideMatch) return 'bg-yellow-500'; 
     return 'bg-green-600'; 
-  };
-
-  const getFullPositionLabel = (pos: Position) => {
-    switch(pos) {
-      case 'GK': return 'GOALKEEPER';
-      case 'DF': return 'DEFENDER';
-      case 'MF': return 'MIDFIELDER';
-      case 'FW': return 'FORWARD';
-      case 'DM': return 'DEF/MID';
-      default: return pos;
-    }
   };
 
   return (
@@ -117,19 +108,10 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                       markerColor === 'bg-red-600' ? "text-red-500" : 
                       markerColor === 'bg-yellow-500' ? "text-yellow-400" : "text-accent"
                     )}>
-                      {getFullPositionLabel(player.position)}
+                      {getNaturalPositionLabel(player.position)} {player.side}
                     </span>
                   </div>
                 </button>
-                {onPlayerProfile && (
-                  <button 
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onPlayerProfile(player); }}
-                    className="mt-0.5 p-0.5 bg-black/70 hover:bg-black/90 text-white/80 hover:text-white rounded-full transition-colors"
-                  >
-                    <UserCircle size={12} />
-                  </button>
-                )}
               </div>
             ) : (
               <div className="w-10 h-10 border-2 border-dashed border-white/20 flex items-center justify-center rounded-full bg-black/50">
@@ -140,7 +122,7 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
         );
       })}
 
-      {lineupPlayers.length === 0 && (
+      {lineupPlayers.filter(Boolean).length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center p-8 text-center bg-black/95 backdrop-blur-md rounded-xl">
           <p className="text-[18px] uppercase font-black text-primary animate-pulse leading-tight tracking-[0.3em]">
             ASSIGN 11 PLAYERS<br/>IN SQUAD VIEW

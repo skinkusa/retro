@@ -77,27 +77,27 @@ export function PlayerMarket() {
   };
 
   const renderPlayerTable = (players: Player[], isShortlistTab = false) => (
-    <Table>
+    <Table className="market-table-root max-md:[&_th]:leading-none max-md:[&_td]:leading-none max-md:[&_thead_th]:h-auto max-md:[&_thead_th]:py-1 max-md:[&_td]:py-0.5">
       <TableHeader>
         <TableRow className="border-b-2 border-primary/40 bg-primary/20">
-          <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Name</TableHead>
-          <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Club</TableHead>
-          <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Age</TableHead>
-          <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Role</TableHead>
+          <TableHead className="text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Name</TableHead>
+          <TableHead className="text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Club</TableHead>
+          <TableHead className="text-center text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Age</TableHead>
+          <TableHead className="text-center text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Role</TableHead>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white cursor-help">Skill</TableHead>
+              <TableHead className="text-center text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white cursor-help">Skill</TableHead>
             </TooltipTrigger>
             <TooltipContent className="font-black">OVERALL TECHNICAL PROFICIENCY (1-20)</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white cursor-help">Pot</TableHead>
+              <TableHead className="text-center text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white cursor-help">Pot</TableHead>
             </TooltipTrigger>
             <TooltipContent className="font-black">SCOUT GRADE FOR FUTURE GROWTH</TooltipContent>
           </Tooltip>
-          <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Value</TableHead>
-          <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Action</TableHead>
+          <TableHead className="text-right text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Value</TableHead>
+          <TableHead className="text-right text-[13px] max-md:text-[10px] uppercase py-4 max-md:py-1 font-black tracking-wide text-white">Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -109,7 +109,7 @@ export function PlayerMarket() {
 
           return (
             <TableRow key={p.id} className="hover:bg-primary/10 transition-colors border-b border-primary/10 group">
-              <TableCell className="text-[14px] font-black py-2.5">
+              <TableCell className="text-[14px] max-md:text-xs font-black py-2.5 max-md:py-0.5">
                 <div className="flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -133,15 +133,15 @@ export function PlayerMarket() {
                   </button>
                 </div>
               </TableCell>
-              <TableCell className="text-[13px] text-muted-foreground truncate max-w-[100px] py-2.5 font-bold">{club?.name.toUpperCase()}</TableCell>
-              <TableCell className="text-center text-[13px] font-mono font-bold py-2.5">{p.age}</TableCell>
-              <TableCell className="text-center font-mono text-cyan text-[13px] font-black py-2.5 whitespace-nowrap">
+              <TableCell className="text-[13px] max-md:text-[10px] text-muted-foreground truncate max-w-[100px] max-md:max-w-[60px] py-2.5 max-md:py-0.5 font-bold">{club?.name.toUpperCase()}</TableCell>
+              <TableCell className="text-center text-[13px] max-md:text-[10px] font-mono font-bold py-2.5 max-md:py-0.5">{p.age}</TableCell>
+              <TableCell className="text-center font-mono text-cyan text-[13px] max-md:text-[10px] font-black py-2.5 max-md:py-0.5 whitespace-nowrap">
                 {p.position} ({p.side})
               </TableCell>
-              <TableCell className="text-center text-[13px] font-mono text-primary font-black py-2.5">
+              <TableCell className="text-center text-[13px] max-md:text-[10px] font-mono text-primary font-black py-2.5 max-md:py-0.5">
                 {scout ? p.attributes.skill : "?"}
               </TableCell>
-              <TableCell className="text-center py-2.5">
+              <TableCell className="text-center py-2.5 max-md:py-0.5">
                 {scout ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -153,9 +153,9 @@ export function PlayerMarket() {
                   <span className="text-muted-foreground opacity-20 text-[13px] font-black">?</span>
                 )}
               </TableCell>
-              <TableCell className="text-right font-mono text-[13px] font-black py-2.5 text-accent">{formatMoney(p.value)}</TableCell>
-              <TableCell className="text-right py-2.5">
-                <div className="flex justify-end gap-2">
+              <TableCell className="text-right font-mono text-[13px] max-md:text-[10px] font-black py-2.5 max-md:py-0.5 text-accent">{formatMoney(p.value)}</TableCell>
+              <TableCell className="text-right py-2.5 max-md:py-0.5">
+                <div className="flex justify-end gap-2 max-md:gap-1">
                   {isShortlistTab && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -195,7 +195,7 @@ export function PlayerMarket() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 bg-muted/40 p-4 border border-primary/20 shadow-inner rounded-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 bg-muted/40 p-4 max-md:p-2 border border-primary/20 shadow-inner rounded-xl">
         <div className="space-y-1.5">
           <label className="text-[11px] font-black uppercase text-primary tracking-widest flex items-center gap-1.5">
             Name Search
@@ -277,10 +277,10 @@ export function PlayerMarket() {
         </div>
       </div>
 
-      <div className="bg-primary/10 border-l-4 border-primary p-3 flex items-center justify-between shadow-sm rounded-r-lg">
-         <div className="flex items-center gap-2.5">
-           <Info size={16} className="text-primary" />
-           <span className="text-[13px] uppercase font-black text-primary tracking-tight">
+      <div className="bg-primary/10 border-l-4 border-primary p-3 max-md:p-2 flex items-center justify-between shadow-sm rounded-r-lg">
+         <div className="flex items-center gap-2.5 max-md:gap-1">
+           <Info size={16} className="text-primary max-md:w-4 max-md:h-4" />
+           <span className="text-[13px] max-md:text-[10px] uppercase font-black text-primary tracking-tight">
              Transfer Budget: {formatMoney(userTeam?.budget || 0)} 
              {!scout && " | HIRE A SCOUT FOR FULL DATA"}
            </span>
@@ -289,9 +289,9 @@ export function PlayerMarket() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="bg-muted/50 border border-primary/20 h-10 gap-1 p-1 mb-4 rounded-xl">
-          <TabsTrigger value="all" className="text-[12px] uppercase font-black tracking-widest px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Market Search</TabsTrigger>
-          <TabsTrigger value="shortlist" className="text-[12px] uppercase font-black tracking-widest px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Shortlist ({shortlistedPlayers.length})</TabsTrigger>
+        <TabsList className="bg-muted/50 border border-primary/20 h-10 max-md:h-8 gap-1 p-1 mb-4 max-md:mb-2 rounded-xl">
+          <TabsTrigger value="all" className="text-[12px] max-md:text-[10px] uppercase font-black tracking-widest px-6 max-md:px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Market Search</TabsTrigger>
+          <TabsTrigger value="shortlist" className="text-[12px] max-md:text-[10px] uppercase font-black tracking-widest px-6 max-md:px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">Shortlist ({shortlistedPlayers.length})</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="m-0">

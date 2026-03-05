@@ -15,35 +15,35 @@ export function ManagerInfo() {
   if (!manager) return null;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-4 max-md:space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-md:gap-2">
         <RetroWindow title="MANAGER PHILOSOPHY">
-          <div className="space-y-4">
+          <div className="space-y-4 max-md:space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground uppercase">Name</span>
-              <span className="text-sm font-bold text-primary">{manager.name.toUpperCase()}</span>
+              <span className="text-xs max-md:text-sm text-white uppercase">Name</span>
+              <span className="text-sm max-md:text-base font-bold text-primary">{manager.name.toUpperCase()}</span>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground uppercase">Philosophy</span>
+                <span className="text-xs max-md:text-sm text-white uppercase">Philosophy</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <HelpCircle size={10} className="text-muted-foreground cursor-help" />
+                    <HelpCircle size={10} className="text-white cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="text-[11px] max-w-[200px]">
                     Your chosen core management style, fixed at career start.
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <span className="text-sm font-bold text-accent">{manager.personality.toUpperCase()}</span>
+              <span className="text-sm max-md:text-base font-bold text-accent">{manager.personality.toUpperCase()}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground uppercase">Reputation</span>
-              <span className="text-sm font-bold">{manager.reputation} / 100</span>
+              <span className="text-xs max-md:text-sm text-white uppercase">Reputation</span>
+              <span className="text-sm max-md:text-base font-bold">{manager.reputation} / 100</span>
             </div>
-            <div className="mt-2 p-3 bg-primary/5 border border-primary/20">
-               <h4 className="text-[10px] font-bold text-primary uppercase mb-1">Philosophy Traits</h4>
-               <p className="text-[10px] italic leading-tight text-muted-foreground">
+            <div className="mt-2 max-md:mt-1 p-3 max-md:p-2 bg-primary/5 border border-primary/20">
+               <h4 className="text-[10px] max-md:text-sm font-bold text-primary uppercase mb-1 max-md:mb-0.5">Philosophy Traits</h4>
+               <p className="text-[10px] max-md:text-sm italic leading-tight text-white">
                  {manager.personality === 'Analyst' && "Tactical Master: Provides a +5% strength boost to all areas of the pitch through superior preparation."}
                  {manager.personality === 'Motivator' && "Man Management: Maintains a positive dressing room with 25% faster morale recovery rates."}
                  {manager.personality === 'Economist' && "Financial Prudence: Reduces the club's weekly wage bill by 10% through strict contract management."}
@@ -55,22 +55,22 @@ export function ManagerInfo() {
         </RetroWindow>
 
         <RetroWindow title="CAREER STATISTICS">
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-muted p-2 border border-primary/10 text-center">
-                <div className="text-[8px] text-muted-foreground uppercase">Games Played</div>
-                <div className="text-lg font-mono text-cyan">{manager.totalGames}</div>
+          <div className="space-y-3 max-md:space-y-2">
+            <div className="grid grid-cols-2 gap-2 max-md:gap-1">
+              <div className="bg-muted p-2 max-md:p-1.5 border border-primary/10 text-center">
+                <div className="text-[8px] max-md:text-xs text-white uppercase">Games Played</div>
+                <div className="text-lg max-md:text-lg font-mono text-cyan">{manager.totalGames}</div>
               </div>
-              <div className="bg-muted p-2 border border-primary/10 text-center">
-                <div className="text-[8px] text-muted-foreground uppercase">Win %</div>
-                <div className="text-lg font-mono text-cyan">{manager.winPercentage.toFixed(1)}%</div>
+              <div className="bg-muted p-2 max-md:p-1.5 border border-primary/10 text-center">
+                <div className="text-[8px] max-md:text-xs text-white uppercase">Win %</div>
+                <div className="text-lg max-md:text-lg font-mono text-cyan">{manager.winPercentage.toFixed(1)}%</div>
               </div>
             </div>
             <div className="pt-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="space-y-1 cursor-help">
-                    <div className="flex justify-between text-[10px] uppercase">
+                    <div className="flex justify-between text-[10px] max-md:text-sm uppercase">
                       <span className="flex items-center gap-1 font-bold">
                         Board Confidence
                       </span>
@@ -84,9 +84,9 @@ export function ManagerInfo() {
                 <TooltipContent className="text-[11px] max-w-[200px]">How much the board trusts your leadership. Drops on losses or failing targets.</TooltipContent>
               </Tooltip>
               <div className="mt-3 p-2 bg-primary/5 border border-primary/10">
-                <div className="text-[8px] text-muted-foreground uppercase mb-1">Board Expectations</div>
-                <div className="text-[10px] font-bold text-primary uppercase">{state.boardExpectation}</div>
-                <div className="text-[8px] text-muted-foreground italic mt-1">Minimum Position: {state.targetPosition}th</div>
+                <div className="text-[8px] max-md:text-xs text-white uppercase mb-1">Board Expectations</div>
+                <div className="text-[10px] max-md:text-sm font-bold text-primary uppercase">{state.boardExpectation}</div>
+                <div className="text-[8px] max-md:text-xs text-white italic mt-1">Minimum Position: {state.targetPosition}th</div>
               </div>
             </div>
           </div>
@@ -94,13 +94,13 @@ export function ManagerInfo() {
       </div>
 
       <RetroWindow title="JOB MARKET: VACANCIES">
-        <Table>
+        <Table className="max-md:[&_th]:leading-none max-md:[&_td]:leading-none max-md:[&_thead_th]:h-auto max-md:[&_thead_th]:py-1 max-md:[&_td]:py-0.5">
           <TableHeader>
             <TableRow className="border-b-2 border-primary/40 bg-primary/20">
-              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Club</TableHead>
-              <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Division</TableHead>
-              <TableHead className="text-center text-[12px] uppercase font-black text-white tracking-wide">Reputation</TableHead>
-              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide">Action</TableHead>
+              <TableHead className="text-[12px] max-md:text-sm uppercase font-black text-white tracking-wide py-4 max-md:py-1">Club</TableHead>
+              <TableHead className="text-[12px] max-md:text-sm uppercase font-black text-white tracking-wide py-4 max-md:py-1">Division</TableHead>
+              <TableHead className="text-center text-[12px] max-md:text-sm uppercase font-black text-white tracking-wide py-4 max-md:py-1">Reputation</TableHead>
+              <TableHead className="text-right text-[12px] max-md:text-sm uppercase font-black text-white tracking-wide py-4 max-md:py-1">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,13 +109,13 @@ export function ManagerInfo() {
               if (!team) return null;
               return (
                 <TableRow key={teamId} className="hover:bg-primary/5 transition-colors border-b border-primary/5">
-                  <TableCell className="text-xs font-bold">{team.name.toUpperCase()}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">DIV {team.division}</TableCell>
-                  <TableCell className="text-center font-mono text-cyan text-xs">{team.reputation}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-xs max-md:text-sm font-bold py-2.5 max-md:py-0.5">{team.name.toUpperCase()}</TableCell>
+                  <TableCell className="text-xs max-md:text-sm text-white py-2.5 max-md:py-0.5">DIV {team.division}</TableCell>
+                  <TableCell className="text-center font-mono text-cyan text-xs max-md:text-sm py-2.5 max-md:py-0.5">{team.reputation}</TableCell>
+                  <TableCell className="text-right py-2.5 max-md:py-0.5">
                     <Button 
                       onClick={() => applyForJob(team.id)} 
-                      className="h-6 text-[8px] bg-accent/20 text-accent hover:bg-accent hover:text-accent-foreground retro-button px-2"
+                      className="h-6 max-md:h-7 text-[8px] max-md:text-xs bg-accent/20 text-accent hover:bg-accent hover:text-accent-foreground retro-button px-2"
                     >
                       APPLY
                     </Button>
@@ -125,7 +125,7 @@ export function ManagerInfo() {
             })}
             {state.jobMarket.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4 text-muted-foreground text-xs italic">
+                <TableCell colSpan={4} className="text-center py-4 text-white text-xs max-md:text-sm italic">
                   NO VACANCIES CURRENTLY ADVERTISED.
                 </TableCell>
               </TableRow>

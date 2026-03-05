@@ -111,7 +111,7 @@ export interface Team {
   isUserTeam?: boolean;
   playedHistory: string[];
   staff: StaffMember[];
-  lineup: string[];
+  lineup: (string | null)[];
   qualification?: QualificationType;
   finances: {
     gateReceipts: number;
