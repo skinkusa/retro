@@ -228,6 +228,17 @@ export interface SeasonSummaryData {
   bestPlayer: { name: string; rating: number; team: string } | null;
 }
 
+/** Persisted so refresh restores the same tab/subview. */
+export type MainTab = 'HUB' | 'SQUAD' | 'WORLD' | 'MARKET' | 'CLUB';
+export type ClubSubView = 'OFFICE' | 'STAFF' | 'FINANCE' | 'MANAGER' | 'RECORDS' | 'SETTINGS';
+export type WorldSubView = 'TABLE' | 'STATS' | 'FIXTURES';
+export interface LastView {
+  activeTab: MainTab;
+  clubSubView: ClubSubView;
+  worldSubView: WorldSubView;
+  viewingDiv: number;
+}
+
 export interface GameState {
   currentWeek: number;
   season: number;
@@ -256,4 +267,6 @@ export interface GameState {
   enginePreset?: 'realistic' | 'arcade';
   /** When set, the match screen is shown for this fixture (survives remounts). */
   currentMatchFixtureId?: string | null;
+  /** Last main tab + sub-views; restored on load so refresh keeps the same screen. */
+  lastView?: LastView | null;
 }

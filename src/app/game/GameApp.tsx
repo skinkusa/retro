@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { GameProvider, useGame } from '@/lib/store';
 import { RetroWindow } from '@/components/game/RetroWindow';
 import { SquadList } from '@/components/game/SquadList';
@@ -185,7 +185,7 @@ function StartMenu() {
 }
 
 function GameContent() {
-  const { state, advanceWeek, setTactics, saveGame, swapPlayers, startMatch, clearCurrentMatch, quitToMainMenu } = useGame();
+  const { state, advanceWeek, setTactics, saveGame, swapPlayers, startMatch, clearCurrentMatch, quitToMainMenu, setLastView } = useGame();
   const [activeTab, setActiveTab] = useState<'HUB' | 'SQUAD' | 'WORLD' | 'MARKET' | 'CLUB'>('HUB');
   const [clubSubView, setClubSubView] = useState<'OFFICE' | 'STAFF' | 'FINANCE' | 'MANAGER' | 'RECORDS' | 'SETTINGS'>('OFFICE');
   const [worldSubView, setWorldSubView] = useState<'TABLE' | 'STATS' | 'FIXTURES'>('TABLE');
@@ -195,8 +195,39 @@ function GameContent() {
   const [openToTab, setOpenToTab] = useState<'overview' | 'contract' | null>(null);
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
   const [showMatchDayScreen, setShowMatchDayScreen] = useState(false);
+  const restoredLastViewRef = useRef(false);
 
-  useEffect(() => { if (state.userTeamId) { const ut = state.teams.find(t => t.id === state.userTeamId); if (ut) setViewingDiv(ut.division); } }, [state.userTeamId, state.teams]);
+  useEffect(() => {
+    if (!state.isGameStarted || !state.lastView || restoredLastViewRef.current) return;
+    restoredLastViewRef.current = true;
+    setActiveTab(state.lastView!.activeTab);
+    setClubSubView(state.lastView!.clubSubView);
+    setWorldSubView(state.lastView!.worldSubView);
+    const d = state.lastView!.viewingDiv;
+    if (d >= 1 && d <= 4) setViewingDiv(d);
+  }, [state.isGameStarted, state.lastView]);
+
+  useEffect(() => { if (state.userTeamId && !state.lastView) { const ut = state.teams.find(t => t.id === state.userTeamId); if (ut) setViewingDiv(ut.division); }   }, [state.userTeamId, state.teams, state.lastView]);
+
+  const goToTab = useCallback((tab: 'HUB' | 'SQUAD' | 'WORLD' | 'MARKET' | 'CLUB') => {
+    setActiveTab(tab);
+    setLastView({ activeTab: tab, clubSubView, worldSubView, viewingDiv });
+  }, [clubSubView, worldSubView, viewingDiv, setLastView]);
+
+  const goToClubSubView = useCallback((sub: 'OFFICE' | 'STAFF' | 'FINANCE' | 'MANAGER' | 'RECORDS' | 'SETTINGS') => {
+    setClubSubView(sub);
+    setLastView({ activeTab, clubSubView: sub, worldSubView, viewingDiv });
+  }, [activeTab, worldSubView, viewingDiv, setLastView]);
+
+  const goToWorldSubView = useCallback((sub: 'TABLE' | 'STATS' | 'FIXTURES') => {
+    setWorldSubView(sub);
+    setLastView({ activeTab, clubSubView, worldSubView: sub, viewingDiv });
+  }, [activeTab, clubSubView, viewingDiv, setLastView]);
+
+  const goToViewingDiv = useCallback((div: number) => {
+    setViewingDiv(div);
+    setLastView({ activeTab, clubSubView, worldSubView, viewingDiv: div });
+  }, [activeTab, clubSubView, worldSubView, setLastView]);
 
   const currentWeekNews = useMemo(() => state.messages.filter(m => m.week === state.currentWeek), [state.messages, state.currentWeek]);
   const handlePlayerSwapInteraction = (pId: string) => { if (!swapSourceId) { setSwapSourceId(pId); } else { if (swapSourceId === pId) { setSwapSourceId(null); } else { swapPlayers(swapSourceId, pId); setSwapSourceId(null); } } };
@@ -214,7 +245,7 @@ function GameContent() {
     const homeTeam = state.teams.find(t => t.id === matchFixture.homeTeamId)!;
     const awayTeam = state.teams.find(t => t.id === matchFixture.awayTeamId)!;
     return (
-      <MatchSim fixture={matchFixture} homeTeam={homeTeam} awayTeam={awayTeam} onFinish={() => { advanceWeek(); clearCurrentMatch(); setActiveTab('HUB'); }} />
+      <MatchSim fixture={matchFixture} homeTeam={homeTeam} awayTeam={awayTeam} onFinish={() => { advanceWeek(); clearCurrentMatch(); goToTab('HUB'); }} />
     );
   }
 
@@ -355,8 +386,8 @@ function GameContent() {
         )}
         {activeTab === 'WORLD' && (
           <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
-            <div className="bg-black/70 p-2 border-2 border-primary/20 flex gap-2 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => setViewingDiv(div)} className={cn("flex-1 h-12 text-lg font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
-            <div className="flex gap-3"><Button onClick={() => setWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => setWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => setWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
+            <div className="bg-black/70 p-2 border-2 border-primary/20 flex gap-2 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => goToViewingDiv(div)} className={cn("flex-1 h-12 text-lg font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
+            <div className="flex gap-3"><Button onClick={() => goToWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => goToWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => goToWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
             {worldSubView === 'TABLE' && <RetroWindow title={`DIV ${viewingDiv} LEAGUE STANDINGS`} noPadding className="bg-black/60 rounded-2xl shadow-2xl"><LeagueTable teams={state.teams.filter(t => t.division === viewingDiv)} onTeamClick={tId => setViewingTeam(state.teams.find(tx => tx.id === tId) || null)} /></RetroWindow>}
             {worldSubView === 'STATS' && <StatsHub division={viewingDiv} />}
             {worldSubView === 'FIXTURES' && (
@@ -376,16 +407,16 @@ function GameContent() {
           <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
             {clubSubView === 'OFFICE' ? (
               <div className="grid grid-cols-2 gap-6 max-md:gap-3 auto-rows-fr">
-                <button onClick={() => setClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Manager Profile</span></button>
-                <button onClick={() => setClubSubView('FINANCE')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-accent/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><DollarSign size={72} className="text-accent group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Financial Hub</span></button>
-                <button onClick={() => setClubSubView('STAFF')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Briefcase size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Staff Management</span></button>
-                <button onClick={() => setClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500" /><span className="text-2xl font-black uppercase text-white">Legacy & Records</span></button>
-                <button onClick={() => setClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground" /><span className="text-2xl font-black uppercase text-white">OS Config</span></button>
+                <button onClick={() => goToClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Manager Profile</span></button>
+                <button onClick={() => goToClubSubView('FINANCE')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-accent/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><DollarSign size={72} className="text-accent group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Financial Hub</span></button>
+                <button onClick={() => goToClubSubView('STAFF')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Briefcase size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Staff Management</span></button>
+                <button onClick={() => goToClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500" /><span className="text-2xl font-black uppercase text-white">Legacy & Records</span></button>
+                <button onClick={() => goToClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground" /><span className="text-2xl font-black uppercase text-white">OS Config</span></button>
                 <button onClick={saveGame} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-4 border-accent/40 bg-accent/5 hover:bg-accent/20 rounded-3xl transition-all shadow-2xl group"><Save size={72} className="text-accent group-hover:animate-bounce" /><span className="text-2xl font-black uppercase text-white">Commit Save</span></button>
                 <button onClick={quitToMainMenu} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 border-2 border-white/20 hover:bg-red-500/20 bg-black/40 rounded-3xl transition-all shadow-2xl group"><LogOut size={72} className="text-white/80 group-hover:text-red-400 transition-colors" /><span className="text-2xl font-black uppercase text-white">Quit to Main Menu</span></button>
               </div>
             ) : (
-              <div className="space-y-6"><Button variant="outline" onClick={() => setClubSubView('OFFICE')} className="h-14 text-lg font-black mb-4 retro-button bg-black/60 px-10 border-2 border-primary/40 rounded-xl hover:bg-primary hover:text-white transition-all uppercase">← Return to Main Office</Button>
+              <div className="space-y-6"><Button variant="outline" onClick={() => goToClubSubView('OFFICE')} className="h-14 text-lg font-black mb-4 retro-button bg-black/60 px-10 border-2 border-primary/40 rounded-xl hover:bg-primary hover:text-white transition-all uppercase">← Return to Main Office</Button>
                 {clubSubView === 'MANAGER' && <ManagerInfo />} {clubSubView === 'FINANCE' && <FinanceHub />} {clubSubView === 'STAFF' && <StaffManagement />} {clubSubView === 'RECORDS' && <TeamRecords />} {clubSubView === 'SETTINGS' && <SettingsHub />}
               </div>
             )}
@@ -395,11 +426,11 @@ function GameContent() {
 
       <nav className="game-nav fixed bottom-0 left-0 right-0 max-w-screen-2xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 max-md:h-auto flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
         <TooltipProvider>
-          <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('HUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'HUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><LayoutDashboard size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Dashboard</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">HUB & NEWS</TooltipContent></TooltipPortal></Tooltip>
-          <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('SQUAD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'SQUAD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Users size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Team</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">SQUAD & TACTICS</TooltipContent></TooltipPortal></Tooltip>
-          <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('WORLD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'WORLD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Globe2 size={36} /><span className="text-[12px] uppercase font-black tracking-widest">World</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">STANDINGS & FIXTURES</TooltipContent></TooltipPortal></Tooltip>
-          <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('MARKET')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'MARKET' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Search size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Market</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">TRANSFER DATABASE</TooltipContent></TooltipPortal></Tooltip>
-          <Tooltip><TooltipTrigger asChild><button onClick={() => setActiveTab('CLUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'CLUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Briefcase size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Office</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">CLUB MANAGEMENT</TooltipContent></TooltipPortal></Tooltip>
+          <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('HUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'HUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><LayoutDashboard size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Dashboard</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">HUB & NEWS</TooltipContent></TooltipPortal></Tooltip>
+          <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('SQUAD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'SQUAD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Users size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Team</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">SQUAD & TACTICS</TooltipContent></TooltipPortal></Tooltip>
+          <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('WORLD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'WORLD' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Globe2 size={36} /><span className="text-[12px] uppercase font-black tracking-widest">World</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">STANDINGS & FIXTURES</TooltipContent></TooltipPortal></Tooltip>
+          <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('MARKET')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'MARKET' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Search size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Market</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">TRANSFER DATABASE</TooltipContent></TooltipPortal></Tooltip>
+          <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('CLUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'CLUB' ? 'text-accent bg-accent/10 border-t-8 border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Briefcase size={36} /><span className="text-[12px] uppercase font-black tracking-widest">Office</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">CLUB MANAGEMENT</TooltipContent></TooltipPortal></Tooltip>
         </TooltipProvider>
       </nav>
 

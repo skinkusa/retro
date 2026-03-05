@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData } from '@/types/game';
+import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData, LastView } from '@/types/game';
 import { generateInitialData, generateFixtures, FIRSTNAME_POOL, SURNAME_POOL } from '@/lib/game-data';
 import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes } from '@/lib/game-engine';
 import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
@@ -43,48 +43,73 @@ interface GameContextType {
   startMatch: (fixtureId: string) => void;
   clearCurrentMatch: () => void;
   quitToMainMenu: () => void;
+  setLastView: (view: LastView) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
+const DEFAULT_STATE: GameState = {
+  currentWeek: 1,
+  season: 1993,
+  userTeamId: null,
+  manager: null,
+  teams: [],
+  players: [],
+  fixtures: [],
+  messages: [],
+  isGameStarted: false,
+  isFired: false,
+  isSeasonOver: false,
+  seasonSummary: null,
+  boardConfidence: 75,
+  boardExpectation: 'No target set',
+  targetPosition: 10,
+  transferMarket: { listed: [], incomingBids: [] },
+  availableStaff: [],
+  jobMarket: [],
+  cupEntrants: [],
+  records: { biggestWin: null, biggestLoss: null, transferPaid: null, transferReceived: null },
+  enginePreset: 'realistic',
+  currentMatchFixtureId: null,
+  lastView: null
+};
+
+function getInitialState(): GameState {
+  if (typeof window === 'undefined') return DEFAULT_STATE;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return DEFAULT_STATE;
+    const data = JSON.parse(saved);
+    const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
+    return { ...data, isGameStarted: true, teams, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null };
+  } catch {
+    return DEFAULT_STATE;
+  }
+}
+
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
-  const [state, setState] = useState<GameState>({
-    currentWeek: 1,
-    season: 1993,
-    userTeamId: null,
-    manager: null,
-    teams: [],
-    players: [],
-    fixtures: [],
-    messages: [],
-    isGameStarted: false,
-    isFired: false,
-    isSeasonOver: false,
-    seasonSummary: null,
-    boardConfidence: 75,
-    boardExpectation: 'No target set',
-    targetPosition: 10,
-    transferMarket: { listed: [], incomingBids: [] },
-    availableStaff: [],
-    jobMarket: [],
-    cupEntrants: [],
-    records: { biggestWin: null, biggestLoss: null, transferPaid: null, transferReceived: null },
-    enginePreset: 'realistic',
-    currentMatchFixtureId: null
-  });
+  const [state, setState] = useState<GameState>(getInitialState);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
+        setState({ ...data, isGameStarted: true, teams, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null });
+        return;
+      } catch (_e) { /* corrupted save: fall through to fresh data */ }
+    }
     const { teams, players, fixtures, availableStaff, cupEntrants } = generateInitialData();
     let finalTeams = [...teams];
-    if (typeof window !== 'undefined') {
-      const overridesRaw = localStorage.getItem(OVERRIDES_KEY);
-      if (overridesRaw) {
-        try {
-          const overrides = JSON.parse(overridesRaw);
-          finalTeams = teams.map(t => overrides[t.id] ? { ...t, name: overrides[t.id] } : t);
-        } catch (e) {}
-      }
+    const overridesRaw = localStorage.getItem(OVERRIDES_KEY);
+    if (overridesRaw) {
+      try {
+        const overrides = JSON.parse(overridesRaw);
+        finalTeams = teams.map(t => overrides[t.id] ? { ...t, name: overrides[t.id] } : t);
+      } catch (_e) {}
     }
     setState(s => ({ ...s, teams: finalTeams, players, fixtures, availableStaff, cupEntrants }));
   }, []);
@@ -638,6 +663,7 @@ setState(s => ({
     autoPickLineup,
     applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })),
     quitToMainMenu: () => setState(s => ({ ...s, isGameStarted: false, currentMatchFixtureId: null })),
+    setLastView: (view: LastView) => setState(s => ({ ...s, lastView: view })),
     acceptBid, rejectBid, updateMidMatchResult, 
     updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch
   }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, updateMidMatchResult, fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch, toast, togglePlayerLineup, swapPlayers, addPlayerToSlot, autoPickLineup]);

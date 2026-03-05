@@ -6,19 +6,38 @@ import { STAFF_ROLES, generateStaffMember } from '@/data/staff-config';
 
 export { FIRSTNAME_POOL, SURNAME_POOL };
 
+/**
+ * Round-robin fixture generation so every week 1..38 has valid fixtures (no empty weeks).
+ * Uses circle method: fix team 0, rotate others. First N-1 weeks = single round-robin;
+ * weeks N..38 repeat with home/away swapped (double round-robin).
+ */
 export function generateFixtures(teams: Team[], season: number) {
   const fixtures: Fixture[] = [];
   DIVISIONS.forEach(div => {
     const divTeams = teams.filter(t => t.division === div.id);
+    const N = divTeams.length;
+    if (N < 2) return; // no fixtures for empty or single-team division
+    const roundsPerHalf = N - 1; // N-1 rounds for single round-robin
     for (let week = 1; week <= 38; week++) {
-      const used = new Set();
-      for (let i = 0; i < divTeams.length; i++) {
-        if (used.has(divTeams[i].id)) continue;
-        const oppIdx = (i + week) % divTeams.length;
-        const opp = divTeams[oppIdx];
-        if (used.has(opp.id) || opp.id === divTeams[i].id) continue;
-        fixtures.push({ id: `f-s${season}-div${div.id}-w${week}-${i}`, homeTeamId: divTeams[i].id, awayTeamId: opp.id, week, division: div.id, competition: 'LEAGUE' });
-        used.add(divTeams[i].id); used.add(opp.id);
+      const r = (week - 1) % roundsPerHalf; // round index 0 .. N-2
+      const swapHomeAway = week > roundsPerHalf; // second half of season: reverse home/away
+      // Circle method: position 0 = team 0; position j (1..N-1) = team (j-1+r) % (N-1) + 1
+      // Pair position i with position N-1-i for i = 0 .. floor(N/2)-1 (each team plays once per round)
+      for (let i = 0; i < Math.floor(N / 2); i++) {
+        const rightPos = N - 1 - i;
+        const leftIdx = i === 0 ? 0 : ((i - 1 + r) % (N - 1)) + 1;
+        const rightIdx = ((rightPos - 1 + r) % (N - 1)) + 1;
+        if (leftIdx === rightIdx) continue; // bye in odd-N case
+        const homeIdx = swapHomeAway ? rightIdx : leftIdx;
+        const awayIdx = swapHomeAway ? leftIdx : rightIdx;
+        fixtures.push({
+          id: `f-s${season}-div${div.id}-w${week}-${i}`,
+          homeTeamId: divTeams[homeIdx].id,
+          awayTeamId: divTeams[awayIdx].id,
+          week,
+          division: div.id,
+          competition: 'LEAGUE',
+        });
       }
     }
   });
