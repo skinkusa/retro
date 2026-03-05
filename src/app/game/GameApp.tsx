@@ -81,11 +81,11 @@ function StartMenu() {
 
   return (
     <div className="start-menu-shell min-h-screen flex items-center justify-center p-4 font-mono">
-      <RetroWindow title="RETRO MANAGER OS v1.0" className="max-w-5xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 px-8">
-          <div className="space-y-8">
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-primary border-b-8 border-primary/20 pb-4 uppercase leading-none italic">Retro Manager</h1>
-            <div className="space-y-6">
+      <RetroWindow title="RETRO MANAGER OS v1.0" titleClassName="text-[8px]" className="max-w-5xl w-full bg-card/90 backdrop-blur-xl border-primary/40 shadow-2xl rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6 px-6 md:py-10 md:px-8">
+          <div className="space-y-6 max-md:space-y-4">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter text-primary border-b-8 border-primary/20 pb-2 md:pb-4 uppercase leading-none italic">Retro Manager</h1>
+            <div className="space-y-6 max-md:space-y-4">
               {hasSave && (
                 <div className="p-6 bg-accent/10 border-2 border-accent space-y-4 shadow-[8px_8px_0px_0px_rgba(38,217,117,0.3)] rounded-2xl">
                   <h2 className="text-[18px] font-black text-accent uppercase tracking-widest text-center">Active Career Detected</h2>
@@ -95,10 +95,9 @@ function StartMenu() {
               <div className="space-y-4">
                 <Button onClick={() => setShowSettings(true)} variant="outline" className="w-full h-14 border-primary/40 text-primary font-black retro-button flex items-center justify-center gap-2 hover:bg-primary/10 bg-black/20 text-xl rounded-xl uppercase"><Settings size={22} /> Database Editor</Button>
               </div>
-              <div className="pt-8 border-t-4 border-primary/10 space-y-6">
+              <div className="pt-4 md:pt-8 border-t-4 border-primary/10 space-y-6 max-md:space-y-4">
                 <div>
-                  <label className="text-[16px] uppercase text-muted-foreground mb-2 block font-black tracking-widest">Manager Identity</label>
-                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-black/40 border-primary/30 h-16 text-3xl font-black rounded-xl uppercase px-6" placeholder="ENTER NAME..." />
+                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-black/40 border-primary/30 h-12 md:h-16 text-xl md:text-3xl font-black rounded-xl uppercase px-4 md:px-6" placeholder="ENTER MANAGER NAME..." />
                 </div>
                 <div>
                   <label className="text-[16px] uppercase text-muted-foreground block font-black tracking-widest mb-2">Management Philosophy</label>
@@ -119,11 +118,11 @@ function StartMenu() {
                 <SelectContent><SelectItem value="1">DIVISION 1</SelectItem><SelectItem value="2">DIVISION 2</SelectItem><SelectItem value="3">DIVISION 3</SelectItem><SelectItem value="4">DIVISION 4</SelectItem></SelectContent>
               </Select>
             </div>
-            <div className="max-h-[450px] overflow-auto border-4 border-primary/20 p-2 space-y-1.5 bg-black/40 backdrop-blur-sm rounded-2xl shadow-inner custom-scrollbar">
+            <div className="max-h-[450px] overflow-auto border-4 border-primary/20 p-2 space-y-0.5 md:space-y-1 bg-black/40 backdrop-blur-sm rounded-2xl shadow-inner custom-scrollbar">
               {state.teams.filter(t => t.division === selectedDiv).map(t => (
-                <button key={t.id} onClick={() => setSelectedTeam(t.id)} className={`w-full text-left px-6 py-5 text-2xl border-4 border-transparent hover:bg-primary/20 transition-all flex justify-between items-center rounded-xl shadow-sm ${selectedTeam === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-black/20'}`}>
+                <button key={t.id} onClick={() => setSelectedTeam(t.id)} className={`w-full text-left px-3 md:px-6 py-2 md:py-4 text-base md:text-xl border-4 border-transparent hover:bg-primary/20 transition-all flex justify-between items-center rounded-xl shadow-sm ${selectedTeam === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-black/20'}`}>
                   <span className="font-black uppercase tracking-tight">{t.name}</span>
-                  <span className="opacity-60 text-[16px] font-mono font-black">REP: {t.reputation}</span>
+                  <span className="opacity-60 text-[14px] md:text-[16px] font-mono font-black">REP: {t.reputation}</span>
                 </button>
               ))}
             </div>
@@ -224,15 +223,15 @@ function GameContent() {
   return (
     <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
       {showMatchDayScreen && (
-        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl bg-black/80 border-4 border-primary/40 rounded-2xl shadow-2xl overflow-hidden">
-            <div className="bg-primary text-primary-foreground px-4 py-3 flex justify-between items-center">
-              <h2 className="text-lg sm:text-xl font-black uppercase tracking-widest">Match day — Week {state.currentWeek}</h2>
-              <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-9 font-black uppercase" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
+        <div className="match-day-overlay fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-stretch p-0 animate-in fade-in duration-200">
+          <div className="match-day-modal w-full max-w-3xl max-h-[100vh] flex flex-col bg-black/80 border-2 sm:border-4 border-primary/40 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden mx-auto sm:my-auto">
+            <div className="bg-primary text-primary-foreground px-2 sm:px-4 py-1 sm:py-0.5 flex justify-between items-center shrink-0 min-h-[2.25rem] sm:min-h-[2.5rem]">
+              <h2 className="text-base sm:text-xl font-black uppercase tracking-widest truncate">Match day — Week {state.currentWeek}</h2>
+              <Button variant="outline" size="sm" className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/20 h-7 sm:h-9 font-black uppercase shrink-0 text-xs sm:text-sm px-2 sm:px-3" onClick={() => setShowMatchDayScreen(false)}>Back</Button>
             </div>
-            <div className="match-day-list p-4 space-y-3 max-h-[60vh] overflow-auto">
+            <div className="match-day-list py-0 px-2 sm:py-1 sm:px-4 space-y-1 sm:space-y-2 flex-1 min-h-0 overflow-auto">
               {currentWeekFixtures.length === 0 ? (
-                <p className="text-center text-muted-foreground font-black uppercase py-8">No fixtures this week</p>
+                <p className="text-center text-muted-foreground font-black uppercase py-2 sm:py-4 text-sm">No fixtures this week</p>
               ) : (
                 currentWeekFixtures.map(f => {
                   const home = state.teams.find(t => t.id === f.homeTeamId);
@@ -240,13 +239,13 @@ function GameContent() {
                   const isUserFixture = f.homeTeamId === userTeam.id || f.awayTeamId === userTeam.id;
                   const canPlay = isUserFixture && !f.result && isLineupValid;
                   return (
-                    <div key={f.id} className={cn("flex items-center gap-3 p-3 rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
+                    <div key={f.id} className={cn("flex items-center gap-1 sm:gap-3 p-1.5 sm:p-3 rounded-md sm:rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
                       <span className="w-10 text-center font-black text-muted-foreground tabular-nums">{f.week}</span>
-                      <span className={cn("flex-1 font-black uppercase text-right truncate", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
-                      <span className="text-center font-black text-lg w-14">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
-                      <span className={cn("flex-1 font-black uppercase text-left truncate", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
+                      <span className={cn("flex-1 font-black uppercase text-right truncate text-sm sm:text-base", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
+                      <span className="text-center font-black text-base sm:text-lg w-10 sm:w-14 shrink-0">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
+                      <span className={cn("flex-1 font-black uppercase text-left truncate text-sm sm:text-base", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
                       {isUserFixture && !f.result && (
-                        <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="h-10 px-4 bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-lg hover:scale-105 transition-transform"><PlayCircle size={18} className="mr-1.5" /> Play</Button>
+                        <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-base bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-md sm:rounded-lg hover:scale-105 transition-transform"><PlayCircle size={14} className="mr-1 sm:mr-1.5 w-3.5 h-3.5 sm:w-[18px] sm:h-[18px]" /> Play</Button>
                       )}
                     </div>
                   );
@@ -254,12 +253,12 @@ function GameContent() {
               )}
             </div>
             {!isLineupValid && nextFixture && (
-              <div className="px-4 pb-4 text-center text-amber-400 text-sm font-black uppercase">Pick at least 11 players in Squad before playing.</div>
+              <div className="px-2 sm:px-4 py-0.5 shrink-0 text-center text-amber-400 text-[11px] sm:text-sm font-black uppercase">Pick at least 11 players in Squad before playing.</div>
             )}
           </div>
         </div>
       )}
-      <div className="game-header bg-primary text-primary-foreground py-1.5 px-3 sm:py-2 sm:px-6 flex justify-between items-center shrink-0 border-b-2 border-black/40 shadow-lg z-50">
+      <div className="game-header max-lg:hidden bg-primary text-primary-foreground py-1.5 px-3 sm:py-2 sm:px-6 flex justify-between items-center shrink-0 border-b-2 border-black/40 shadow-lg z-50">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <span className="text-base sm:text-lg font-black tracking-tighter uppercase leading-none italic drop-shadow-md truncate">Retro Manager</span>
           <span className="text-[10px] sm:text-[11px] opacity-90 font-black whitespace-nowrap">STATION OS v1.0</span>
@@ -267,10 +266,10 @@ function GameContent() {
         <Link href="/" className="text-[11px] font-black uppercase text-primary-foreground/80 hover:text-white transition-colors">← Landing</Link>
       </div>
 
-      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 px-3 sm:px-5">
+      <main className="flex-1 min-h-0 overflow-auto scrollbar-none pb-24 sm:pb-28 pt-4 px-2 md:px-5">
         {activeTab === 'HUB' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 max-md:px-2">
-            <div className="retro-tile flex flex-col bg-black/30 backdrop-blur-xl border-2 border-primary/40 p-4 rounded-2xl shadow-2xl h-fit">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1 py-3 md:p-4">
+            <div className="hub-identity-card retro-tile flex flex-col bg-black/30 backdrop-blur-xl border-2 border-primary/40 p-4 rounded-2xl shadow-2xl h-fit">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b-2 border-primary/10 pb-3">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <h3 className="text-[12px] sm:text-[14px] font-black text-primary uppercase shrink-0">Team Identity:</h3>
@@ -278,16 +277,18 @@ function GameContent() {
                 </div>
                 <span className="text-[11px] bg-black/60 px-3 py-1 rounded-full font-black border border-white/10 uppercase shrink-0">Season {state.season}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="hub-stats-grid grid grid-cols-2 lg:grid-cols-4 gap-2 min-w-0">
                 <TooltipProvider>
-                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Week</div><div className="text-lg sm:text-xl font-black text-accent tabular-nums">{state.currentWeek}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">CURRENT MATCH WEEK (38 TOTAL)</TooltipContent></TooltipPortal></Tooltip>
-                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Balance</div><div className="text-base sm:text-lg font-black text-white tabular-nums truncate">{formatMoney(userTeam.budget)}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">TOTAL CLUB CAPITAL</TooltipContent></TooltipPortal></Tooltip>
+                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Week</div><div className="text-lg sm:text-xl font-black text-accent tabular-nums">{state.currentWeek}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">CURRENT MATCH WEEK (38 TOTAL)</TooltipContent></TooltipPortal></Tooltip>
                 </TooltipProvider>
-                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Board Confidence</div><div className={`text-lg sm:text-xl font-black ${state.boardConfidence > 50 ? 'text-green-500' : 'text-red-500'}`}>{state.boardConfidence}%</div></div>
-                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">League Points</div><div className="text-lg sm:text-xl font-black text-accent">{userTeam.points} PTS</div></div>
+                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Board Confidence</div><div className={`text-lg sm:text-xl font-black ${state.boardConfidence > 50 ? 'text-green-500' : 'text-red-500'}`}>{state.boardConfidence}%</div></div>
+                <div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">League Points</div><div className="text-lg sm:text-xl font-black text-accent">{userTeam.points} PTS</div></div>
+                <TooltipProvider>
+                  <Tooltip><TooltipTrigger asChild><div className="bg-black/40 p-2.5 rounded-xl border border-white/5 min-w-0"><div className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase mb-0.5">Balance</div><div className="text-base sm:text-lg font-black text-white tabular-nums truncate">{formatMoney(userTeam.budget)}</div></div></TooltipTrigger><TooltipPortal><TooltipContent className="font-black">TOTAL CLUB CAPITAL</TooltipContent></TooltipPortal></Tooltip>
+                </TooltipProvider>
               </div>
             </div>
-            <div className="retro-tile bg-black/30 border-2 border-primary/40 p-3 rounded-2xl shadow-2xl">
+            <div className="hub-division-card retro-tile bg-black/30 border-2 border-primary/40 p-3 rounded-2xl shadow-2xl">
               <h3 className="text-[13px] font-black text-primary uppercase mb-2 border-b-2 border-primary/10 pb-1.5">Division {userTeam.division} Snapshot</h3>
               <div className="space-y-2">
                 {state.teams.filter(t => t.division === userTeam.division).slice(0, 3).map((t, i) => (
@@ -297,21 +298,21 @@ function GameContent() {
                 ))}
               </div>
             </div>
-            <div className="retro-tile col-span-1 md:col-span-2 bg-primary/5 border-2 border-primary/40 p-4 rounded-2xl shadow-2xl flex flex-col items-center">
-              <div className="w-full flex justify-between items-center mb-4 border-b-2 border-primary/20 pb-2">
-                <h3 className="text-[14px] font-black text-primary uppercase tracking-widest">Next Fixture Intel</h3>
-                <span className="text-[12px] font-black text-muted-foreground">WEEK {state.currentWeek}</span>
+            <div className="retro-tile col-span-1 md:col-span-2 bg-primary/5 border-2 border-primary/40 p-2 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex flex-col items-center">
+              <div className="w-full flex justify-between items-center mb-2 sm:mb-4 border-b border-primary/30 pb-1.5 sm:pb-2">
+                <h3 className="text-xs sm:text-[14px] font-black text-primary uppercase tracking-widest">Next Fixture Intel</h3>
+                <span className="text-[10px] sm:text-[12px] font-black text-muted-foreground tabular-nums">WEEK {state.currentWeek}</span>
               </div>
               {nextFixture ? (
-                <div className="w-full flex flex-col md:flex-row items-center gap-10">
-                  <div className="flex-1 flex justify-center items-center gap-12">
-                    <span className="text-3xl font-black uppercase text-white truncate text-right flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
-                    <div className="bg-primary/20 px-6 py-2 rounded-xl border-2 border-primary/40 font-black text-primary text-xl">VS</div>
-                    <span className="text-3xl font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
+                <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 md:gap-10">
+                  <div className="flex-1 flex justify-center items-center gap-2 sm:gap-4 md:gap-12 min-w-0 py-1">
+                    <span className="text-base sm:text-lg md:text-3xl font-black uppercase text-white truncate text-right flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
+                    <div className="bg-primary/20 px-2 py-0.5 sm:px-3 sm:py-1 md:px-6 md:py-2 rounded-md sm:rounded-lg md:rounded-xl border border-primary/40 sm:border-2 font-black text-primary text-xs sm:text-sm md:text-xl shrink-0">VS</div>
+                    <span className="text-base sm:text-lg md:text-3xl font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
                   </div>
-                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="w-full md:w-64 h-16 bg-accent text-accent-foreground retro-button font-black text-2xl rounded-2xl shadow-2xl hover:scale-[1.05] transition-transform animate-pulse"><PlayCircle size={32} className="mr-3" /> PLAY MATCH</Button>
+                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="w-full sm:w-auto sm:max-w-[25%] md:w-64 md:max-w-none h-10 sm:h-9 md:h-16 bg-accent text-accent-foreground retro-button font-black text-sm md:text-2xl rounded-lg md:rounded-2xl shadow-xl md:shadow-2xl hover:scale-[1.05] transition-transform animate-pulse shrink-0 px-3 md:px-6"><PlayCircle size={20} className="mr-1.5 md:mr-3 w-5 h-5 md:w-8 md:h-8 shrink-0 sm:inline-block md:block" /> PLAY MATCH</Button>
                 </div>
-              ) : <div className="text-xl font-black text-muted-foreground uppercase italic py-8 tracking-[0.3em]">Season Concluded</div>}
+              ) : <div className="text-base sm:text-xl font-black text-muted-foreground uppercase italic py-4 sm:py-8 tracking-[0.3em]">Season Concluded</div>}
             </div>
             <div className="retro-tile col-span-1 md:col-span-2 bg-black/30 border-2 border-primary/40 p-4 rounded-2xl shadow-2xl">
               <h3 className="text-[14px] font-black text-primary uppercase mb-3 border-b-2 border-primary/10 pb-1.5">Weekly Headlines</h3>
@@ -334,7 +335,7 @@ function GameContent() {
           </div>
         )}
         {activeTab === 'SQUAD' && (
-          <div className="p-4 space-y-6 bg-black/40 rounded-2xl border border-primary/10">
+          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6 bg-black/40 rounded-2xl border border-primary/10">
             <Tabs defaultValue="list" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-black/85 h-16 border-2 border-primary/25 rounded-2xl p-1 gap-1"><TabsTrigger value="list" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Squad Selection</TabsTrigger><TabsTrigger value="tactics" className="text-lg uppercase font-black rounded-xl data-[state=active]:bg-primary">Tactical Hub</TabsTrigger></TabsList>
               <TabsContent value="list" className="m-0 pt-4"><SquadList players={userPlayers} onPlayerSwap={handlePlayerSwapInteraction} activeSwapId={swapSourceId} /></TabsContent>
@@ -353,7 +354,7 @@ function GameContent() {
           </div>
         )}
         {activeTab === 'WORLD' && (
-          <div className="p-4 max-md:px-2 space-y-6">
+          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
             <div className="bg-black/70 p-2 border-2 border-primary/20 flex gap-2 rounded-2xl shadow-inner">{[1, 2, 3, 4].map(div => (<Button key={div} onClick={() => setViewingDiv(div)} className={cn("flex-1 h-12 text-lg font-black uppercase rounded-xl transition-all", viewingDiv === div ? "bg-primary text-primary-foreground shadow-lg" : "bg-transparent text-white hover:bg-white/10")}>DIV {div}</Button>))}</div>
             <div className="flex gap-3"><Button onClick={() => setWorldSubView('TABLE')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'TABLE' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Standings</Button><Button onClick={() => setWorldSubView('STATS')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'STATS' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Player Stats</Button><Button onClick={() => setWorldSubView('FIXTURES')} className={cn("h-14 text-lg font-black flex-1 rounded-xl uppercase tracking-widest transition-all text-white", worldSubView === 'FIXTURES' ? 'bg-primary shadow-lg' : 'bg-black/70 border-2 border-primary/20')}>Fixtures</Button></div>
             {worldSubView === 'TABLE' && <RetroWindow title={`DIV ${viewingDiv} LEAGUE STANDINGS`} noPadding className="bg-black/60 rounded-2xl shadow-2xl"><LeagueTable teams={state.teams.filter(t => t.division === viewingDiv)} onTeamClick={tId => setViewingTeam(state.teams.find(tx => tx.id === tId) || null)} /></RetroWindow>}
@@ -370,9 +371,9 @@ function GameContent() {
             )}
           </div>
         )}
-        {activeTab === 'MARKET' && <div className="p-4 max-md:px-2 h-full"><RetroWindow title="GLOBAL TRANSFER DATABASE" className="bg-black/20 rounded-2xl shadow-2xl"><PlayerMarket /></RetroWindow></div>}
+        {activeTab === 'MARKET' && <div className="p-4 max-md:px-1 max-md:py-3 h-full"><RetroWindow title="GLOBAL TRANSFER DATABASE" className="bg-black/20 rounded-2xl shadow-2xl"><PlayerMarket /></RetroWindow></div>}
         {activeTab === 'CLUB' && (
-          <div className="p-4 max-md:px-2 space-y-6">
+          <div className="p-4 max-md:px-1 max-md:py-3 space-y-6">
             {clubSubView === 'OFFICE' ? (
               <div className="grid grid-cols-2 gap-6 max-md:gap-3 auto-rows-fr">
                 <button onClick={() => setClubSubView('MANAGER')} className="retro-tile flex flex-col items-center justify-center gap-6 py-16 hover:bg-primary/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><UserCircle size={72} className="text-primary group-hover:scale-110 transition-transform" /><span className="text-2xl font-black uppercase text-white">Manager Profile</span></button>

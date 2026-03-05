@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Inter } from 'next/font/google';
-import { VisitorCount } from '@/components/VisitorCount';
 import './globals.css';
 
 const GA_ID = 'G-9NKK8JNLRH';
@@ -43,9 +42,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} font-body antialiased selection:bg-accent selection:text-accent-foreground`}>
         {children}
-        <footer className="fixed bottom-2 right-2 pointer-events-none">
-          <VisitorCount />
-        </footer>
       </body>
     </html>
   );

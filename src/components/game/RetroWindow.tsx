@@ -7,13 +7,14 @@ interface RetroWindowProps {
   className?: string;
   footer?: React.ReactNode;
   noPadding?: boolean;
+  titleClassName?: string;
 }
 
-export function RetroWindow({ title, children, className, footer, noPadding = false }: RetroWindowProps) {
+export function RetroWindow({ title, children, className, footer, noPadding = false, titleClassName }: RetroWindowProps) {
   return (
     <div className={cn("flex flex-col h-full border border-primary/30 bg-card/40 backdrop-blur-sm shadow-[2px_2px_0px_0px_rgba(64,121,176,0.2)]", className)}>
-      <div className="bg-primary/90 px-3 py-1 flex justify-between items-center shrink-0">
-        <span className="text-primary-foreground font-bold tracking-tight uppercase text-[10px]">{title}</span>
+      <div className="bg-primary/90 px-3 py-1 flex justify-between items-center shrink-0 max-md:hidden">
+        <span className={cn("text-primary-foreground font-bold tracking-tight uppercase text-[10px]", titleClassName)}>{title}</span>
         <div className="flex gap-1">
           <div className="w-2 h-2 border border-primary-foreground/50 bg-transparent"></div>
         </div>

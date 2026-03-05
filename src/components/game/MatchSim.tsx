@@ -393,14 +393,14 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             <div className="flex-1 flex flex-col items-end min-w-0">
               <div className="match-team-name w-full min-h-[2.75rem] sm:min-h-[3rem] border-4 border-white/30 flex items-center justify-center font-black shadow-2xl rounded-lg uppercase leading-tight text-center px-1 overflow-hidden" style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}><span className="truncate block w-full">{homeTeam.name}</span></div>
               <div className="flex items-center gap-4 sm:gap-6 mt-2">
-                <div className="flex flex-col items-end w-[140px] shrink-0">
+                <div className="flex flex-col items-end w-[200px] sm:w-[220px] shrink-0">
                   <span className="text-[13px] font-black text-white/90 uppercase">Shots: {homeShots}</span>
-                  <div className="text-[10px] font-black text-accent uppercase text-right leading-tight w-full mt-1 min-h-[3.5rem] max-h-[3.5rem] overflow-y-auto overflow-x-hidden space-y-0.5 pr-0.5">
+                  <div className="text-[10px] font-black text-accent uppercase text-right leading-tight w-full mt-1 min-h-[3.5rem] max-h-[3.5rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pr-0.5">
                     {fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
                       <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name} {s.minute}&apos;</div>
                     ))}
                   </div>
-                  <div className="text-[10px] font-black uppercase text-right leading-tight w-full mt-0.5 min-h-[2rem] max-h-[2.5rem] overflow-y-auto overflow-x-hidden space-y-0.5 pr-0.5">
+                  <div className="text-[10px] font-black uppercase text-right leading-tight w-full mt-0.5 min-h-[2rem] max-h-[2.5rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pr-0.5">
                     {fixture.result?.cards?.filter(c => homeLineup.some(p => p.id === c.playerId) && c.minute <= currentMinute).map(c => (
                       <div key={`card-${c.playerId}-${c.minute}-${c.type}`} className={c.type === 'RED' ? 'text-red-400' : 'text-yellow-400'}>
                         {c.type} {c.minute}&apos; {state.players.find(p => p.id === c.playerId)?.name}
@@ -408,26 +408,26 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                     ))}
                   </div>
                 </div>
-                <span className="text-6xl sm:text-7xl max-md:text-3xl font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">{currentHomeGoals}</span>
+                <span className="text-6xl sm:text-7xl max-md:text-sm font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">{currentHomeGoals}</span>
               </div>
             </div>
             
-            <div className="bg-black border-4 border-accent p-3 rounded-xl shadow-[0_0_30px_rgba(38,217,117,0.2)] shrink-0">
-              <div className="text-4xl sm:text-5xl font-black text-red-600 tabular-nums leading-none tracking-tighter w-[72px] sm:w-[85px] text-center">{currentMinute.toString().padStart(3, '0')}</div>
+            <div className="bg-black border-4 border-accent p-3 max-md:p-1 max-md:rounded-md max-md:border-2 rounded-xl shadow-[0_0_30px_rgba(38,217,117,0.2)] shrink-0">
+              <div className="text-4xl sm:text-5xl max-md:text-base max-md:w-8 font-black text-red-600 tabular-nums leading-none tracking-tighter w-[72px] sm:w-[85px] text-center">{currentMinute.toString().padStart(3, '0')}</div>
             </div>
 
             <div className="flex-1 flex flex-col items-start min-w-0">
               <div className="match-team-name w-full min-h-[2.75rem] sm:min-h-[3rem] border-4 border-white/30 flex items-center justify-center font-black shadow-2xl rounded-lg uppercase leading-tight text-center px-1 overflow-hidden" style={{ backgroundColor: awayKitColor, color: awayKitText }}><span className="truncate block w-full">{awayTeam.name}</span></div>
               <div className="flex items-center gap-4 sm:gap-6 mt-2">
-                <span className="text-6xl sm:text-7xl max-md:text-3xl font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">{currentAwayGoals}</span>
-                <div className="flex flex-col items-start w-[140px] shrink-0">
+                <span className="text-6xl sm:text-7xl max-md:text-sm font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">{currentAwayGoals}</span>
+                <div className="flex flex-col items-start w-[200px] sm:w-[220px] shrink-0">
                   <span className="text-[13px] font-black text-white/90 uppercase">Shots: {awayShots}</span>
-                  <div className="text-[10px] font-black text-accent uppercase text-left leading-tight w-full mt-1 min-h-[3.5rem] max-h-[3.5rem] overflow-y-auto overflow-x-hidden space-y-0.5 pl-0.5">
+                  <div className="text-[10px] font-black text-accent uppercase text-left leading-tight w-full mt-1 min-h-[3.5rem] max-h-[3.5rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pl-0.5">
                     {fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).map(s => (
                       <div key={`${s.playerId}-${s.minute}`}>{state.players.find(p => p.id === s.playerId)?.name} {s.minute}&apos;</div>
                     ))}
                   </div>
-                  <div className="text-[10px] font-black uppercase text-left leading-tight w-full mt-0.5 min-h-[2rem] max-h-[2.5rem] overflow-y-auto overflow-x-hidden space-y-0.5 pl-0.5">
+                  <div className="text-[10px] font-black uppercase text-left leading-tight w-full mt-0.5 min-h-[2rem] max-h-[2.5rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pl-0.5">
                     {fixture.result?.cards?.filter(c => awayLineup.some(p => p.id === c.playerId) && c.minute <= currentMinute).map(c => (
                       <div key={`card-${c.playerId}-${c.minute}-${c.type}`} className={c.type === 'RED' ? 'text-red-400' : 'text-yellow-400'}>
                         {c.type} {c.minute}&apos; {state.players.find(p => p.id === c.playerId)?.name}
@@ -465,8 +465,15 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         </div>
 
         {(isHalfTime || isFinished) && !isPaused && (
-          <div className="absolute inset-0 z-[500] bg-black/98 backdrop-blur-xl flex items-center justify-center p-2 max-md:p-2 sm:p-4 animate-in zoom-in duration-300">
-            <div className="max-w-5xl w-full h-full max-h-[95vh] flex flex-col justify-center text-center gap-2 max-md:gap-2 sm:gap-4">
+          <div className="absolute inset-0 z-[500] bg-black/98 backdrop-blur-xl flex flex-col p-2 max-md:p-2 sm:p-4 animate-in zoom-in duration-300 overflow-hidden">
+            {/* Mobile/tablet (< lg): Tactical Review top LEFT, Kick off / Back to Hub top RIGHT — single row, never overlaps player lists */}
+            <div className="max-lg:grid max-lg:grid-cols-2 max-lg:gap-2 max-lg:items-center max-lg:shrink-0 max-lg:min-h-[2.5rem] max-lg:py-1 max-lg:px-1 max-lg:w-full">
+              <Button onClick={() => setIsPaused(true)} variant="outline" size="sm" className="max-lg:h-8 max-lg:text-[10px] max-lg:font-black max-lg:uppercase max-lg:border-primary/40 max-lg:hover:bg-primary/10 max-lg:justify-self-start lg:hidden">Tactical Review</Button>
+              <Button onClick={isHalfTime ? () => setIsHalfTime(false) : onFinish} size="sm" className="max-lg:h-8 max-lg:text-[10px] max-lg:font-black max-lg:uppercase max-lg:bg-primary max-lg:text-primary-foreground max-lg:shadow-xl max-lg:justify-self-end lg:hidden">
+                {isHalfTime ? 'KICK OFF SECOND HALF' : 'BACK TO HUB'}
+              </Button>
+            </div>
+            <div className="max-w-5xl w-full flex-1 min-h-0 flex flex-col justify-center text-center gap-2 max-md:gap-1 sm:gap-4 relative overflow-auto pt-1">
               <div className="space-y-1 shrink-0 max-md:space-y-0">
                 <h4 className="text-primary font-black uppercase tracking-[0.4em] text-lg sm:text-xl max-md:text-sm">{isFinished ? 'FULL TIME' : 'HALF TIME'}</h4>
                 <div className="text-4xl max-md:text-2xl sm:text-7xl font-black text-accent drop-shadow-[0_0_20px_rgba(38,217,117,0.4)]">{currentHomeGoals} - {currentAwayGoals}</div>
@@ -481,12 +488,13 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                 )}
               </div>
               
-              <div className="grid grid-cols-2 gap-2 max-md:gap-2 sm:gap-6 py-2 flex-1 min-h-0">
+              <div className="grid grid-cols-2 gap-2 max-md:gap-1.5 sm:gap-6 py-2 flex-1 min-h-0 overflow-auto">
                 <SummaryRatings teamPlayers={homeLineup} teamRatings={fixture.result?.ratings} />
                 <SummaryRatings teamPlayers={awayLineup} teamRatings={fixture.result?.ratings} />
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-center gap-3 shrink-0">
+              {/* Desktop only (lg+): bottom buttons — hidden below 1024px so they never overlap player lists */}
+              <div className="hidden lg:flex flex-col sm:flex-row justify-center gap-3 shrink-0">
                 <Button onClick={() => setIsPaused(true)} variant="outline" className="h-12 sm:h-14 font-black uppercase text-base sm:text-lg border-primary/40 hover:bg-primary/10">Tactical Review</Button>
                 <Button onClick={isHalfTime ? () => setIsHalfTime(false) : onFinish} className="h-12 sm:h-14 font-black uppercase text-base sm:text-lg bg-primary text-primary-foreground shadow-2xl hover:scale-[1.02] transition-transform">
                   {isHalfTime ? 'KICK OFF SECOND HALF' : 'BACK TO HUB'}

@@ -2,6 +2,8 @@
 
 This plan is derived from [docs/CODEBASE_REVIEW.md](docs/CODEBASE_REVIEW.md). It groups work into **fixes**, **enhancements**, and **game-event propagation** so that all match and game events are reflected correctly across the app.
 
+**Responsive / mobile:** See [docs/RESPONSIVE.md](docs/RESPONSIVE.md) for breakpoints, mobile-first approach, and when to use `useIsMobile()`.
+
 ---
 
 ## Part A: Game event propagation (ensure events reflect everywhere)

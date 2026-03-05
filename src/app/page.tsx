@@ -6,26 +6,27 @@ import { PlayCircle } from 'lucide-react';
 export default function LandingPage() {
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: 'url(/retromanager.png)', backgroundColor: 'hsl(210 16% 10%)' }}
     >
       <div className="absolute inset-0 bg-black/40" aria-hidden />
-      <div className="relative z-10 flex flex-col items-center justify-center gap-8 max-w-2xl w-full">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white uppercase text-center drop-shadow-lg italic">
+      {/* Mobile: safe-area padding; desktop: unchanged */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-8 max-w-2xl w-full px-2 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:px-0 md:pt-0 md:pb-0 md:gap-8">
+        <h1 className="text-3xl font-black tracking-tighter text-white uppercase text-center drop-shadow-lg italic max-md:leading-tight md:text-4xl sm:text-5xl md:text-6xl">
           Retro Manager
         </h1>
 
-        <div className="w-full bg-black/80 backdrop-blur-sm border-2 border-amber-500/60 rounded-2xl p-6 shadow-2xl">
-          <p className="text-amber-200 text-center text-base sm:text-lg font-bold leading-relaxed">
+        <div className="w-full bg-black/80 backdrop-blur-sm border-2 border-amber-500/60 rounded-2xl p-6 shadow-2xl max-md:p-4 max-md:rounded-xl">
+          <p className="text-amber-200 text-center text-base sm:text-lg font-bold leading-relaxed max-md:text-sm max-md:leading-snug">
             This game is designed to be run in a desktop browser and is not yet optimized for mobile. For the best experience, please play on a computer or tablet.
           </p>
         </div>
 
         <Link
           href="/game"
-          className="inline-flex items-center justify-center gap-3 h-16 px-12 bg-amber-500 hover:bg-amber-400 text-black font-black text-xl uppercase tracking-widest rounded-2xl shadow-[0_8px_0_0_rgba(180,83,9,0.5)] hover:shadow-[0_6px_0_0_rgba(180,83,9,0.5)] hover:translate-y-0.5 transition-all"
+          className="inline-flex items-center justify-center gap-3 h-16 px-12 bg-amber-500 hover:bg-amber-400 active:bg-amber-400 text-black font-black text-xl uppercase tracking-widest rounded-2xl shadow-[0_8px_0_0_rgba(180,83,9,0.5)] hover:shadow-[0_6px_0_0_rgba(180,83,9,0.5)] hover:translate-y-0.5 transition-all w-full max-w-sm min-h-[48px] max-md:min-h-[48px] max-md:py-4 max-md:rounded-xl md:w-auto md:max-w-none md:min-h-0"
         >
-          <PlayCircle size={28} />
+          <PlayCircle className="max-md:w-6 max-md:h-6 md:w-7 md:h-7" />
           Play Game
         </Link>
       </div>

@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { incrementVisitCount } from '@/lib/visit-count';
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next();
-  // Increment visit count in the background so we don't block the response
-  void incrementVisitCount();
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {
