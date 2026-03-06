@@ -29,29 +29,29 @@ export function FinanceHub() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-md:gap-2">
-      <RetroWindow title="SEASON ACCOUNTS">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+      <RetroWindow title="SEASON ACCOUNTS" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
         <Table>
           <TableBody>
             {accounts.map((acc, i) => (
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
                   <TableRow className="border-b border-primary/5 cursor-help">
-                    <TableCell className="text-xs max-md:text-sm uppercase text-white flex items-center gap-1 py-2.5 max-md:py-0.5">
+                    <TableCell className="text-[13px] md:text-[14px] uppercase text-white/90 font-semibold flex items-center gap-1 py-3">
                       {acc.label}
-                      <Info size={10} className="text-white opacity-60" />
+                      <Info size={14} className="text-white opacity-60" />
                     </TableCell>
-                    <TableCell className={`text-right font-mono text-xs max-md:text-sm py-2.5 max-md:py-0.5 ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                    <TableCell className={`text-right font-mono text-[15px] md:text-[16px] font-semibold py-3 ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
                       {acc.type === 'income' ? '+' : '-'} £{formatCurrency(acc.value)}
                     </TableCell>
                   </TableRow>
                 </TooltipTrigger>
-                <TooltipContent className="text-[11px]">{acc.tooltip}</TooltipContent>
+                <TooltipContent className="text-[13px] max-w-[220px]">{acc.tooltip}</TooltipContent>
               </Tooltip>
             ))}
             <TableRow className="bg-muted/50 font-bold">
-              <TableCell className="text-xs max-md:text-sm uppercase text-primary py-2.5 max-md:py-0.5">NET BALANCE</TableCell>
-              <TableCell className={`text-right font-mono text-sm max-md:text-sm py-2.5 max-md:py-0.5 ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'}`}>
+              <TableCell className="text-[14px] uppercase font-bold text-primary py-3">NET BALANCE</TableCell>
+              <TableCell className={`text-right font-mono text-[15px] md:text-[16px] font-bold py-3 ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'}`}>
                 £{formatCurrency(totalIncome - totalExpense)}
               </TableCell>
             </TableRow>
@@ -59,23 +59,23 @@ export function FinanceHub() {
         </Table>
       </RetroWindow>
 
-      <RetroWindow title="FINANCIAL STATUS">
-        <div className="space-y-4 max-md:space-y-2">
-          <div className="p-4 max-md:p-2 bg-muted border border-primary/20 text-center">
-            <div className="text-[10px] max-md:text-sm uppercase text-white mb-1">Total Bank Balance</div>
-            <div className="text-2xl max-md:text-2xl font-mono text-cyan">£{formatCurrency(userTeam.budget)}</div>
+      <RetroWindow title="FINANCIAL STATUS" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
+        <div className="space-y-5 md:space-y-6">
+          <div className="p-4 md:p-5 bg-muted border border-primary/20 text-center rounded-lg">
+            <div className="text-[12px] md:text-[13px] text-white/80 uppercase font-semibold mb-1">Total Bank Balance</div>
+            <div className="text-[28px] md:text-[34px] font-black font-mono text-cyan tabular-nums">£{formatCurrency(userTeam.budget)}</div>
           </div>
-          <div className="text-[10px] max-md:text-sm text-white uppercase space-y-2 max-md:space-y-1">
-            <div className="flex justify-between">
+          <div className="text-[13px] md:text-[14px] text-white/90 uppercase font-semibold space-y-2">
+            <div className="flex justify-between items-center">
               <span>Weekly Wage Bill:</span>
-              <span className="text-white">£{formatCurrency(userTeam.weeklyWages)}</span>
+              <span className="text-white font-bold">£{formatCurrency(userTeam.weeklyWages)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span>Projected Annual Profit:</span>
-              <span className="text-white">£{formatCurrency(totalIncome - totalExpense)}</span>
+              <span className="text-white font-bold">£{formatCurrency(totalIncome - totalExpense)}</span>
             </div>
           </div>
-          <div className="pt-4 border-t border-primary/10 italic text-[10px] max-md:text-sm text-white text-center">
+          <div className="pt-4 border-t border-primary/10 italic text-[14px] md:text-[15px] text-white/95 text-center">
             &ldquo;THE BOARD IS {(totalIncome - totalExpense) > 0 ? 'SATISFIED' : 'CONCERNED'} WITH CURRENT FINANCIAL PERFORMANCE.&rdquo;
           </div>
         </div>

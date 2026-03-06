@@ -5,6 +5,9 @@ export type PlayStyle = 'Long Ball' | 'Pass to Feet' | 'Counter-Attack' | 'Tiki-
 export type CompetitionType = 'LEAGUE' | 'CUP';
 export type QualificationType = 'CHAMPIONS' | 'EUROPE' | 'PROMOTION' | 'RELEGATION' | null;
 
+/** Kit color category for clash detection: same category => away team uses away kit. */
+export type KitColorCategory = 'red' | 'blue' | 'white' | 'black' | 'yellow' | 'green' | 'orange' | 'maroon' | 'gold' | 'sky_blue';
+
 export interface PlayerStats {
   apps: number;
   goals: number;
@@ -93,6 +96,8 @@ export interface Team {
   awayColor: string;
   /** Text color for away kit (contrast with awayColor). Omit in legacy saves; UI falls back to white. */
   awayTextColor?: string;
+  /** Category of home kit for clash detection; if same as opponent, away team uses away kit. Omit in legacy saves. */
+  homeColorCategory?: KitColorCategory;
   budget: number;
   weeklyWages: number;
   points: number;

@@ -50,24 +50,24 @@ export function StatsHub({ division }: StatsHubProps) {
     <Table>
       <TableHeader>
         <TableRow className="border-b-2 border-primary/40 bg-primary/20">
-          <TableHead className="w-8 max-md:w-6 text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">#</TableHead>
-          <TableHead className="text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Player</TableHead>
-          <TableHead className="text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Club</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Apps</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Goals</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Shots</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">SOT</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">CS</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Mins</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">Rating</TableHead>
-          <TableHead className="text-right text-[12px] max-md:text-[9px] uppercase font-black text-white tracking-wide py-2 max-md:py-1">MoM</TableHead>
+          <TableHead className="w-10 max-md:w-8 text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">#</TableHead>
+          <TableHead className="text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Player</TableHead>
+          <TableHead className="text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Club</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Apps</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Goals</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Shots</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">SOT</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">CS</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Mins</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Rating</TableHead>
+          <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">MoM</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {players.map((p, i) => (
           <TableRow key={p.id} className="hover:bg-primary/5 border-b border-primary/5">
-            <TableCell className="font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{i + 1}</TableCell>
-            <TableCell className="text-xs max-md:text-[10px] font-bold py-1.5 max-md:py-1">
+            <TableCell className="font-mono text-[18px] max-md:text-base font-black py-2.5 max-md:py-2 tabular-nums">{i + 1}</TableCell>
+            <TableCell className="text-[17px] max-md:text-base font-bold py-2.5 max-md:py-2">
               <button
                 onClick={() => setSelectedPlayer(p)}
                 className="hover:text-accent transition-colors text-left uppercase"
@@ -75,22 +75,22 @@ export function StatsHub({ division }: StatsHubProps) {
                 {p.name}
               </button>
             </TableCell>
-            <TableCell className="text-xs max-md:text-[10px] text-muted-foreground py-1.5 max-md:py-1">{getTeamName(p.clubId).toUpperCase()}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{p.seasonStats.apps}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1 text-cyan">{p.seasonStats.goals}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{p.seasonStats.shots ?? '—'}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{p.seasonStats.shotsOnTarget ?? '—'}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">
+            <TableCell className="text-[16px] max-md:text-sm text-muted-foreground py-2.5 max-md:py-2">{getTeamName(p.clubId).toUpperCase()}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">{p.seasonStats.apps}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2 text-cyan">{p.seasonStats.goals}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">{p.seasonStats.shots ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">{p.seasonStats.shotsOnTarget ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">
               {p.position === 'GK' ? (p.seasonStats.cleanSheets ?? '—') : '—'}
             </TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{p.seasonStats.minutesPlayed ?? '—'}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1 text-accent font-bold">{p.seasonStats.avgRating.toFixed(2)}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1 text-primary font-bold">{p.seasonStats.manOfTheMatch ?? 0}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">{p.seasonStats.minutesPlayed ?? '—'}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2 text-accent font-bold">{p.seasonStats.avgRating.toFixed(2)}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2 text-primary font-bold">{p.seasonStats.manOfTheMatch ?? 0}</TableCell>
           </TableRow>
         ))}
         {players.length === 0 && (
           <TableRow>
-            <TableCell colSpan={11} className="text-center py-8 max-md:py-4 text-muted-foreground text-[10px] max-md:text-[9px] uppercase italic">
+            <TableCell colSpan={11} className="text-center py-8 max-md:py-6 text-muted-foreground text-sm max-md:text-xs uppercase italic">
               No appearances recorded for this division yet.
             </TableCell>
           </TableRow>
@@ -103,12 +103,12 @@ export function StatsHub({ division }: StatsHubProps) {
     <Table>
       <TableHeader>
         <TableRow className="border-b-2 border-primary/40 bg-primary/20">
-          <TableHead className="w-8 text-[12px] uppercase font-black text-white tracking-wide">#</TableHead>
-          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Player</TableHead>
-          <TableHead className="text-[12px] uppercase font-black text-white tracking-wide">Club</TableHead>
+          <TableHead className="w-10 text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">#</TableHead>
+          <TableHead className="text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Player</TableHead>
+          <TableHead className="text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2">Club</TableHead>
           <Tooltip>
             <TooltipTrigger asChild>
-              <TableHead className="text-right text-[12px] uppercase font-black text-white tracking-wide cursor-help">
+              <TableHead className="text-right text-[14px] max-md:text-xs uppercase font-black text-white tracking-wide py-3 max-md:py-2 cursor-help">
                 {type === 'scorers' ? 'Goals' : type === 'ratings' ? 'Rating' : 'Y / R'}
               </TableHead>
             </TooltipTrigger>
@@ -121,8 +121,8 @@ export function StatsHub({ division }: StatsHubProps) {
       <TableBody>
         {players.map((p, i) => (
           <TableRow key={p.id} className="hover:bg-primary/5 border-b border-primary/5">
-            <TableCell className="font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">{i + 1}</TableCell>
-            <TableCell className="text-xs max-md:text-[10px] font-bold py-1.5 max-md:py-1">
+            <TableCell className="font-mono text-[18px] max-md:text-base font-black py-2.5 max-md:py-2 tabular-nums">{i + 1}</TableCell>
+            <TableCell className="text-[17px] max-md:text-base font-bold py-2.5 max-md:py-2">
               <button 
                 onClick={() => setSelectedPlayer(p)}
                 className="hover:text-accent transition-colors text-left uppercase"
@@ -130,8 +130,8 @@ export function StatsHub({ division }: StatsHubProps) {
                 {p.name}
               </button>
             </TableCell>
-            <TableCell className="text-xs max-md:text-[10px] text-muted-foreground py-1.5 max-md:py-1">{getTeamName(p.clubId).toUpperCase()}</TableCell>
-            <TableCell className="text-right font-mono text-xs max-md:text-[10px] py-1.5 max-md:py-1">
+            <TableCell className="text-[16px] max-md:text-sm text-muted-foreground py-2.5 max-md:py-2">{getTeamName(p.clubId).toUpperCase()}</TableCell>
+            <TableCell className="text-right font-mono text-[16px] max-md:text-sm py-2.5 max-md:py-2">
               {type === 'scorers' && <span className="text-cyan font-bold">{p.seasonStats.goals}</span>}
               {type === 'ratings' && <span className="text-accent font-bold">{p.seasonStats.avgRating.toFixed(2)}</span>}
               {type === 'discipline' && (
@@ -146,7 +146,7 @@ export function StatsHub({ division }: StatsHubProps) {
         ))}
         {players.length === 0 && (
           <TableRow>
-            <TableCell colSpan={4} className="text-center py-8 max-md:py-4 text-muted-foreground text-[10px] max-md:text-[9px] uppercase italic">
+            <TableCell colSpan={4} className="text-center py-8 max-md:py-6 text-muted-foreground text-sm max-md:text-xs uppercase italic">
               No data recorded for this division yet.
             </TableCell>
           </TableRow>
@@ -159,35 +159,35 @@ export function StatsHub({ division }: StatsHubProps) {
     <div className="space-y-4 max-md:space-y-2">
       <TooltipProvider>
         <Tabs defaultValue="scorers" className="space-y-4 max-md:space-y-2">
-          <TabsList className="bg-muted border border-primary/20 h-10 max-md:h-8 gap-1 p-1">
+          <TabsList className="bg-muted border border-primary/20 h-12 max-md:h-10 gap-1.5 p-1.5">
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="scorers" className="text-[10px] uppercase py-1 flex items-center gap-2">
-                  <Target size={14} /> Top Scorers
+                <TabsTrigger value="scorers" className="text-[14px] max-md:text-xs uppercase py-2 flex items-center gap-2 font-black">
+                  <Target size={16} /> Top Scorers
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent className="font-black">LEAGUE GOLDEN BOOT RACE</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="ratings" className="text-[10px] uppercase py-1 flex items-center gap-2">
-                  <Star size={14} /> Avg Ratings
+                <TabsTrigger value="ratings" className="text-[14px] max-md:text-xs uppercase py-2 flex items-center gap-2 font-black">
+                  <Star size={16} /> Avg Ratings
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent className="font-black">PLAYER OF THE YEAR CANDIDATES</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="discipline" className="text-[10px] uppercase py-1 flex items-center gap-2">
-                  <ShieldAlert size={14} /> Discipline
+                <TabsTrigger value="discipline" className="text-[14px] max-md:text-xs uppercase py-2 flex items-center gap-2 font-black">
+                  <ShieldAlert size={16} /> Discipline
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent className="font-black">DIRTIEST PLAYERS (Reds weight heavier)</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="season" className="text-[10px] uppercase py-1 flex items-center gap-2">
-                  <BarChart3 size={14} /> Season Stats
+                <TabsTrigger value="season" className="text-[14px] max-md:text-xs uppercase py-2 flex items-center gap-2 font-black">
+                  <BarChart3 size={16} /> Season Stats
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent className="font-black">APPS, GOALS, SHOTS, SOT, CLEAN SHEETS, MINS, RATING</TooltipContent>
@@ -195,25 +195,25 @@ export function StatsHub({ division }: StatsHubProps) {
           </TabsList>
 
           <TabsContent value="scorers">
-            <RetroWindow title={`TOP GOALSCORERS - DIVISION ${division}`}>
+            <RetroWindow title={`TOP GOALSCORERS - DIVISION ${division}`} titleClassName="text-[16px] max-md:text-sm">
               {renderTable(topScorers, 'scorers')}
             </RetroWindow>
           </TabsContent>
 
           <TabsContent value="ratings">
-            <RetroWindow title={`BEST AVERAGE RATINGS (MIN 3 APPS) - DIVISION ${division}`}>
+            <RetroWindow title={`BEST AVERAGE RATINGS (MIN 3 APPS) - DIVISION ${division}`} titleClassName="text-[16px] max-md:text-sm">
               {renderTable(bestRated, 'ratings')}
             </RetroWindow>
           </TabsContent>
 
           <TabsContent value="discipline">
-            <RetroWindow title={`DISCIPLINARY TABLE - DIVISION ${division}`}>
+            <RetroWindow title={`DISCIPLINARY TABLE - DIVISION ${division}`} titleClassName="text-[16px] max-md:text-sm">
               {renderTable(badBoys, 'discipline')}
             </RetroWindow>
           </TabsContent>
 
           <TabsContent value="season">
-            <RetroWindow title={`SEASON STATS (MIN 1 APP) - DIVISION ${division}`}>
+            <RetroWindow title={`SEASON STATS (MIN 1 APP) - DIVISION ${division}`} titleClassName="text-[16px] max-md:text-sm">
               {renderSeasonStatsTable(seasonStatsList)}
             </RetroWindow>
           </TabsContent>

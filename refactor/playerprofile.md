@@ -174,7 +174,7 @@ export function PlayerProfile({
 
   return (
     <Dialog open={!!player} onOpenChange={onClose}>
-      <DialogContent className="flex flex-col w-[min(96vw,1200px)] max-w-[96vw] h-[min(96dvh,900px)] max-h-[96dvh] p-0 gap-0 overflow-hidden border-primary/50 bg-[#10161f] text-white rounded-2xl md:rounded-3xl font-mono shadow-[0_20px_80px_rgba(0,0,0,0.65)]">
+      <DialogContent className="max-w-[760px] w-[96vw] md:w-full max-h-[92vh] p-0 gap-0 overflow-hidden border-primary/50 bg-[#10161f] text-white rounded-2xl md:rounded-3xl font-mono shadow-[0_20px_80px_rgba(0,0,0,0.65)]">
         <DialogHeader className="shrink-0 border-b border-primary/25 bg-[linear-gradient(180deg,#4e87c4,#4a82bf)] px-4 py-4 md:px-5 md:py-5">
           <DialogTitle className="flex items-center justify-between gap-4 text-primary-foreground">
             <div className="flex items-center gap-3 min-w-0">
@@ -832,3 +832,24 @@ export function PlayerProfile({
     </Dialog>
   );
 }
+
+---
+
+## Refactor check — functionality preserved
+
+All current behaviour and call-sites remain valid:
+
+- **Props**: `player`, `onClose`, `defaultTab` — unchanged. Callers (GameApp with `defaultTab={openToTab ?? 'overview'}`, MatchSim, SquadList, PlayerMarket, StatsHub) pass `player` and `onClose`; GameApp also passes `defaultTab`.
+- **Store**: `toggleShortlist`, `toggleTransferList`, `buyPlayer`, `renewContract`, `acceptBid`, `rejectBid` — all used in the proposed code.
+- **State**: `offeredYears`, `offeredWage`, `patience`, `feedback` — same; reset in `useEffect` when `player`/`targetWage` change.
+- **Derived**: `userTeam`, `scout`, `isOwnPlayer`, `canAfford`, `targetWage`, `activeOffer` — same logic.
+- **Overview tab**: Age, Position, Value, Morale cards; “This Season” (apps, goals, shots, SOT, minutes, rating, MoM, CS) when `player.seasonStats.apps > 0`; Status & Availability (fitness, match readiness, injury); proposed adds “Snapshot” (Natural Role, Wage, Contract, Club) — extra only.
+- **Attributes tab**: Physical (Pace, Stamina, Heading), Technical (Skill, Passing, Shooting), Mental (Influence, Temper, Consistency), Special (Keeper, Dirty, Professional) with tooltips — same.
+- **Contract tab**: Current wage/expiry; own player: transfer list toggle, incoming bid accept/reject, negotiation console (patience, feedback, term, wage, submit); other club: “Propose Transfer Bid” with `canAfford` disable — same.
+- **Report tab**: Scout conclusion (`getPotentialHint`, best role), Psychological Profile (scout: consistency / injuryProne / professionalism labels; else “HIRE A SCOUT…”); Stats (this season + career history slice) — same.
+- **Header**: Shortlist heart, close (× / X), “Player Profile V.1993” — same. Proposed adds `MoreVertical` on mobile and refines layout.
+- **Footer**: “Close File” button calling `onClose` — same.
+- **Dialog**: `open={!!player}`, `onOpenChange={onClose}` — same.
+- **Types**: Proposed narrows `getHiddenTraitLabel` to `HiddenTraitKey` ('injuryProne' | 'consistency' | 'professionalism'); behaviour unchanged.
+
+**Conclusion**: The refactor is a drop-in replacement; no call-site or behaviour changes required. Styling and layout are updated; functionality is preserved or expanded (Snapshot in Overview).

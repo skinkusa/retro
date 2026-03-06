@@ -35,29 +35,29 @@ export function SettingsHub() {
   };
 
   return (
-    <div className="space-y-6 max-md:space-y-3">
-      <RetroWindow title="SIMULATION & TESTING TOOLS">
-        <div className="p-4 max-md:p-2 space-y-4 max-md:space-y-2 bg-red-950/20 border-b border-red-900/40">
-           <div className="flex items-center gap-3 max-md:gap-2 text-red-500">
-             <ShieldAlert size={20} className="max-md:w-4 max-md:h-4" />
-             <h4 className="text-[12px] max-md:text-sm font-black uppercase tracking-widest">Advanced Debug Control</h4>
+    <div className="space-y-6 md:space-y-8">
+      <RetroWindow title="SIMULATION & TESTING TOOLS" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
+        <div className="p-4 md:p-5 space-y-4 md:space-y-5 bg-red-950/20 border border-red-900/40 rounded-lg">
+           <div className="flex items-center gap-3 text-red-500">
+             <ShieldAlert size={22} />
+             <h4 className="text-[13px] md:text-[15px] font-black uppercase tracking-widest">Advanced Debug Control</h4>
            </div>
-           <p className="text-[11px] max-md:text-sm text-white leading-tight italic">
+           <p className="text-[14px] md:text-[15px] text-white/95 leading-snug italic">
              Simulate all remaining fixtures to week 38, then advance week to process results.
            </p>
            <Button 
             onClick={fastForwardSeason} 
-            className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-black retro-button flex items-center justify-center gap-2 shadow-lg"
+            className="w-full h-12 md:h-14 bg-red-600 hover:bg-red-700 text-white text-[13px] md:text-[14px] font-bold retro-button flex items-center justify-center gap-2 shadow-lg uppercase"
            >
              <FastForward size={20} /> SKIP TO END OF SEASON
            </Button>
-           <div className="pt-3 border-t border-red-900/40">
-             <label className="text-[11px] max-md:text-sm font-bold text-white uppercase block mb-2">Match engine</label>
+           <div className="pt-4 border-t border-red-900/40">
+             <label className="text-[13px] md:text-[14px] font-bold text-white uppercase block mb-2">Match engine</label>
              <div className="flex gap-2">
                <Button
                  size="sm"
                  variant={state.enginePreset === 'realistic' ? 'default' : 'outline'}
-                 className="flex-1"
+                 className="flex-1 text-[13px] md:text-[14px] font-semibold"
                  onClick={() => setEnginePreset('realistic')}
                >
                  Realistic
@@ -65,63 +65,63 @@ export function SettingsHub() {
                <Button
                  size="sm"
                  variant={state.enginePreset === 'arcade' ? 'default' : 'outline'}
-                 className="flex-1"
+                 className="flex-1 text-[13px] md:text-[14px] font-semibold"
                  onClick={() => setEnginePreset('arcade')}
                >
                  Arcade
                </Button>
              </div>
-             <p className="text-[10px] max-md:text-sm text-white mt-1">Realistic = lower scoring, fewer cards. Arcade = more goals & cards.</p>
+             <p className="text-[13px] md:text-[14px] text-white/80 mt-2">Realistic = lower scoring, fewer cards. Arcade = more goals & cards.</p>
            </div>
         </div>
       </RetroWindow>
 
-      <RetroWindow title="CHRONOLOGICAL CONFIG">
-        <div className="flex items-end gap-6 max-md:gap-2 p-3 max-md:p-2">
-          <div className="flex-1 space-y-2 max-md:space-y-1">
-            <label className="text-[12px] max-md:text-sm font-bold text-primary uppercase">Current Season Starting Year</label>
+      <RetroWindow title="CHRONOLOGICAL CONFIG" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
+        <div className="flex items-end gap-6 p-2">
+          <div className="flex-1 space-y-2">
+            <label className="text-[13px] md:text-[14px] font-bold text-primary uppercase block">Current Season Starting Year</label>
             <Input 
               type="number" 
               value={newSeason} 
               onChange={(e) => setNewSeason(e.target.value)}
-              className="bg-card border-primary/20 h-10 max-md:h-11 text-[14px] max-md:text-base font-mono"
+              className="bg-card border-primary/20 h-10 md:h-12 text-[15px] md:text-[16px] font-mono font-semibold"
             />
           </div>
-          <Button onClick={handleSeasonChange} className="retro-button bg-accent text-accent-foreground h-10 px-6 font-bold">
+          <Button onClick={handleSeasonChange} className="retro-button bg-accent text-accent-foreground h-10 md:h-12 px-6 text-[13px] md:text-[14px] font-bold uppercase">
             <History size={18} className="mr-2" /> UPDATE TIMELINE
           </Button>
         </div>
-        <p className="text-[11px] max-md:text-sm text-white italic px-3 pb-3 leading-tight">
+        <p className="text-[14px] md:text-[15px] text-white/90 italic px-2 pb-2 pt-1 leading-snug">
           * Warning: Changing the starting year will shift all historical records and fixture dates for your current career.
         </p>
       </RetroWindow>
 
-      <RetroWindow title="GLOBAL DATABASE EDITOR: TEAM NAMES" noPadding>
-        <div className="p-4 max-md:p-2 bg-primary/5 border-b border-primary/20 flex items-center gap-3 max-md:gap-2">
-          <Database size={20} className="text-primary max-md:w-4 max-md:h-4" />
-          <p className="text-[12px] max-md:text-sm text-white leading-tight">
+      <RetroWindow title="GLOBAL DATABASE EDITOR: TEAM NAMES" titleClassName="text-[14px] md:text-[15px]" noPadding>
+        <div className="p-4 md:p-5 bg-primary/5 border-b border-primary/20 flex items-center gap-3">
+          <Database size={22} className="text-primary" />
+          <p className="text-[14px] md:text-[15px] text-white leading-snug">
             Renaming teams here will update them in your current save AND for all <span className="text-primary font-bold">FUTURE NEW GAMES</span> you start.
           </p>
         </div>
         <div className="max-h-[500px] overflow-auto">
-          <Table className="max-md:[&_th]:leading-none max-md:[&_td]:leading-none max-md:[&_thead_th]:h-auto max-md:[&_thead_th]:py-1 max-md:[&_td]:py-0.5">
+          <Table>
             <TableHeader>
-              <TableRow className="bg-primary/20 border-b-2 border-primary/40">
-                <TableHead className="text-[13px] max-md:text-sm uppercase font-black py-4 max-md:py-1 text-white tracking-wide">Original ID</TableHead>
-                <TableHead className="text-[13px] max-md:text-sm uppercase font-black py-4 max-md:py-1 text-white tracking-wide">Team Name</TableHead>
-                <TableHead className="text-right text-[13px] max-md:text-sm uppercase font-black py-4 max-md:py-1 text-white tracking-wide">Action</TableHead>
+              <TableRow className="bg-primary/20 border-b-2 border-primary/40 hover:bg-primary/20">
+                <TableHead className="text-[14px] uppercase font-bold py-4 text-white tracking-wide">Original ID</TableHead>
+                <TableHead className="text-[14px] uppercase font-bold py-4 text-white tracking-wide">Team Name</TableHead>
+                <TableHead className="text-right text-[14px] uppercase font-bold py-4 text-white tracking-wide">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {state.teams.map((t) => (
                 <TableRow key={t.id} className="border-b border-primary/5 hover:bg-primary/5">
-                  <TableCell className="text-[11px] max-md:text-sm font-mono text-white py-3 max-md:py-0.5">{t.id}</TableCell>
-                  <TableCell className="text-[13px] max-md:text-sm font-bold py-3 max-md:py-0.5">
+                  <TableCell className="text-[15px] md:text-[16px] font-mono text-white/90 py-3">{t.id}</TableCell>
+                  <TableCell className="text-[15px] md:text-[16px] font-bold py-3 text-white">
                     {editingTeamId === t.id ? (
                       <Input 
                         value={tempTeamName} 
                         onChange={(e) => setTempTeamName(e.target.value)}
-                        className="h-8 max-md:h-9 text-[13px] max-md:text-sm bg-card border-accent font-bold"
+                        className="h-9 md:h-10 text-[15px] md:text-[16px] bg-card border-accent font-bold"
                         autoFocus
                         onKeyDown={(e) => e.key === 'Enter' && saveTeamName()}
                       />
@@ -129,13 +129,13 @@ export function SettingsHub() {
                       t.name.toUpperCase()
                     )}
                   </TableCell>
-                  <TableCell className="text-right py-3 max-md:py-0.5">
+                  <TableCell className="text-right py-3">
                     {editingTeamId === t.id ? (
-                      <Button onClick={saveTeamName} className="h-8 text-[10px] max-md:text-[11px] bg-accent text-accent-foreground retro-button px-4 font-bold">
+                      <Button onClick={saveTeamName} className="h-9 md:h-10 text-[13px] md:text-[14px] font-bold bg-accent text-accent-foreground retro-button px-4 uppercase">
                         <Save size={14} className="mr-2" /> SAVE GLOBAL
                       </Button>
                     ) : (
-                      <Button onClick={() => startEditingTeam(t.id, t.name)} variant="outline" className="h-8 max-md:h-9 text-[10px] max-md:text-sm retro-button px-4 font-bold">
+                      <Button onClick={() => startEditingTeam(t.id, t.name)} variant="outline" className="h-9 md:h-10 text-[13px] md:text-[14px] font-bold retro-button px-4 uppercase">
                         <Edit2 size={14} className="mr-2" /> EDIT NAME
                       </Button>
                     )}

@@ -14,26 +14,26 @@ export function TeamRecords() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="retro-tile flex items-start gap-3 max-md:gap-2 h-full min-h-[80px] max-md:min-h-[60px] cursor-help">
-            <div className={`p-2 max-md:p-1.5 bg-muted border border-primary/10 ${color}`}>
-              <Icon size={18} className="max-md:w-4 max-md:h-4" />
+          <div className="retro-tile flex items-start gap-3 md:gap-4 h-full min-h-[90px] md:min-h-[100px] cursor-help p-2">
+            <div className={`p-2.5 md:p-3 bg-muted border border-primary/10 rounded-lg ${color}`}>
+              <Icon size={22} className="md:w-6 md:h-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[8px] max-md:text-xs text-white uppercase font-bold">{title}</div>
-              <div className="text-[10px] max-md:text-sm font-bold truncate uppercase">{value || 'NO RECORD'}</div>
-              <div className="text-[7px] max-md:text-xs text-white italic truncate uppercase">{sub}</div>
+              <div className="text-[12px] md:text-[13px] text-white/80 uppercase font-semibold mb-0.5">{title}</div>
+              <div className="text-[15px] md:text-[18px] font-bold truncate uppercase text-white">{value || 'NO RECORD'}</div>
+              <div className="text-[13px] md:text-[14px] text-white/70 italic truncate uppercase">{sub}</div>
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent className="font-black uppercase">{tooltip}</TooltipContent>
+        <TooltipContent className="text-[13px] font-black uppercase max-w-[240px]">{tooltip}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 
   return (
-    <div className="space-y-4 max-md:space-y-2">
-      <RetroWindow title="CLUB PERFORMANCE RECORDS">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-md:gap-2 auto-rows-fr">
+    <div className="space-y-6 md:space-y-8">
+      <RetroWindow title="CLUB PERFORMANCE RECORDS" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 auto-rows-fr">
           <RecordTile 
             title="Biggest Victory" 
             value={records.biggestWin?.score} 
@@ -69,37 +69,37 @@ export function TeamRecords() {
         </div>
       </RetroWindow>
 
-      <RetroWindow title="MANAGER LEGACY">
-        <div className="space-y-2 max-md:space-y-1 py-2 max-md:py-1">
+      <RetroWindow title="MANAGER LEGACY" titleClassName="text-[14px] md:text-[15px]" contentClassName="p-5 md:p-6">
+        <div className="space-y-3 md:space-y-4 py-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-white font-bold">Total Games Managed</span>
-                   <span className="font-bold text-cyan">{state.manager?.totalGames}</span>
+                <div className="flex justify-between items-center text-[13px] md:text-[14px] uppercase font-semibold border-b border-primary/5 pb-3 cursor-help">
+                   <span className="text-white/90">Total Games Managed</span>
+                   <span className="font-bold text-cyan tabular-nums">{state.manager?.totalGames}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="font-black">AGGREGATE CAREER MATCH COUNT</TooltipContent>
+              <TooltipContent className="text-[13px] font-black uppercase max-w-[240px]">AGGREGATE CAREER MATCH COUNT</TooltipContent>
             </Tooltip>
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-white font-bold">Career Win Rate</span>
-                   <span className="font-bold text-accent">{state.manager?.winPercentage.toFixed(1)}%</span>
+                <div className="flex justify-between items-center text-[13px] md:text-[14px] uppercase font-semibold border-b border-primary/5 pb-3 cursor-help">
+                   <span className="text-white/90">Career Win Rate</span>
+                   <span className="font-bold text-accent tabular-nums">{state.manager?.winPercentage.toFixed(1)}%</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="font-black">TOTAL CAREER PERFORMANCE METRIC</TooltipContent>
+              <TooltipContent className="text-[13px] font-black uppercase max-w-[240px]">TOTAL CAREER PERFORMANCE METRIC</TooltipContent>
             </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] max-md:text-sm uppercase border-b border-primary/5 pb-1 cursor-help">
-                   <span className="text-white font-bold">Seasons Completed</span>
-                   <span className="font-bold">{state.manager?.seasonsManaged}</span>
+                <div className="flex justify-between items-center text-[13px] md:text-[14px] uppercase font-semibold border-b border-primary/5 pb-3 cursor-help">
+                   <span className="text-white/90">Seasons Completed</span>
+                   <span className="font-bold text-white tabular-nums">{state.manager?.seasonsManaged}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="font-black">TOTAL COMPLETED CAMPAIGNS</TooltipContent>
+              <TooltipContent className="text-[13px] font-black uppercase max-w-[240px]">TOTAL COMPLETED CAMPAIGNS</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>

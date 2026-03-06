@@ -7,8 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Trash2, Wand2, Smile, Eye } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
+import {
+  Trash2,
+  Wand2,
+  Smile,
+  UserCircle,
+  Eye,
+  Search,
+  Menu
+} from 'lucide-react';
 import { PlayerProfile } from './PlayerProfile';
 import { getTacticalAssignments, getFormationSlots } from '@/lib/game-engine';
 import { cn, getNaturalPositionLabel } from '@/lib/utils';
@@ -19,7 +27,6 @@ interface SquadListProps {
   onPlayerSwap?: (pId: string) => void;
   activeSwapId?: string | null;
   hideReserves?: boolean;
-  sentOffPlayerIds?: Set<string>;
 }
 
 type PlayerGroup = 'STARTER' | 'BENCH' | 'RESERVE';
@@ -31,8 +38,7 @@ export function SquadList({
   currentMatchRatings,
   onPlayerSwap,
   activeSwapId,
-  hideReserves = false,
-  sentOffPlayerIds
+  hideReserves = false
 }: SquadListProps) {
   const { state, togglePlayerLineup, addPlayerToSlot, clearLineup, autoPickLineup } = useGame();
   const [filter, setFilter] = useState<Position | 'ALL'>('ALL');
@@ -177,7 +183,6 @@ export function SquadList({
     const isInjured = !!p.injury;
     const canPick = !isSuspended && !isInjured;
     const isBeingSwapped = activeSwapId === p.id;
-    const isSentOff = sentOffPlayerIds?.has(p.id);
     const status = getPlayerStatus(p);
 
     return (
@@ -191,8 +196,7 @@ export function SquadList({
             : group === 'BENCH'
               ? 'bg-accent/5'
               : 'bg-black/20',
-          isBeingSwapped && 'bg-accent/15 ring-2 ring-inset ring-accent',
-          isSentOff && 'opacity-75 cursor-not-allowed'
+          isBeingSwapped && 'bg-accent/15 ring-2 ring-inset ring-accent'
         )}
       >
         <TableCell className="w-[54px] p-2 text-center" onClick={(e) => e.stopPropagation()}>
@@ -232,12 +236,9 @@ export function SquadList({
 
         <TableCell className="w-[110px] text-center py-3">
           {currentMatchRatings ? (
-            <div className="flex flex-col items-center gap-0.5">
-              <span className={cn("text-[18px] font-black font-mono", status.className)}>
-                {status.label}
-              </span>
-              {isSentOff && <Badge className="bg-red-600 text-[9px] font-black uppercase">SENT OFF</Badge>}
-            </div>
+            <span className={cn("text-[18px] font-black font-mono", status.className)}>
+              {status.label}
+            </span>
           ) : isSuspended ? (
             <Badge className="bg-red-600 text-[10px] font-black uppercase">SUSP</Badge>
           ) : isInjured ? (
@@ -289,14 +290,13 @@ export function SquadList({
     const isInjured = !!p.injury;
     const canPick = !isSuspended && !isInjured;
     const isBeingSwapped = activeSwapId === p.id;
-    const isSentOff = sentOffPlayerIds?.has(p.id);
     const status = getPlayerStatus(p);
 
     return (
       <div
         key={p.id}
         onClick={() => handleRowClick(p)}
-        className={cn(getCardShellClass(group, isBeingSwapped), "p-3", isSentOff && "opacity-75 cursor-not-allowed")}
+        className={cn(getCardShellClass(group, isBeingSwapped), "p-3")}
       >
         <div className="flex items-start gap-3">
           <div className="shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
@@ -352,7 +352,6 @@ export function SquadList({
               <div className="rounded-xl border border-primary/15 bg-black/35 px-3 py-2">
                 <div className="text-[10px] font-black uppercase text-white/50">Status</div>
                 <div className={cn("text-[20px] font-black", status.className)}>{status.label}</div>
-                {isSentOff && <Badge className="mt-1 bg-red-600 text-[9px] font-black uppercase">SENT OFF</Badge>}
               </div>
 
               <div className="rounded-xl border border-primary/15 bg-black/35 px-3 py-2">
@@ -423,193 +422,230 @@ export function SquadList({
       )}
 
       <div className="rounded-2xl border-2 border-primary/20 bg-black/70 shadow-inner overflow-hidden">
+        <div className="p-2 sm:p-3 border-b border-primary/15">
+          <div className="grid grid-cols-2 rounded-2xl border border-primary/20 bg-black/50 p-1 gap-1">
+            <button
+              type="button"
+              className="h-11 sm:h-12 rounded-xl bg-primary text-primary-foreground text-sm sm:text-lg font-black uppercase tracking-wider"
+            >
+              Squad Selection
+            </button>
+            <button
+              type="button"
+              className="h-11 sm:h-12 rounded-xl text-white/65 text-sm sm:text-lg font-black uppercase tracking-wider hover:bg-white/5"
+            >
+              Tactical Hub
+            </button>
+          </div>
+        </div>
+
         <div className="p-3 sm:p-4 space-y-3">
           <div className="flex flex-col gap-3">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
               <div className="flex flex-wrap gap-2">
-                  {FILTERS.map(pos => (
-                    <Button
-                      key={pos}
-                      onClick={() => setFilter(pos)}
-                      variant={filter === pos ? "default" : "outline"}
-                      className={cn(
-                        "h-9 sm:h-10 px-3 sm:px-4 rounded-xl font-black text-[11px] sm:text-sm uppercase tracking-wider",
-                        filter === pos
-                          ? "bg-primary text-primary-foreground"
-                          : "border-primary/25 bg-black/40 text-white/85"
-                      )}
-                    >
-                      {pos}
-                    </Button>
-                  ))}
-                </div>
-
-                {!currentMatchRatings && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className={cn(
-                      "h-9 px-3 rounded-xl border text-[11px] sm:text-sm font-black flex items-center",
-                      starterCount >= 11
-                        ? 'text-green-500 border-green-500/30 bg-green-500/10'
-                        : 'text-red-500 border-red-500/30 bg-red-500/10'
-                    )}>
-                      {starterCount}/11 XI
-                    </div>
-
-                    <div className={cn(
-                      "h-9 px-3 rounded-xl border text-[11px] sm:text-sm font-black flex items-center",
-                      subCount >= 5
-                        ? 'text-green-500 border-green-500/30 bg-green-500/10'
-                        : 'text-red-500 border-red-500/30 bg-red-500/10'
-                    )}>
-                      {subCount}/5 Subs
-                    </div>
-
-                    <Button
-                      onClick={clearLineup}
-                      variant="outline"
-                      className="h-9 px-3 rounded-xl border-red-500/30 bg-black/30 text-red-500 font-black uppercase text-[11px] sm:text-sm"
-                    >
-                      <Trash2 size={13} className="mr-1.5" />
-                      Clear
-                    </Button>
-
-                    <Button
-                      onClick={autoPickLineup}
-                      variant="outline"
-                      className="h-9 px-3 rounded-xl border-accent/30 bg-black/30 text-accent font-black uppercase text-[11px] sm:text-sm"
-                    >
-                      <Wand2 size={13} className="mr-1.5" />
-                      Auto XI
-                    </Button>
-                  </div>
-                )}
+                {FILTERS.map(pos => (
+                  <Button
+                    key={pos}
+                    onClick={() => setFilter(pos)}
+                    variant={filter === pos ? "default" : "outline"}
+                    className={cn(
+                      "h-9 sm:h-10 px-3 sm:px-4 rounded-xl font-black text-[11px] sm:text-sm uppercase tracking-wider",
+                      filter === pos
+                        ? "bg-primary text-primary-foreground"
+                        : "border-primary/25 bg-black/40 text-white/85"
+                    )}
+                  >
+                    {pos}
+                  </Button>
+                ))}
               </div>
 
-              {!currentMatchRatings && emptySlotIndices.length > 0 && (
-                <div className="border-t border-primary/10 pt-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] sm:text-xs font-black text-white/50 uppercase tracking-wider">
-                      Assign to:
-                    </span>
-
-                    {emptySlotIndices.map((slotIdx) => (
-                      <label
-                        key={slotIdx}
-                        className={cn(
-                          "flex items-center gap-1.5 px-2 py-1 rounded-lg border cursor-pointer",
-                          pinnedSlotIndex === slotIdx
-                            ? 'border-primary/40 bg-primary/10'
-                            : 'border-primary/15 bg-black/20'
-                        )}
-                      >
-                        <Checkbox
-                          checked={pinnedSlotIndex === slotIdx}
-                          onCheckedChange={(checked: boolean | 'indeterminate') =>
-                            setPinnedSlotIndex(checked === true ? slotIdx : null)
-                          }
-                          className="border-primary/50 h-4 w-4"
-                        />
-                        <span className="text-[11px] sm:text-xs font-black text-white/90">
-                          {getEmptySlotLabel(slotIdx)}
-                        </span>
-                      </label>
-                    ))}
+              {!currentMatchRatings && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className={cn(
+                    "h-9 px-3 rounded-xl border text-[11px] sm:text-sm font-black flex items-center",
+                    starterCount >= 11
+                      ? 'text-green-500 border-green-500/30 bg-green-500/10'
+                      : 'text-red-500 border-red-500/30 bg-red-500/10'
+                  )}>
+                    {starterCount}/11 XI
                   </div>
+
+                  <div className={cn(
+                    "h-9 px-3 rounded-xl border text-[11px] sm:text-sm font-black flex items-center",
+                    subCount >= 5
+                      ? 'text-green-500 border-green-500/30 bg-green-500/10'
+                      : 'text-red-500 border-red-500/30 bg-red-500/10'
+                  )}>
+                    {subCount}/5 Subs
+                  </div>
+
+                  <Button
+                    onClick={clearLineup}
+                    variant="outline"
+                    className="h-9 px-3 rounded-xl border-red-500/30 bg-black/30 text-red-500 font-black uppercase text-[11px] sm:text-sm"
+                  >
+                    <Trash2 size={13} className="mr-1.5" />
+                    Clear
+                  </Button>
+
+                  <Button
+                    onClick={autoPickLineup}
+                    variant="outline"
+                    className="h-9 px-3 rounded-xl border-accent/30 bg-black/30 text-accent font-black uppercase text-[11px] sm:text-sm"
+                  >
+                    <Wand2 size={13} className="mr-1.5" />
+                    Auto XI
+                  </Button>
                 </div>
+              )}
+            </div>
+
+            {!currentMatchRatings && emptySlotIndices.length > 0 && (
+              <div className="border-t border-primary/10 pt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] sm:text-xs font-black text-white/50 uppercase tracking-wider">
+                    Assign to:
+                  </span>
+
+                  {emptySlotIndices.map((slotIdx) => (
+                    <label
+                      key={slotIdx}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-lg border cursor-pointer",
+                        pinnedSlotIndex === slotIdx
+                          ? 'border-primary/40 bg-primary/10'
+                          : 'border-primary/15 bg-black/20'
+                      )}
+                    >
+                      <Checkbox
+                        checked={pinnedSlotIndex === slotIdx}
+                        onCheckedChange={(checked: boolean | 'indeterminate') =>
+                          setPinnedSlotIndex(checked === true ? slotIdx : null)
+                        }
+                        className="border-primary/50 h-4 w-4"
+                      />
+                      <span className="text-[11px] sm:text-xs font-black text-white/90">
+                        {getEmptySlotLabel(slotIdx)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
 
       <div className="hidden md:block rounded-2xl border border-primary/20 bg-black/65 shadow-inner overflow-hidden">
-            <TooltipProvider>
-              <div className="max-h-[62vh] overflow-auto custom-scrollbar">
-                <Table>
-                  <TableHeader className="sticky top-0 z-10">
-                    <TableRow className="border-b-2 border-primary/40 bg-[rgba(25,53,89,0.92)] backdrop-blur">
-                      <TableHead className="w-[54px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Sel
-                      </TableHead>
-                      <TableHead className="w-[120px] py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Pos
-                      </TableHead>
-                      <TableHead className="py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Player
-                      </TableHead>
-                      <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Status
-                      </TableHead>
-                      <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Morale
-                      </TableHead>
-                      <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Fitness
-                      </TableHead>
-                      <TableHead className="w-[90px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
-                        Skill
-                      </TableHead>
-                      <TableHead className="w-[72px] py-3" />
-                    </TableRow>
-                  </TableHeader>
+        <TooltipProvider>
+          <div className="max-h-[62vh] overflow-auto custom-scrollbar">
+            <Table>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-b-2 border-primary/40 bg-[rgba(25,53,89,0.92)] backdrop-blur">
+                  <TableHead className="w-[54px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Sel
+                  </TableHead>
+                  <TableHead className="w-[120px] py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Pos
+                  </TableHead>
+                  <TableHead className="py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Player
+                  </TableHead>
+                  <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Status
+                  </TableHead>
+                  <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Morale
+                  </TableHead>
+                  <TableHead className="w-[110px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Fitness
+                  </TableHead>
+                  <TableHead className="w-[90px] text-center py-3 text-xs font-black uppercase text-white tracking-widest">
+                    Skill
+                  </TableHead>
+                  <TableHead className="w-[72px] py-3" />
+                </TableRow>
+              </TableHeader>
 
-                  <TableBody>
-                    {filteredStarters.map(p => renderDesktopRow(p, 'STARTER'))}
+              <TableBody>
+                {filteredStarters.map(p => renderDesktopRow(p, 'STARTER'))}
 
-                    {filteredBench.length > 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="p-0">
-                          {renderSectionLabel('Substitute Bench', 'accent')}
-                        </TableCell>
-                      </TableRow>
-                    )}
+                {filteredBench.length > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="p-0">
+                      {renderSectionLabel('Substitute Bench', 'accent')}
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                    {filteredBench.map(p => renderDesktopRow(p, 'BENCH'))}
+                {filteredBench.map(p => renderDesktopRow(p, 'BENCH'))}
 
-                    {!hideReserves && filteredReserves.length > 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="p-0">
-                          {renderSectionLabel('Reserve Pool')}
-                        </TableCell>
-                      </TableRow>
-                    )}
+                {!hideReserves && filteredReserves.length > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="p-0">
+                      {renderSectionLabel('Reserve Pool')}
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                    {!hideReserves && filteredReserves.map(p => renderDesktopRow(p, 'RESERVE'))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TooltipProvider>
+                {!hideReserves && filteredReserves.map(p => renderDesktopRow(p, 'RESERVE'))}
+              </TableBody>
+            </Table>
           </div>
+        </TooltipProvider>
+      </div>
 
-          <div className="md:hidden space-y-3">
-            {filteredStarters.length > 0 && (
-              <>
-                {renderSectionLabel('Starting XI', 'accent')}
-                <div className="space-y-3">
-                  {filteredStarters.map(p => renderMobileCard(p, 'STARTER'))}
-                </div>
-              </>
-            )}
+      <div className="md:hidden space-y-3">
+        {filteredStarters.length > 0 && (
+          <>
+            {renderSectionLabel('Starting XI', 'accent')}
+            <div className="space-y-3">
+              {filteredStarters.map(p => renderMobileCard(p, 'STARTER'))}
+            </div>
+          </>
+        )}
 
-            {filteredBench.length > 0 && (
-              <>
-                {renderSectionLabel('Substitute Bench', 'accent')}
-                <div className="space-y-3">
-                  {filteredBench.map(p => renderMobileCard(p, 'BENCH'))}
-                </div>
-              </>
-            )}
+        {filteredBench.length > 0 && (
+          <>
+            {renderSectionLabel('Substitute Bench', 'accent')}
+            <div className="space-y-3">
+              {filteredBench.map(p => renderMobileCard(p, 'BENCH'))}
+            </div>
+          </>
+        )}
 
-            {!hideReserves && filteredReserves.length > 0 && (
-              <>
-                {renderSectionLabel('Reserve Pool')}
-                <div className="space-y-3">
-                  {filteredReserves.map(p => renderMobileCard(p, 'RESERVE'))}
-                </div>
-              </>
-            )}
-          </div>
+        {!hideReserves && filteredReserves.length > 0 && (
+          <>
+            {renderSectionLabel('Reserve Pool')}
+            <div className="space-y-3">
+              {filteredReserves.map(p => renderMobileCard(p, 'RESERVE'))}
+            </div>
+          </>
+        )}
+      </div>
 
       <PlayerProfile player={viewingPlayer} onClose={() => setViewingPlayer(null)} />
     </div>
   );
 }
+
+---
+
+## Refactor check — functionality
+
+All current behaviour is preserved:
+
+- **Props**: `players`, `currentMatchRatings`, `onPlayerSwap`, `activeSwapId`, `hideReserves` — all used; callers in `GameApp.tsx` and `MatchSim.tsx` need no changes.
+- **Lineup**: `togglePlayerLineup`, `addPlayerToSlot`, `clearLineup`, `autoPickLineup`, `pinnedSlotIndex`, and the empty-slot “Assign to” pins.
+- **Filter**: Position filter (ALL, GK, DF, MF, FW, DM).
+- **Swap mode**: Row/card click calls `onPlayerSwap` when `!currentMatchRatings`; `activeSwapId` drives highlight and banner.
+- **Match ratings**: Status shows rating or SUSP/INJ/Fit; checkbox and assign disabled when `currentMatchRatings` is set.
+- **Sections**: Starters, Substitute Bench, Reserve Pool (`hideReserves` respected); reserves sorted by position then skill.
+- **PlayerProfile**: Modal via `viewingPlayer`.
+- **Actions**: XI/Subs counts, Clear, Auto XI.
+
+## Fixes needed before applying
+
+1. **Squad Selection / Tactical Hub buttons** — No state or `onClick`; they do nothing. Either add tab state (e.g. `activeTab: 'squad' | 'tactical'`) and conditional content, or remove the Tactical Hub button until that view exists.
+2. **Unused imports** — Remove: `Tooltip`, `TooltipContent`, `TooltipTrigger`, `TooltipPortal` (keep `TooltipProvider` if you add tooltips later), and from lucide: `Search`, `Menu`, `UserCircle` (only `Eye` is used for the profile button).

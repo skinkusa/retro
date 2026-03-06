@@ -533,19 +533,40 @@ setState(s => ({
       const nextBids: TransferOffer[] = [];
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
-      
-      // AI Transfer Market Logic
-      if (Math.random() < 0.15) {
-        const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
-        const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);
-        if (seller && buyer) {
-          const sellerPlayers = allPlayers.filter(p => p.clubId === seller.id);
-          const p = sellerPlayers[Math.floor(Math.random() * sellerPlayers.length)];
-          if (p && buyer.budget >= p.value) {
-            allPlayers = allPlayers.map(x => x.id === p.id ? { ...x, clubId: buyer.id } : x);
-            nextMessages.unshift({ id: `ai-tr-${Date.now()}`, title: 'TRANSFER BOMBSHELL', content: '', date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', buyerId: buyer.id, sellerId: seller.id, playerName: p.name, transferValue: p.value });
-          }
-        }
+
+      // AI Transfer Market: 0–10 transfers per week across all divisions, with sensible constraints
+      const numTransfersThisWeek = Math.floor(Math.random() * 11); // 0–10
+      const movedPlayerIds = new Set<string>();
+      const aiTeams = allTeams.filter(t => t.id !== s.userTeamId);
+      for (let i = 0; i < numTransfersThisWeek; i++) {
+        const seller = aiTeams[Math.floor(Math.random() * aiTeams.length)];
+        if (!seller) continue;
+        const sellerPlayers = allPlayers.filter(
+          p => p.clubId === seller.id && !movedPlayerIds.has(p.id) && p.status !== 'INJURED'
+        );
+        if (sellerPlayers.length === 0) continue;
+        const p = sellerPlayers[Math.floor(Math.random() * sellerPlayers.length)];
+        if (!p) continue;
+        // Buyer: same division (realistic), has budget for fee + some wage headroom, reputation not far below seller (player would join)
+        const fee = Math.floor(p.value * (0.9 + Math.random() * 0.2));
+        const minRep = Math.max(0, seller.reputation - 25);
+        const candidates = aiTeams.filter(
+          t => t.id !== seller.id &&
+            t.budget >= fee &&
+            t.reputation >= minRep &&
+            (t.division === seller.division || (t.division === seller.division - 1 && seller.division > 1) || (t.division === seller.division + 1 && seller.division < 4))
+        );
+        if (candidates.length === 0) continue;
+        const buyer = candidates[Math.floor(Math.random() * candidates.length)];
+        if (!buyer || buyer.budget < fee) continue;
+        movedPlayerIds.add(p.id);
+        allPlayers = allPlayers.map(x => x.id === p.id ? { ...x, clubId: buyer.id } : x);
+        allTeams = allTeams.map(t => {
+          if (t.id === buyer.id) return { ...t, budget: t.budget - fee, weeklyWages: t.weeklyWages + p.wage, finances: { ...t.finances, transfersIn: t.finances.transfersIn + fee } };
+          if (t.id === seller.id) return { ...t, budget: t.budget + fee, weeklyWages: t.weeklyWages - p.wage, finances: { ...t.finances, transfersOut: t.finances.transfersOut + fee } };
+          return t;
+        });
+        nextMessages.unshift({ id: `ai-tr-${Date.now()}-${i}`, title: 'TRANSFER', content: '', date: Date.now(), week: nextWeek, read: false, type: 'TRANSFER', buyerId: buyer.id, sellerId: seller.id, playerName: p.name, transferValue: fee });
       }
 
       // User Team Incoming Bids

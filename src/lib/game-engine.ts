@@ -217,6 +217,7 @@ export function simulateMatch(
   };
 
   for (let min = startMin; min <= 90; min++) {
+    // Sent-off and injured players are excluded so their ability no longer contributes to team strength
     const currentHome = activeHome.filter(p => !redCarded.has(p.id) && !injuredInMatch.has(p.id));
     const currentAway = activeAway.filter(p => !redCarded.has(p.id) && !injuredInMatch.has(p.id));
 

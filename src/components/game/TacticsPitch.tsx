@@ -6,15 +6,20 @@ import { useMemo } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { getTacticalAssignments } from '@/lib/game-engine';
 
+/** Shared container class so Squad tactics and match-day command center use identical pitch visuals */
+export const TACTICS_PITCH_CONTAINER_CLASS =
+  "bg-black/60 p-3 border border-primary/20 rounded-xl shadow-inner h-full flex items-center justify-center min-h-[320px] sm:min-h-[420px]";
+
 interface TacticsPitchProps {
   team: Team;
   players: Player[];
   onPlayerClick: (player: Player) => void;
   onPlayerProfile?: (player: Player) => void;
   activeSwapId?: string | null;
+  sentOffPlayerIds?: Set<string>;
 }
 
-export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, activeSwapId }: TacticsPitchProps) {
+export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, activeSwapId, sentOffPlayerIds }: TacticsPitchProps) {
   const lineupPlayers = useMemo(() => {
     return (team.lineup.slice(0, 11) as (string | null)[]).map(id =>
       id ? (players.find(p => p.id === id) ?? null) : null
@@ -66,6 +71,8 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
         const markerColor = player ? getPositionColor(player, slot.pos, slot.label) : '';
         const isProblematic = player && (markerColor === 'bg-red-600' || markerColor === 'bg-yellow-500');
         const isBeingSwapped = player && activeSwapId === player.id;
+        const isSentOff = player && sentOffPlayerIds?.has(player.id);
+        const isInjured = player && (player.status === 'INJURED' || player.injury != null);
         
         return (
           <div
@@ -76,22 +83,30 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
             {player ? (
               <div className="flex flex-col items-center">
                 <button
-                  onClick={() => onPlayerClick(player)}
+                  onClick={() => !isSentOff && onPlayerClick(player)}
+                  disabled={!!isSentOff}
                   className={cn(
                     "group flex flex-col items-center transition-all active:scale-95",
-                    isBeingSwapped ? "animate-pulse" : ""
+                    isBeingSwapped ? "animate-pulse" : "",
+                    isSentOff && "opacity-60 cursor-not-allowed"
                   )}
                 >
                   <div className={cn(
                     "w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white/50 shadow-xl flex items-center justify-center text-[16px] md:text-[18px] font-black text-white relative",
                     markerColor,
-                    isBeingSwapped ? "ring-4 ring-accent ring-offset-2 ring-offset-black" : ""
+                    isBeingSwapped ? "ring-4 ring-accent ring-offset-2 ring-offset-black" : "",
+                    isSentOff && "ring-2 ring-red-500"
                   )}>
                     {slot.label}
                     {isProblematic && (
                       <div className="absolute -top-1 -right-1 bg-black p-0.5 border border-white animate-pulse rounded-full">
                         <ShieldAlert size={14} className={markerColor === 'bg-red-600' ? 'text-red-500' : 'text-yellow-500'} />
                       </div>
+                    )}
+                    {isInjured && (
+                      <span className="absolute -top-1.5 -left-1 bg-red-600 text-white text-[8px] md:text-[9px] font-black px-1 rounded border border-white/50 leading-tight">
+                        INJ
+                      </span>
                     )}
                   </div>
                   <div className={cn(
@@ -104,12 +119,18 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
                       {player.name}
                     </span>
                     <span className={cn(
-                      "text-[8px] md:text-[9px] block font-black mt-0.5 tracking-tight uppercase",
+                      "text-[16px] md:text-[18px] block font-black mt-0.5 tracking-tight uppercase",
                       markerColor === 'bg-red-600' ? "text-red-500" : 
                       markerColor === 'bg-yellow-500' ? "text-yellow-400" : "text-accent"
                     )}>
                       {getNaturalPositionLabel(player.position)} {player.side}
                     </span>
+                    {isSentOff && (
+                      <span className="text-[8px] font-black text-red-500 uppercase block mt-0.5">SENT OFF</span>
+                    )}
+                    {isInjured && (
+                      <span className="text-[8px] font-black text-orange-400 uppercase block mt-0.5">INJ</span>
+                    )}
                   </div>
                 </button>
               </div>
@@ -136,6 +157,18 @@ export function TacticsPitch({ team, players, onPlayerClick, onPlayerProfile, ac
           {team.formation} / {team.playStyle}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Pitch + shared container. Use this in both Squad tab and match-day tactical command center
+ * so the tactics view looks identical in both places.
+ */
+export function TacticsPitchView(props: TacticsPitchProps) {
+  return (
+    <div className={TACTICS_PITCH_CONTAINER_CLASS}>
+      <TacticsPitch {...props} />
     </div>
   );
 }
