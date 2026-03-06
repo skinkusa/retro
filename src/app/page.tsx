@@ -1,16 +1,39 @@
 "use client"
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PlayCircle } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [isNative, setIsNative] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const native = Capacitor.isNativePlatform();
+    setIsNative(native);
+
+    if (native) {
+      // Must match next.config trailingSlash: true → static file is at /game/
+      router.replace('/game/');
+    }
+  }, [router]);
+
+  if (isNative === true) {
+    return (
+      <div className="min-h-screen min-h-[100dvh] w-full flex items-center justify-center bg-[hsl(210_16%_10%)]">
+        <div className="text-white/60 text-sm uppercase tracking-widest">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="landing-page min-h-screen min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 max-md:p-2 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: 'url(/retromanager.png)', backgroundColor: 'hsl(210 16% 10%)' }}
     >
       <div className="absolute inset-0 bg-black/40" aria-hidden />
-      {/* Mobile: safe-area padding; desktop: unchanged */}
       <div className="landing-content relative z-10 flex flex-col items-center justify-center gap-8 max-md:gap-3 max-w-2xl w-full px-2 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:px-0 md:pt-0 md:pb-0 md:gap-8">
         <h1 className="text-3xl font-black tracking-tighter text-white uppercase text-center drop-shadow-lg italic max-md:leading-tight md:text-4xl sm:text-5xl md:text-6xl">
           Retro Manager

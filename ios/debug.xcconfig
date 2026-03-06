@@ -1,1 +1,6 @@
 CAPACITOR_DEBUG = true
+
+// Disable code signing for simulator/CLI builds (no Apple Developer cert required)
+CODE_SIGN_IDENTITY = -
+CODE_SIGNING_REQUIRED = NO
+CODE_SIGNING_ALLOWED = NO

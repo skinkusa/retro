@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import './globals.css';
-
-const GA_ID = 'G-9NKK8JNLRH';
+import { CapacitorSplashHide } from '@/components/CapacitorSplashHide';
+import { ClientAnalytics } from '@/components/ClientAnalytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,20 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}
-        </Script>
+        <ClientAnalytics />
       </head>
       <body className={`${inter.className} font-body antialiased selection:bg-accent selection:text-accent-foreground`}>
+        <CapacitorSplashHide />
         {children}
       </body>
     </html>
