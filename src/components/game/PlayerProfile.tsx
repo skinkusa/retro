@@ -5,7 +5,6 @@ import { Player, Position } from '@/types/game';
 import { useGame } from '@/lib/store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -88,9 +87,9 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
   const renderAttribute = (label: string, value: number, tooltip: string) => (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex justify-between items-center py-3 border-b border-white/10 cursor-help hover:bg-white/5 transition-colors px-2">
-          <span className="text-[15px] uppercase text-muted-foreground font-black tracking-tight">{label}</span>
-          <span className={`font-mono text-[18px] font-black ${value >= 15 ? 'text-accent' : value >= 10 ? 'text-primary' : 'text-white'}`}>
+        <div className="flex justify-between items-center py-2 border-b border-white/10 cursor-help hover:bg-white/5 transition-colors px-2">
+          <span className="text-[13px] uppercase text-muted-foreground font-black tracking-tight">{label}</span>
+          <span className={`font-mono text-[16px] font-black ${value >= 15 ? 'text-accent' : value >= 10 ? 'text-primary' : 'text-white'}`}>
             {value}
           </span>
         </div>
@@ -175,113 +174,80 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
 
           <ScrollArea className="flex-1">
             <div className="p-6 max-md:p-3">
-              <TabsContent value="overview" className="mt-0 space-y-6 max-md:space-y-3">
-                <div className="grid grid-cols-4 gap-4 max-md:gap-2 text-center">
-                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Age</div>
-                    <div className="text-3xl max-md:text-xl font-black text-white">{player.age}</div>
-                  </div>
-                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Position</div>
-                    <div className="text-[20px] font-black text-cyan leading-tight">{player.position}</div>
-                    <div className="text-[10px] opacity-60 font-black">({player.side})</div>
-                  </div>
-                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Value</div>
-                    <div className="text-[20px] font-black text-accent">{formatMoney(player.value)}</div>
-                  </div>
-                  <div className="bg-black/60 p-4 max-md:p-2 border border-primary/20 rounded-xl shadow-inner">
-                    <div className="text-[12px] max-md:text-[10px] text-muted-foreground uppercase font-black mb-1">Morale</div>
-                    <div className={cn("text-[24px] font-black", player.morale > 70 ? "text-green-500" : "text-yellow-500")}>
-                      {player.morale}%
-                    </div>
-                  </div>
-                </div>
-
-                {player.seasonStats.apps > 0 && (
-                  <div className="bg-black/60 p-6 border border-primary/20 rounded-xl shadow-inner">
-                    <h4 className="text-[14px] font-black text-primary uppercase border-b border-primary/20 pb-3 mb-4">This season</h4>
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 text-center">
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">Apps</div>
-                        <div className="text-xl font-black text-white">{player.seasonStats.apps}</div>
+              <TabsContent value="overview" className="mt-0 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full max-h-[calc(95vh-220px)] min-h-0">
+                  <div className="flex flex-col gap-4 min-h-0">
+                    <div className="grid grid-cols-4 gap-3 text-center shrink-0">
+                      <div className="bg-black/60 p-3 border border-primary/20 rounded-xl shadow-inner">
+                        <div className="text-[11px] text-muted-foreground uppercase font-black mb-0.5">Age</div>
+                        <div className="text-2xl font-black text-white">{player.age}</div>
                       </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">Goals</div>
-                        <div className="text-xl font-black text-cyan">{player.seasonStats.goals}</div>
                       </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">Shots</div>
-                        <div className="text-xl font-black text-white">{player.seasonStats.shots ?? '—'}</div>
+                      <div className="bg-black/60 p-3 border border-primary/20 rounded-xl shadow-inner">
+                        <div className="text-[11px] text-muted-foreground uppercase font-black mb-0.5">Position</div>
+                        <div className="text-lg font-black text-cyan leading-tight">{player.position}</div>
+                        <div className="text-[9px] opacity-60 font-black">({player.side})</div>
                       </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">SOT</div>
-                        <div className="text-xl font-black text-white">{player.seasonStats.shotsOnTarget ?? '—'}</div>
+                      <div className="bg-black/60 p-3 border border-primary/20 rounded-xl shadow-inner">
+                        <div className="text-[11px] text-muted-foreground uppercase font-black mb-0.5">Value</div>
+                        <div className="text-lg font-black text-accent">{formatMoney(player.value)}</div>
                       </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">CS</div>
-                        <div className="text-xl font-black text-white">{player.position === 'GK' ? (player.seasonStats.cleanSheets ?? '—') : '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">Mins</div>
-                        <div className="text-xl font-black text-white">{player.seasonStats.minutesPlayed ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">Rating</div>
-                        <div className="text-xl font-black text-accent">{player.seasonStats.avgRating.toFixed(2)}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-muted-foreground uppercase font-black">MoM</div>
-                        <div className="text-xl font-black text-primary">{player.seasonStats.manOfTheMatch ?? 0}</div>
+                      <div className="bg-black/60 p-3 border border-primary/20 rounded-xl shadow-inner">
+                        <div className="text-[11px] text-muted-foreground uppercase font-black mb-0.5">Morale</div>
+                        <div className={cn("text-xl font-black", player.morale > 70 ? "text-green-500" : "text-yellow-500")}>{player.morale}%</div>
                       </div>
                     </div>
+                    {player.seasonStats.apps > 0 && (
+                      <div className="bg-black/60 p-4 border border-primary/20 rounded-xl shadow-inner shrink-0">
+                        <h4 className="text-[12px] font-black text-primary uppercase border-b border-primary/20 pb-2 mb-3">This season</h4>
+                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 text-center">
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">Apps</div><div className="text-base font-black text-white">{player.seasonStats.apps}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">Goals</div><div className="text-base font-black text-cyan">{player.seasonStats.goals}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">Shots</div><div className="text-base font-black text-white">{player.seasonStats.shots ?? '—'}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">SOT</div><div className="text-base font-black text-white">{player.seasonStats.shotsOnTarget ?? '—'}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">CS</div><div className="text-base font-black text-white">{player.position === 'GK' ? (player.seasonStats.cleanSheets ?? '—') : '—'}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">Mins</div><div className="text-base font-black text-white">{player.seasonStats.minutesPlayed ?? '—'}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">Rating</div><div className="text-base font-black text-accent">{player.seasonStats.avgRating.toFixed(2)}</div></div>
+                          <div><div className="text-[9px] text-muted-foreground uppercase font-black">MoM</div><div className="text-base font-black text-primary">{player.seasonStats.manOfTheMatch ?? 0}</div></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                <div className="bg-primary/5 border border-primary/20 p-6 rounded-xl space-y-4">
-                  <h4 className="text-[14px] font-black text-primary uppercase border-b border-primary/10 pb-2">Status & Availability</h4>
-                  <div className="grid grid-cols-2 gap-8">
-                    <div className="space-y-2">
-                       <span className="text-[13px] text-muted-foreground uppercase font-bold">Physical Condition</span>
-                       <div className="text-2xl font-black text-white">{player.fitness}% FIT</div>
+                  <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl shrink-0 lg:shrink flex flex-col gap-3">
+                    <h4 className="text-[12px] font-black text-primary uppercase border-b border-primary/10 pb-2">Status & Availability</h4>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1"><span className="text-[12px] text-muted-foreground uppercase font-bold">Physical Condition</span><div className="text-xl font-black text-white">{player.fitness}% FIT</div></div>
+                      <div className="space-y-1"><span className="text-[12px] text-muted-foreground uppercase font-bold">Match Readiness</span><div className={cn("text-xl font-black", player.status === 'FIT' ? "text-accent" : "text-red-500")}>{player.status.toUpperCase()}</div></div>
                     </div>
-                    <div className="space-y-2">
-                       <span className="text-[13px] text-muted-foreground uppercase font-bold">Match Readiness</span>
-                       <div className={cn("text-2xl font-black", player.status === 'FIT' ? "text-accent" : "text-red-500")}>
-                         {player.status.toUpperCase()}
-                       </div>
-                    </div>
+                    {player.injury && (
+                      <div className="p-2 bg-red-600/10 border border-red-600/30 text-red-500 text-[12px] font-black uppercase text-center rounded-lg mt-auto">SIDELINED: {player.injury.type} ({player.injury.weeksRemaining} WEEKS)</div>
+                    )}
                   </div>
-                  {player.injury && (
-                    <div className="p-3 bg-red-600/10 border border-red-600/30 text-red-500 text-[14px] font-black uppercase text-center rounded-lg">
-                      SIDELINED: {player.injury.type} ({player.injury.weeksRemaining} WEEKS)
-                    </div>
-                  )}
                 </div>
               </TabsContent>
 
               <TabsContent value="attributes" className="mt-0">
-                <div className="grid grid-cols-2 gap-x-12 gap-y-2">
-                  <div className="space-y-1">
-                    <h4 className="text-[14px] font-black text-primary uppercase border-b-2 border-primary/30 mb-4 pb-2">Physical</h4>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                  <div className="space-y-0">
+                    <h4 className="text-[12px] font-black text-primary uppercase border-b-2 border-primary/30 mb-2 pb-1">Physical</h4>
                     {renderAttribute("Pace", player.attributes.pace, "Impacts speed and off-the-ball runs.")}
                     {renderAttribute("Stamina", player.attributes.stamina, "Affects how quickly fitness drops.")}
                     {renderAttribute("Heading", player.attributes.heading, "Quality of aerial duels.")}
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-[14px] font-black text-primary uppercase border-b-2 border-primary/30 mb-4 pb-2">Technical</h4>
+                  <div className="space-y-0">
+                    <h4 className="text-[12px] font-black text-primary uppercase border-b-2 border-primary/30 mb-2 pb-1">Technical</h4>
                     {renderAttribute("Skill", player.attributes.skill, "Overall ball control quality.")}
                     {renderAttribute("Passing", player.attributes.passing, "Precision for distribution.")}
                     {renderAttribute("Shooting", player.attributes.shooting, "Accuracy of goal attempts.")}
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-[14px] font-black text-primary uppercase border-b-2 border-primary/30 mb-4 pb-2 mt-6">Mental</h4>
+                  <div className="space-y-0">
+                    <h4 className="text-[12px] font-black text-primary uppercase border-b-2 border-primary/30 mb-2 pb-1">Mental</h4>
                     {renderAttribute("Influence", player.attributes.influence, "Leadership and impact.")}
                     {renderAttribute("Temper", player.attributes.temperament, "Discipline and composure.")}
                     {renderAttribute("Consistency", player.attributes.consistency, "Stability of performance.")}
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-[14px] font-black text-primary uppercase border-b-2 border-primary/30 mb-4 pb-2 mt-6">Special</h4>
+                  <div className="space-y-0">
+                    <h4 className="text-[12px] font-black text-primary uppercase border-b-2 border-primary/30 mb-2 pb-1">Special</h4>
                     {renderAttribute("Keeper", player.attributes.goalkeeping, "Primary shot-stopping ability.")}
                     {renderAttribute("Dirty", player.attributes.dirtiness, "Likelihood of fouls/cards.")}
                     {renderAttribute("Professional", player.attributes.professionalism, "Attitude in training.")}
@@ -289,7 +255,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                 </div>
               </TabsContent>
 
-              <TabsContent value="contract" className="mt-0 space-y-6">
+              <TabsContent value="contract" className="mt-0 space-y-4">
                 <div className="bg-black/60 p-5 border border-primary/20 rounded-xl shadow-inner flex justify-between items-center">
                   <div className="space-y-1">
                     <span className="text-[12px] text-muted-foreground uppercase font-black">Current Wage</span>
@@ -401,8 +367,8 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                 )}
               </TabsContent>
 
-              <TabsContent value="report" className="mt-0 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TabsContent value="report" className="mt-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div className="bg-primary/10 p-6 border border-primary/30 flex flex-col items-center gap-4 rounded-xl shadow-sm">
                     <div className="text-[13px] text-primary font-black uppercase tracking-widest border-b border-primary/20 w-full text-center pb-2">Scout Conclusion</div>
                     <div className="text-[18px] font-black text-white uppercase italic text-center leading-snug">{getPotentialHint()}</div>

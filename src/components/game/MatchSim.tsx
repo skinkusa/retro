@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Pause, UserCircle, Briefcase, LayoutDashboard, Swords } from 'lucide-react';
 import { cn, getNaturalPositionLabel } from '@/lib/utils';
 import { PlayerProfile } from './PlayerProfile';
+import { MatchOverlayTemplate } from './MatchOverlayTemplate';
+import { MatchPlayView } from './MatchPlayView';
 
 export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: { 
   fixture: Fixture, 
