@@ -1,1 +1,4 @@
-CAPACITOR_DEBUG = true
+// Capacitor iOS debug build settings
+// Used by Xcode when building the App target (Debug/Release).
+// See: https://capacitorjs.com/docs/ios/configuration
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) DEBUG
