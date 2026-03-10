@@ -18,6 +18,7 @@ function makePlayer(
   return {
     id,
     name: `Player ${id}`,
+    nationality: 'England',
     age: 25,
     position,
     side: 'C',
@@ -98,6 +99,7 @@ function makePlayerWithLevel(id: string, position: 'GK' | 'DF' | 'MF' | 'FW' | '
   return {
     id,
     name: `Player ${id}`,
+    nationality: 'England',
     age: 25,
     position,
     side: 'C',
