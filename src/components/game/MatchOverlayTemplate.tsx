@@ -68,17 +68,17 @@ export function MatchOverlayTemplate({
           hasSecondary ? 'max-w-5xl mx-auto justify-center text-center gap-1 sm:gap-2 max-md:gap-1 relative overflow-hidden pt-0.5' : 'max-w-4xl mx-auto justify-center min-h-0 py-6 space-y-6'
         )}
       >
-        <div className={cn('shrink-0', hasSecondary ? 'max-md:space-y-0 space-y-0.5' : 'text-center space-y-2')}>
+        <div className={cn('shrink-0', hasSecondary ? 'max-md:space-y-0 space-y-0.5' : 'text-center space-y-2 max-[1300px]:space-y-4')}>
           <h2
             className={cn(
               'text-primary font-black uppercase tracking-[0.4em]',
-              hasSecondary ? 'text-sm sm:text-base md:text-lg' : 'text-xl'
+              hasSecondary ? 'text-sm sm:text-base md:text-lg max-[1300px]:text-[24px]' : 'text-xl max-[1300px]:text-3xl'
             )}
           >
             {title}
           </h2>
           {subtitle && (
-            <p className="text-white/90 uppercase font-black text-[12px]">{subtitle}</p>
+            <p className="text-white/90 uppercase font-black text-[12px] max-[1300px]:text-[18px]">{subtitle}</p>
           )}
         </div>
 
@@ -98,17 +98,17 @@ export function MatchOverlayTemplate({
         )}
 
         {hasSecondary && (
-          <div className="hidden lg:flex flex-col sm:flex-row justify-center gap-3 shrink-0">
+          <div className="hidden lg:flex flex-col sm:flex-row justify-center gap-3 max-[1300px]:gap-6 shrink-0">
             <Button
               onClick={secondaryButton!.onClick}
               variant="outline"
-              className="h-12 sm:h-14 font-black uppercase text-base sm:text-lg border-primary/40 hover:bg-primary/10"
+              className="h-12 sm:h-14 max-[1300px]:h-20 font-black uppercase text-base sm:text-lg max-[1300px]:text-[24px] border-primary/40 hover:bg-primary/10"
             >
               {secondaryButton!.label}
             </Button>
             <Button
               onClick={primaryButton.onClick}
-              className="h-12 sm:h-14 font-black uppercase text-base sm:text-lg bg-primary text-primary-foreground shadow-2xl hover:scale-[1.02] transition-transform"
+              className="h-12 sm:h-14 max-[1300px]:h-20 font-black uppercase text-base sm:text-lg max-[1300px]:text-[24px] bg-primary text-primary-foreground shadow-2xl hover:scale-[1.02] transition-transform"
             >
               {primaryButton.label}
             </Button>

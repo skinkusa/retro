@@ -37,11 +37,11 @@ export function FinanceHub() {
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
                   <TableRow className="border-b border-primary/5 cursor-help">
-                    <TableCell className="text-xs uppercase text-muted-foreground flex items-center gap-1">
+                    <TableCell className="text-xs max-[1300px]:text-[18px] uppercase text-muted-foreground flex items-center gap-1 max-[1300px]:py-4">
                       {acc.label}
-                      <Info size={10} className="opacity-30" />
+                      <Info size={10} className="opacity-30 max-[1300px]:w-4 max-[1300px]:h-4" />
                     </TableCell>
-                    <TableCell className={`text-right font-mono text-xs ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
+                    <TableCell className={`text-right font-mono text-xs max-[1300px]:text-[18px] ${acc.type === 'income' ? 'text-green-500' : 'text-red-500'} max-[1300px]:py-4`}>
                       {acc.type === 'income' ? '+' : '-'} £{formatCurrency(acc.value)}
                     </TableCell>
                   </TableRow>
@@ -50,8 +50,8 @@ export function FinanceHub() {
               </Tooltip>
             ))}
             <TableRow className="bg-muted/50 font-bold">
-              <TableCell className="text-xs uppercase text-primary">NET BALANCE</TableCell>
-              <TableCell className={`text-right font-mono text-sm ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'}`}>
+              <TableCell className="text-xs max-[1300px]:text-[18px] uppercase text-primary max-[1300px]:py-5">NET BALANCE</TableCell>
+              <TableCell className={`text-right font-mono text-sm max-[1300px]:text-[20px] ${(totalIncome - totalExpense) >= 0 ? 'text-cyan' : 'text-red-500'} max-[1300px]:py-5`}>
                 £{formatCurrency(totalIncome - totalExpense)}
               </TableCell>
             </TableRow>
@@ -61,11 +61,11 @@ export function FinanceHub() {
 
       <RetroWindow title="FINANCIAL STATUS">
         <div className="space-y-4">
-          <div className="p-4 bg-muted border border-primary/20 text-center">
-            <div className="text-[10px] uppercase text-muted-foreground mb-1">Total Bank Balance</div>
-            <div className="text-2xl font-mono text-cyan">£{formatCurrency(userTeam.budget)}</div>
+          <div className="p-4 max-[1300px]:p-8 bg-muted border border-primary/20 text-center">
+            <div className="text-[10px] max-[1300px]:text-[16px] uppercase text-muted-foreground mb-1">Total Bank Balance</div>
+            <div className="text-2xl max-[1300px]:text-4xl font-mono text-cyan">£{formatCurrency(userTeam.budget)}</div>
           </div>
-          <div className="text-[10px] text-muted-foreground uppercase space-y-2">
+          <div className="text-[10px] max-[1300px]:text-[18px] text-muted-foreground uppercase space-y-2 max-[1300px]:space-y-4">
             <div className="flex justify-between">
               <span>Weekly Wage Bill:</span>
               <span className="text-foreground">£{formatCurrency(userTeam.weeklyWages)}</span>
@@ -75,7 +75,7 @@ export function FinanceHub() {
               <span className="text-foreground">£{formatCurrency(totalIncome - totalExpense)}</span>
             </div>
           </div>
-          <div className="pt-4 border-t border-primary/10 italic text-[10px] text-muted-foreground text-center">
+          <div className="pt-4 border-t border-primary/10 italic text-[10px] max-[1300px]:text-[16px] text-muted-foreground text-center">
             &ldquo;THE BOARD IS {(totalIncome - totalExpense) > 0 ? 'SATISFIED' : 'CONCERNED'} WITH CURRENT FINANCIAL PERFORMANCE.&rdquo;
           </div>
         </div>

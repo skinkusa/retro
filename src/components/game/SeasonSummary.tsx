@@ -17,10 +17,10 @@ export function SeasonSummary() {
     <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 font-mono overflow-auto">
       <div className="max-w-5xl w-full max-h-[95vh] flex flex-col gap-4 py-2">
         <div className="text-center space-y-1 border-b-4 border-primary pb-3 shrink-0">
-          <h1 className="text-4xl sm:text-5xl font-black text-primary tracking-tighter uppercase leading-none">
+          <h1 className="text-4xl sm:text-5xl max-[1300px]:text-6xl font-black text-primary tracking-tighter uppercase leading-none">
             SEASON {summary.season} WRAP-UP
           </h1>
-          <p className="text-[12px] sm:text-[14px] text-muted-foreground font-bold tracking-[0.2em] uppercase">
+          <p className="text-[12px] sm:text-[14px] max-[1300px]:text-[20px] text-muted-foreground font-bold tracking-[0.2em] uppercase">
             Official League Record & Performance Review
           </p>
         </div>
@@ -34,8 +34,8 @@ export function SeasonSummary() {
                     <Trophy className="text-yellow-500" size={22} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] text-muted-foreground font-black uppercase">Division {div}</div>
-                    <div className="text-[16px] sm:text-[18px] font-black text-white uppercase italic truncate">{team}</div>
+                    <div className="text-[10px] max-[1300px]:text-[14px] text-muted-foreground font-black uppercase">Division {div}</div>
+                    <div className="text-[16px] sm:text-[18px] max-[1300px]:text-[24px] font-black text-white uppercase italic truncate">{team}</div>
                   </div>
                 </div>
               ))}
@@ -47,18 +47,18 @@ export function SeasonSummary() {
               <div className="bg-card p-3 sm:p-4 border-2 border-primary/20 space-y-3 flex-1 min-h-0">
                 <div className="flex justify-between items-center">
                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase">Final Position</span>
-                      <span className="text-2xl sm:text-3xl font-black text-white">{summary.userPos}th</span>
+                      <span className="text-[10px] max-[1300px]:text-[16px] font-black text-muted-foreground uppercase">Final Position</span>
+                      <span className="text-2xl sm:text-3xl max-[1300px]:text-5xl font-black text-white">{summary.userPos}th</span>
                    </div>
                    <div className="flex flex-col text-right">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase">Board Target</span>
-                      <span className="text-2xl sm:text-3xl font-black text-primary">{summary.userTarget}th</span>
+                      <span className="text-[10px] max-[1300px]:text-[16px] font-black text-muted-foreground uppercase">Board Target</span>
+                      <span className="text-2xl sm:text-3xl max-[1300px]:text-5xl font-black text-primary">{summary.userTarget}th</span>
                    </div>
                 </div>
                 
                 <div className="pt-3 border-t border-primary/10">
-                   <div className="text-[11px] font-black text-primary uppercase mb-1">Board Assessment</div>
-                   <p className="text-[12px] sm:text-[13px] leading-tight italic text-white/80">
+                   <div className="text-[11px] max-[1300px]:text-[18px] font-black text-primary uppercase mb-1">Board Assessment</div>
+                   <p className="text-[12px] sm:text-[13px] max-[1300px]:text-[20px] leading-tight italic text-white/80">
                       {summary.userPos <= summary.userTarget 
                         ? `"Excellent work this season. You exceeded our expectations and the fans are delighted with the progress."`
                         : summary.userPos <= summary.userTarget + 5
@@ -69,10 +69,10 @@ export function SeasonSummary() {
 
                 <div className="flex justify-between items-center bg-primary/10 p-2.5 mt-3">
                    <div className="flex items-center gap-2">
-                      <Target size={14} className="text-primary shrink-0" />
-                      <span className="text-[11px] font-black uppercase">Board Confidence</span>
+                      <Target size={14} className="text-primary shrink-0 max-[1300px]:w-6 max-[1300px]:h-6" />
+                      <span className="text-[11px] max-[1300px]:text-[18px] font-black uppercase">Board Confidence</span>
                    </div>
-                   <span className={cn("text-[14px] sm:text-[15px] font-black", state.boardConfidence > 50 ? "text-green-500" : "text-red-500")}>
+                   <span className={cn("text-[14px] sm:text-[15px] max-[1300px]:text-[22px] font-black", state.boardConfidence > 50 ? "text-green-500" : "text-red-500")}>
                       {state.boardConfidence}%
                    </span>
                 </div>
@@ -86,11 +86,11 @@ export function SeasonSummary() {
               <div className="space-y-2 p-1.5 h-full min-h-0 overflow-auto">
                  {Object.entries(summary.promoted).map(([div, teams]) => (
                     <div key={div} className="space-y-1">
-                       <div className="text-[9px] font-black text-green-500 uppercase px-2">To Div {parseInt(div)-1}</div>
+                       <div className="text-[9px] max-[1300px]:text-[14px] font-black text-green-500 uppercase px-2">To Div {parseInt(div)-1}</div>
                        {teams.map(t => (
                           <div key={t} className="flex items-center gap-2 bg-green-500/5 px-2 py-1 border-l-2 border-green-500">
-                             <TrendingUp size={10} className="text-green-500 shrink-0" />
-                             <span className="text-[11px] font-black text-white uppercase truncate">{t}</span>
+                             <TrendingUp size={10} className="text-green-500 shrink-0 max-[1300px]:w-4 max-[1300px]:h-4" />
+                             <span className="text-[11px] max-[1300px]:text-[16px] font-black text-white uppercase truncate">{t}</span>
                           </div>
                        ))}
                     </div>
@@ -102,11 +102,11 @@ export function SeasonSummary() {
               <div className="space-y-2 p-1.5 h-full min-h-0 overflow-auto">
                  {Object.entries(summary.relegated).map(([div, teams]) => (
                     <div key={div} className="space-y-1">
-                       <div className="text-[9px] font-black text-red-500 uppercase px-2">From Div {div}</div>
+                       <div className="text-[9px] max-[1300px]:text-[14px] font-black text-red-500 uppercase px-2">From Div {div}</div>
                        {teams.map(t => (
                           <div key={t} className="flex items-center gap-2 bg-red-500/5 px-2 py-1 border-l-2 border-red-500">
-                             <TrendingDown size={10} className="text-red-500 shrink-0" />
-                             <span className="text-[11px] font-black text-white uppercase truncate">{t}</span>
+                             <TrendingDown size={10} className="text-red-500 shrink-0 max-[1300px]:w-4 max-[1300px]:h-4" />
+                             <span className="text-[11px] max-[1300px]:text-[16px] font-black text-white uppercase truncate">{t}</span>
                           </div>
                        ))}
                     </div>
@@ -139,14 +139,14 @@ export function SeasonSummary() {
            </RetroWindow>
         </div>
 
-        <div className="pt-2 shrink-0">
-           <Button 
-            onClick={startNextSeason}
-            className="w-full h-14 sm:h-16 bg-primary text-primary-foreground font-black retro-button text-lg sm:text-xl tracking-[0.2em] shadow-[8px_8px_0_0_rgba(64,121,176,0.3)] hover:scale-[1.02] transition-transform"
-           >
-             COMMENCE NEXT SEASON <ArrowRightCircle size={22} className="ml-3" />
-           </Button>
-        </div>
+         <div className="pt-2 shrink-0">
+            <Button 
+             onClick={startNextSeason}
+             className="w-full h-14 sm:h-16 max-[1300px]:h-24 bg-primary text-primary-foreground font-black retro-button text-lg sm:text-xl max-[1300px]:text-[32px] tracking-[0.2em] shadow-[8px_8px_0_0_rgba(64,121,176,0.3)] hover:scale-[1.02] transition-transform"
+            >
+              COMMENCE NEXT SEASON <ArrowRightCircle size={22} className="ml-3 max-[1300px]:w-8 max-[1300px]:h-8" />
+            </Button>
+         </div>
       </div>
     </div>
   );

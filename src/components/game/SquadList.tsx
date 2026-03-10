@@ -28,13 +28,16 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
   const [pinnedSlotIndex, setPinnedSlotIndex] = useState<number | null>(null);
 
   const userTeam = state.teams.find(t => t.id === state.userTeamId);
-  const selectedCount = userTeam?.lineup.length || 0;
+  const selectedCount = userTeam?.lineup.filter(id => id !== null).length || 0;
   const lineupLength = userTeam?.lineup.length ?? 0;
   const emptySlotIndices = useMemo(() => {
+    const lineup = userTeam?.lineup ?? [];
     const out: number[] = [];
-    for (let i = lineupLength; i < 16; i++) out.push(i);
+    for (let i = 0; i < 16; i++) {
+      if (lineup[i] === null || lineup[i] === undefined) out.push(i);
+    }
     return out;
-  }, [lineupLength]);
+  }, [userTeam?.lineup]);
 
   const formationSlots = useMemo(() => getFormationSlots(userTeam?.formation ?? '4-4-2'), [userTeam?.formation]);
   const getEmptySlotLabel = (slotIdx: number) =>
@@ -42,8 +45,8 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
 
   const tacticalAssignments = useMemo(() => {
     if (!userTeam) return new Map<string, string>();
-    const lineupPlayers = userTeam.lineup.slice(0, 11).map(id => players.find(p => p.id === id)).filter(Boolean) as Player[];
-    const assignments = getTacticalAssignments(userTeam.formation, lineupPlayers);
+    const lineupPlayers = userTeam.lineup.slice(0, 11).map(id => id ? players.find(p => p.id === id) : null) as (Player | null)[];
+    const assignments = getTacticalAssignments(userTeam.formation, lineupPlayers as Player[]); // Cast for engine compatibility with nulls
     const map = new Map<string, string>();
     assignments.forEach(a => { if (a.player) map.set(a.player.id, a.slot.label); });
     return map;
@@ -54,14 +57,10 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
     const starterIds = lineup.slice(0, 11);
     const benchIds = lineup.slice(11, 16);
 
-    const starters = players.filter(p => starterIds.includes(p.id));
-    const bench = players.filter(p => benchIds.includes(p.id));
-    const reserves = players.filter(p => !lineup.includes(p.id));
-
-    const sortedStarters = starterIds.map(id => starters.find(p => p.id === id)).filter(Boolean) as Player[];
-    const sortedBench = benchIds.map(id => bench.find(p => p.id === id)).filter(Boolean) as Player[];
-
-    return { starters: sortedStarters, bench: sortedBench, reserves };
+    const starters = starterIds.map(id => id ? players.find(p => p.id === id) : null).filter(Boolean) as Player[];
+    const bench = benchIds.map(id => id ? players.find(p => p.id === id) : null).filter(Boolean) as Player[];
+    
+    return { starters, bench, reserves: players.filter(p => !lineup.includes(p.id)) };
   }, [players, userTeam]);
 
   const renderPlayerRow = (p: Player, group: 'STARTER' | 'BENCH' | 'RESERVE') => {
@@ -108,36 +107,46 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
         </TableCell>
         <TableCell className="py-2">
           <div className="flex flex-col">
-            <span className="font-mono text-cyan text-[13px] font-black uppercase leading-tight mb-0.5">{p.position} ({p.side})</span>
-            {group === 'STARTER' && assignedRole && <span className="text-[10px] font-black text-accent uppercase tracking-tighter">ROLE: {assignedRole}</span>}
-            {group === 'BENCH' && <span className="text-[10px] font-black text-primary uppercase tracking-tighter">BENCH</span>}
+            <span className="font-mono text-cyan text-[13px] max-[1300px]:text-[18px] font-black uppercase leading-tight mb-0.5">{p.position} ({p.side})</span>
+            {group === 'STARTER' && assignedRole && <span className="text-[10px] max-[1300px]:text-[14px] font-black text-accent uppercase tracking-tighter">ROLE: {assignedRole}</span>}
+            {group === 'BENCH' && <span className="text-[10px] max-[1300px]:text-[14px] font-black text-primary uppercase tracking-tighter">BENCH</span>}
           </div>
         </TableCell>
         <TableCell className="py-2">
-          <div className="text-[15px] font-black uppercase text-white tracking-tight truncate max-w-[160px]">{p.name}</div>
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] max-[1300px]:text-[18px] shrink-0">
+              {p.nationality === 'France' ? '🇫🇷' : 
+               p.nationality === 'Germany' ? '🇩🇪' : 
+               p.nationality === 'Spain' ? '🇪🇸' : 
+               p.nationality === 'Italy' ? '🇮🇹' : 
+               p.nationality === 'Brazil' ? '🇧🇷' : 
+               p.nationality === 'Netherlands' ? '🇳🇱' : '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}
+            </span>
+            <div className="text-[15px] max-[1300px]:text-[22px] font-black uppercase text-white tracking-tight truncate max-w-[150px] max-[1300px]:max-w-[280px]">{p.name}</div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 max-[1300px]:h-12 max-[1300px]:w-12 hover:text-accent ml-auto shrink-0" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }}>
+              <UserCircle size={20} className="w-5 h-5 max-[1300px]:w-8 max-[1300px]:h-8" />
+            </Button>
+          </div>
         </TableCell>
         <TableCell className="text-center py-2">
           {currentMatchRatings ? (
-            <span className={cn("font-mono text-[16px] font-black", matchRating && matchRating >= 7.5 ? 'text-accent' : matchRating && matchRating < 5.5 ? 'text-red-500' : 'text-white')}>{matchRating?.toFixed(1) || '0.0'}</span>
+            <span className={cn("font-mono text-[16px] max-[1300px]:text-[24px] font-black", matchRating && matchRating >= 7.5 ? 'text-accent' : matchRating && matchRating < 5.5 ? 'text-red-500' : 'text-white')}>{matchRating?.toFixed(1) || '0.0'}</span>
           ) : (
             <div className="flex justify-center gap-1">
-              {isSuspended && <Badge className="bg-red-600 font-black text-[9px] h-4">SUSP</Badge>}
-              {isInjured && <Badge className="bg-red-600 font-black text-[9px] h-4">INJ</Badge>}
-              {!isSuspended && !isInjured && <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">FIT</span>}
+              {isSuspended && <Badge className="bg-red-600 font-black text-[9px] max-[1300px]:text-[14px] h-4 max-[1300px]:h-6 px-1.5 pt-0.5">SUSP</Badge>}
+              {isInjured && <Badge className="bg-red-600 font-black text-[9px] max-[1300px]:text-[14px] h-4 max-[1300px]:h-6 px-1.5 pt-0.5">INJ</Badge>}
+              {!isSuspended && !isInjured && <span className="text-[10px] max-[1300px]:text-[16px] font-black text-green-500 uppercase tracking-widest">FIT</span>}
             </div>
           )}
         </TableCell>
         <TableCell className="text-center py-2">
           <div className="flex justify-center items-center gap-1">
-            <Smile size={12} className={p.morale > 70 ? "text-green-500" : p.morale > 40 ? "text-yellow-500" : "text-red-500"} />
-            <span className="text-[13px] font-mono font-black">{p.morale}%</span>
+            <Smile size={12} className={cn(p.morale > 70 ? "text-green-500" : p.morale > 40 ? "text-yellow-500" : "text-red-500", "w-3 h-3 max-[1300px]:w-5 max-[1300px]:h-5")} />
+            <span className="text-[13px] max-[1300px]:text-[20px] font-mono font-black">{p.morale}%</span>
           </div>
         </TableCell>
-        <TableCell className={cn("text-center text-[13px] font-mono font-black py-2", p.fitness < 80 ? 'text-red-500' : '')}>{p.fitness}%</TableCell>
-        <TableCell className="text-center text-[16px] font-mono text-primary font-black py-2">{p.attributes.skill}</TableCell>
-        <TableCell className="text-right py-2 pr-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-accent" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }}><UserCircle size={20} /></Button>
-        </TableCell>
+        <TableCell className={cn("text-center text-[13px] max-[1300px]:text-[20px] font-mono font-black py-2", p.fitness < 80 ? 'text-red-500' : '')}>{p.fitness}%</TableCell>
+        <TableCell className="text-center text-[16px] max-[1300px]:text-[24px] font-mono text-primary font-black py-2 pr-3">{p.attributes.skill}</TableCell>
       </TableRow>
     );
   };
@@ -151,21 +160,21 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
       )}
       <div className="flex flex-col gap-2 px-3 py-2 bg-black/70 border border-primary/20 rounded-xl shadow-inner">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 max-[1300px]:gap-2">
             {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
-              <Button key={pos} onClick={() => setFilter(pos)} variant={filter === pos ? "default" : "outline"} className="h-7 text-[10px] px-3 retro-button font-black">{pos}</Button>
+              <Button key={pos} onClick={() => setFilter(pos)} variant={filter === pos ? "default" : "outline"} className="h-7 max-[1300px]:h-10 text-[10px] max-[1300px]:text-[15px] px-3 max-[1300px]:px-5 retro-button font-black">{pos}</Button>
             ))}
           </div>
           {!currentMatchRatings && (
-            <div className="flex flex-wrap items-center gap-2">
-              <div className={cn("text-[11px] font-black px-3 py-1 border-2 rounded-xl shadow-sm", selectedCount >= 11 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
+            <div className="flex flex-wrap items-center gap-2 max-[1300px]:gap-3">
+              <div className={cn("text-[11px] max-[1300px]:text-[16px] font-black px-3 py-1 max-[1300px]:py-2 max-[1300px]:px-5 border-2 rounded-xl shadow-sm", selectedCount >= 11 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
                 {Math.min(11, selectedCount)}/11 XI
               </div>
-              <div className={cn("text-[11px] font-black px-3 py-1 border-2 rounded-xl shadow-sm", selectedCount >= 16 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
+              <div className={cn("text-[11px] max-[1300px]:text-[16px] font-black px-3 py-1 max-[1300px]:py-2 max-[1300px]:px-5 border-2 rounded-xl shadow-sm", selectedCount >= 16 ? 'text-green-500 border-green-500/20 bg-green-500/10' : 'text-red-500 border-red-500/20 bg-red-500/10')}>
                 {Math.min(5, Math.max(0, selectedCount - 11))}/5 SUBS
               </div>
-              <Button onClick={clearLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-red-500 border-red-500/30 font-black uppercase"><Trash2 size={12} className="mr-1.5" /> CLEAR</Button>
-              <Button onClick={autoPickLineup} variant="outline" className="h-7 text-[10px] px-3 retro-button text-accent border-accent/30 font-black uppercase"><Wand2 size={12} className="mr-1.5" /> AUTO XI</Button>
+              <Button onClick={clearLineup} variant="outline" className="h-7 max-[1300px]:h-10 text-[10px] max-[1300px]:text-[15px] px-3 max-[1300px]:px-5 retro-button text-red-500 border-red-500/30 font-black uppercase"><Trash2 size={12} className="mr-1.5 max-[1300px]:w-4 max-[1300px]:h-4" /> CLEAR</Button>
+              <Button onClick={autoPickLineup} variant="outline" className="h-7 max-[1300px]:h-10 text-[10px] max-[1300px]:text-[15px] px-3 max-[1300px]:px-5 retro-button text-accent border-accent/30 font-black uppercase"><Wand2 size={12} className="mr-1.5 max-[1300px]:w-4 max-[1300px]:h-4" /> AUTO XI</Button>
             </div>
           )}
         </div>
@@ -193,25 +202,24 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
           <Table>
             <TableHeader>
               <TableRow className="border-b-2 border-primary/40 bg-primary/35">
-                <TableHead className="w-[45px] text-[12px] font-black uppercase text-white tracking-widest text-center">PK</TableHead>
-                <TableHead className="w-[110px] text-[12px] font-black uppercase text-white tracking-widest">TACTICS</TableHead>
-                <TableHead className="text-[12px] font-black uppercase text-white tracking-widest">IDENTITY</TableHead>
-                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">STAT</TableHead>
-                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">MORALE</TableHead>
-                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">FIT</TableHead>
-                <TableHead className="text-center text-[12px] font-black uppercase text-white tracking-widest">SKL</TableHead>
-                <TableHead className="w-[45px]"></TableHead>
+                <TableHead className="w-[45px] max-[1300px]:w-[60px] text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest text-center">PK</TableHead>
+                <TableHead className="w-[110px] max-[1300px]:w-[160px] text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest">TACTICS</TableHead>
+                <TableHead className="text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest">IDENTITY</TableHead>
+                <TableHead className="text-center text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest">STAT</TableHead>
+                <TableHead className="text-center text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest">MORALE</TableHead>
+                <TableHead className="text-center text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest">FIT</TableHead>
+                <TableHead className="text-center text-[12px] max-[1300px]:text-[16px] font-black uppercase text-white tracking-widest pr-3">SKL</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categorizedPlayers.starters.filter(p => filter === 'ALL' || p.position === filter).map(p => renderPlayerRow(p, 'STARTER'))}
               {categorizedPlayers.bench.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
-                <TableRow className="bg-accent/20 border-y border-accent/30"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-accent uppercase text-center tracking-[0.4em]">Substitute Bench</TableCell></TableRow>
+                <TableRow className="bg-accent/20 border-y border-accent/30"><TableCell colSpan={7} className="py-1 text-[10px] font-black text-accent uppercase text-center tracking-[0.4em]">Substitute Bench</TableCell></TableRow>
               )}
               {categorizedPlayers.bench.filter(p => filter === 'ALL' || p.position === filter).map(p => renderPlayerRow(p, 'BENCH'))}
               
               {!hideReserves && categorizedPlayers.reserves.filter(p => filter === 'ALL' || p.position === filter).length > 0 && (
-                <TableRow className="bg-black/50 border-y border-primary/25"><TableCell colSpan={8} className="py-1 text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.4em]">Reserve Pool</TableCell></TableRow>
+                <TableRow className="bg-black/50 border-y border-primary/25"><TableCell colSpan={7} className="py-1 text-[10px] font-black text-muted-foreground uppercase text-center tracking-[0.4em]">Reserve Pool</TableCell></TableRow>
               )}
               {!hideReserves && categorizedPlayers.reserves
                 .filter(p => filter === 'ALL' || p.position === filter)

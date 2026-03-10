@@ -14,14 +14,14 @@ export function TeamRecords() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="retro-tile flex items-start gap-3 h-full min-h-[80px] cursor-help">
-            <div className={`p-2 bg-muted border border-primary/10 ${color}`}>
-              <Icon size={18} />
+          <div className="retro-tile flex items-start gap-3 max-[1300px]:gap-5 h-full min-h-[80px] max-[1300px]:min-h-[120px] cursor-help">
+            <div className={`p-2 max-[1300px]:p-4 bg-muted border border-primary/10 ${color}`}>
+              <Icon size={18} className="max-[1300px]:w-8 max-[1300px]:h-8" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[8px] text-muted-foreground uppercase font-bold">{title}</div>
-              <div className="text-[10px] font-bold truncate uppercase">{value || 'NO RECORD'}</div>
-              <div className="text-[7px] text-muted-foreground italic truncate uppercase">{sub}</div>
+              <div className="text-[8px] max-[1300px]:text-[14px] text-muted-foreground uppercase font-bold">{title}</div>
+              <div className="text-[10px] max-[1300px]:text-[18px] font-bold truncate uppercase">{value || 'NO RECORD'}</div>
+              <div className="text-[7px] max-[1300px]:text-[12px] text-muted-foreground italic truncate uppercase">{sub}</div>
             </div>
           </div>
         </TooltipTrigger>
@@ -74,7 +74,7 @@ export function TeamRecords() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
+                <div className="flex justify-between items-center text-[10px] max-[1300px]:text-[18px] uppercase border-b border-primary/5 pb-1 max-[1300px]:pb-3 cursor-help">
                    <span className="text-muted-foreground font-bold">Total Games Managed</span>
                    <span className="font-bold text-cyan">{state.manager?.totalGames}</span>
                 </div>
@@ -84,7 +84,7 @@ export function TeamRecords() {
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
+                <div className="flex justify-between items-center text-[10px] max-[1300px]:text-[18px] uppercase border-b border-primary/5 pb-1 max-[1300px]:pb-3 cursor-help">
                    <span className="text-muted-foreground font-bold">Career Win Rate</span>
                    <span className="font-bold text-accent">{state.manager?.winPercentage.toFixed(1)}%</span>
                 </div>
@@ -94,7 +94,7 @@ export function TeamRecords() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex justify-between items-center text-[10px] uppercase border-b border-primary/5 pb-1 cursor-help">
+                <div className="flex justify-between items-center text-[10px] max-[1300px]:text-[18px] uppercase border-b border-primary/5 pb-1 max-[1300px]:pb-3 cursor-help">
                    <span className="text-muted-foreground font-bold">Seasons Completed</span>
                    <span className="font-bold">{state.manager?.seasonsManaged}</span>
                 </div>

@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pause, UserCircle, Briefcase, LayoutDashboard, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { isColorClash } from '@/lib/color-utils';
 import { PlayerProfile } from './PlayerProfile';
 import { MatchOverlayTemplate } from './MatchOverlayTemplate';
 import { MatchPlayView } from './MatchPlayView';
@@ -34,7 +33,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const [isPaused, setIsPaused] = useState(false);
   const [isGoalPaused, setIsGoalPaused] = useState(false);
   const [pausedForInjury, setPausedForInjury] = useState(false);
-  const [pausedForRedCard, setPausedForRedCard] = useState(false);
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
@@ -54,7 +52,9 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const userPlayers = state.players.filter(p => p.clubId === activeUserTeam.id);
 
   const { awayKitBg, awayKitText } = useMemo(() => {
-    const useAwayKit = isColorClash(homeTeam.color, awayTeam.color);
+    const hex1 = homeTeam.color.replace('#', '');
+    const hex2 = awayTeam.color.replace('#', '');
+    const useAwayKit = hex1.substring(0, 2) === hex2.substring(0, 2) || homeTeam.color.toLowerCase() === awayTeam.color.toLowerCase();
     return {
       awayKitBg: useAwayKit ? awayTeam.awayColor : awayTeam.color,
       awayKitText: useAwayKit ? (awayTeam.awayTextColor ?? '#ffffff') : (awayTeam.homeTextColor ?? '#ffffff'),
@@ -76,17 +76,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         if (minuteEvent) {
           setActiveEvent(minuteEvent);
           if (minuteEvent.type === 'GOAL') { setIsGoalPaused(true); setActiveAlert(minuteEvent); }
-          if (minuteEvent.type === 'RED') {
-            setIsGoalPaused(true);
-            setActiveAlert(minuteEvent);
-            // Auto-open tactics if it's the USER's player who got sent off
-            if (minuteEvent.teamId === activeUserTeam.id) {
-              setTimeout(() => {
-                setPausedForRedCard(true);
-                setIsPaused(true);
-              }, 2500);
-            }
-          }
+          if (minuteEvent.type === 'RED') { setIsGoalPaused(true); setActiveAlert(minuteEvent); }
           if (minuteEvent.type === 'INJURY') { setPausedForInjury(true); setIsPaused(true); setActiveAlert(minuteEvent); }
         }
         return nextMin;
@@ -105,7 +95,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     return () => clearTimeout(timer);
   }, [activeAlert]);
 
-  const handleResume = () => { setIsPaused(false); setSwapSourceId(null); setPausedForInjury(false); setPausedForRedCard(false); };
+  const handleResume = () => { setIsPaused(false); setSwapSourceId(null); setPausedForInjury(false); };
   const handleSwapInteraction = (pId: string) => {
     if (!swapSourceId) {
       setSwapSourceId(pId);
@@ -113,20 +103,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
       if (swapSourceId === pId) {
         setSwapSourceId(null);
       } else {
-        // Record substitution as a local event for the feed
-        if (fixture.result) {
-          const subEvent: MatchEvent = {
-            minute: currentMinute,
-            type: 'SUB',
-            playerId: swapSourceId, // Off
-            subPlayerId: pId,      // On
-            teamId: activeUserTeam.id,
-            text: `SUBSTITUTION: ${getPlayerName(swapSourceId)} OFF, ${getPlayerName(pId)} ON`
-          };
-          fixture.result.events.push(subEvent);
-          setActiveEvent(subEvent);
-        }
-        
         swapPlayers(swapSourceId, pId);
         setSwapSourceId(null);
       }
@@ -172,31 +148,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
       ? awayKitColor
       : 'hsl(var(--accent))';
 
+  const homeScorers = useMemo(() => fixture.result?.scorers?.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute) ?? [], [fixture.result?.scorers, homeLineup, currentMinute]);
+  const awayScorers = useMemo(() => fixture.result?.scorers?.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute) ?? [], [fixture.result?.scorers, awayLineup, currentMinute]);
+  const homeCards = useMemo(() => fixture.result?.cards?.filter(c => homeLineup.some(p => p.id === c.playerId) && c.minute <= currentMinute) ?? [], [fixture.result?.cards, homeLineup, currentMinute]);
+  const awayCards = useMemo(() => fixture.result?.cards?.filter(c => awayLineup.some(p => p.id === c.playerId) && c.minute <= currentMinute) ?? [], [fixture.result?.cards, awayLineup, currentMinute]);
   const getPlayerName = (id: string) => state.players.find(p => p.id === id)?.name ?? 'Unknown';
-
-  const TeamLineupTable = ({ teamPlayers, compact }: { teamPlayers: Player[], compact?: boolean }) => (
-    <div className={cn(
-      'overflow-auto border border-white/10 rounded-lg sm:rounded-xl bg-black/70',
-      compact ? 'min-h-0 max-h-full' : 'max-h-[45vh] min-h-[200px] max-md:max-h-[55vh] max-md:min-h-[120px]'
-    )}>
-      <Table>
-        <TableHeader>
-          <TableRow className="border-b-2 border-primary/40 bg-primary/25">
-            <TableHead className={cn('uppercase font-black text-white tracking-wide w-12', compact ? 'text-xs max-[1300px]:text-[16px] py-1 max-[1300px]:py-2' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Pos</TableHead>
-            <TableHead className={cn('uppercase font-black text-white tracking-wide', compact ? 'text-xs max-[1300px]:text-[16px] py-1 max-[1300px]:py-2' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Player</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {teamPlayers.map(p => (
-            <TableRow key={p.id} className="border-b border-white/5 hover:bg-white/5">
-              <TableCell className={cn('font-black text-cyan uppercase', compact ? 'py-1 max-[1300px]:py-2 text-[10px] sm:text-[12px] max-[1300px]:text-[16px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px]')}>{p.position}</TableCell>
-              <TableCell className={cn('font-bold uppercase truncate', compact ? 'py-1 max-[1300px]:py-2 text-xs sm:text-sm max-[1300px]:text-[18px] max-w-[80px] sm:max-w-[120px] max-[1300px]:max-w-[200px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px] max-w-[120px]')}>{p.name}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
 
   const SummaryRatings = ({ teamPlayers, teamRatings, compact }: { teamPlayers: Player[], teamRatings: Record<string, number> | undefined; compact?: boolean }) => (
     <div className={cn(
@@ -289,21 +245,34 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
         {showLineups && (
           <MatchOverlayTemplate
-            title="Lineups"
+            title="Official Match Lineups"
+            subtitle={`${fixture.competition} • ${homeTeam.stadium}`}
             zIndex="z-[600]"
-            className="bg-black/98 animate-in fade-in duration-500"
+            className="animate-in fade-in duration-500"
             primaryButton={{ label: 'KICK OFF MATCH', onClick: () => setShowLineups(false) }}
-            secondaryButton={{ label: 'Tactical Setup', onClick: () => setIsPaused(true) }}
           >
-            <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-h-0 overflow-auto">
-              <div className="shrink-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 text-center mb-2 max-[1300px]:mb-4">
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}>{homeTeam.name}</span>
-                <div className="text-xl sm:text-3xl md:text-4xl font-black text-accent tracking-tighter italic px-2">VS</div>
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: awayKitColor, color: awayKitText }}>{awayTeam.name}</span>
+            <div className="grid grid-cols-2 gap-6 sm:gap-12 shrink-0">
+              <div className="space-y-3">
+                <div className="h-11 flex items-center justify-center font-black text-lg sm:text-xl uppercase border-b-4 border-white/30" style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}>{homeTeam.name}</div>
+                <div className="space-y-1">
+                  {homeLineup.map(p => (
+                    <div key={p.id} className="flex justify-between text-[13px] sm:text-[14px] font-black border-b border-white/10 pb-1">
+                      <span className="text-cyan w-8">{p.position}</span>
+                      <span className="flex-1 uppercase truncate">{p.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-1.5 sm:gap-4 max-[1300px]:gap-6 py-1 sm:py-2 flex-1 min-h-0 overflow-hidden text-sm max-[1300px]:text-[18px]">
-                <TeamLineupTable teamPlayers={homeLineup} compact />
-                <TeamLineupTable teamPlayers={awayLineup} compact />
+              <div className="space-y-3">
+                <div className="h-11 flex items-center justify-center font-black text-lg sm:text-xl uppercase border-b-4 border-white/30" style={{ backgroundColor: awayKitColor, color: awayKitText }}>{awayTeam.name}</div>
+                <div className="space-y-1">
+                  {awayLineup.map(p => (
+                    <div key={p.id} className="flex justify-between text-[13px] sm:text-[14px] font-black border-b border-white/10 pb-1">
+                      <span className="text-cyan w-8">{p.position}</span>
+                      <span className="flex-1 uppercase truncate">{p.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </MatchOverlayTemplate>
@@ -319,9 +288,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                 </div>
                 {pausedForInjury && (
                   <p className="text-[11px] sm:text-[12px] font-black text-amber-400 uppercase tracking-wide">A player was injured — make a substitution below if needed, then Apply &amp; Resume</p>
-                )}
-                {pausedForRedCard && (
-                  <p className="text-[11px] sm:text-[12px] font-black text-red-400 uppercase tracking-wide">⚠ Player sent off — adjust your tactics below, then Apply &amp; Resume</p>
                 )}
               </div>
               <Button onClick={handleResume} className="bg-accent text-accent-foreground retro-button h-9 sm:h-10 px-6 sm:px-8 text-sm font-black uppercase shadow-xl hover:scale-105 transition-all shrink-0">Apply & Resume</Button>
@@ -343,9 +309,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                         players={userPlayers} 
                         onPlayerClick={(p) => handleSwapInteraction(p.id)} 
                         onPlayerProfile={(p) => setViewingPlayer(p)} 
-                        activeSwapId={swapSourceId}
-                        matchCards={fixture.result?.cards.filter(c => c.minute <= currentMinute)}
-                        matchInjuries={fixture.result?.injuries}
+                        activeSwapId={swapSourceId} 
                       />
                     </div>
                     <BenchList />
@@ -431,7 +395,10 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           onSpeedToggle={() => setPlaybackSpeed(s => s === 1 ? 2 : 1)}
           onPause={() => setIsPaused(true)}
           getPlayerName={getPlayerName}
-          allEvents={fixture.result?.events.filter(e => e.minute <= currentMinute) || []}
+          homeScorers={homeScorers}
+          awayScorers={awayScorers}
+          homeCards={homeCards}
+          awayCards={awayCards}
         />
 
         {(isHalfTime || isFinished) && !isPaused && (

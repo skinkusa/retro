@@ -14,72 +14,72 @@ export function getFormationSlots(formation: string): TacticalSlot[] {
   switch (formation) {
     case '4-3-3':
       return [
-        { id: 'gk', label: 'GK', top: 90, left: 50, pos: 'GK' },
-        { id: 'dl', label: 'DL', top: 72, left: 15, pos: 'DF' },
-        { id: 'dc1', label: 'DC', top: 75, left: 38, pos: 'DF' },
-        { id: 'dc2', label: 'DC', top: 75, left: 62, pos: 'DF' },
-        { id: 'dr', label: 'DR', top: 72, left: 85, pos: 'DF' },
-        { id: 'mc1', label: 'MC', top: 45, left: 25, pos: 'MF' },
-        { id: 'mc2', label: 'MC', top: 45, left: 50, pos: 'MF' },
-        { id: 'mc3', label: 'MC', top: 45, left: 75, pos: 'MF' },
+        { id: 'gk', label: 'GK', top: 88, left: 50, pos: 'GK' },
+        { id: 'dl', label: 'DL', top: 62, left: 15, pos: 'DF' },
+        { id: 'dc1', label: 'DC', top: 64, left: 38, pos: 'DF' },
+        { id: 'dc2', label: 'DC', top: 64, left: 62, pos: 'DF' },
+        { id: 'dr', label: 'DR', top: 62, left: 85, pos: 'DF' },
+        { id: 'mc1', label: 'MC', top: 38, left: 25, pos: 'MF' },
+        { id: 'mc2', label: 'MC', top: 38, left: 50, pos: 'MF' },
+        { id: 'mc3', label: 'MC', top: 38, left: 75, pos: 'MF' },
         { id: 'fl', label: 'FL', top: 15, left: 20, pos: 'FW' },
         { id: 'fc', label: 'FC', top: 12, left: 50, pos: 'FW' },
         { id: 'fr', label: 'FR', top: 15, left: 80, pos: 'FW' },
       ];
     case '3-5-2':
       return [
-        { id: 'gk', label: 'GK', top: 90, left: 50, pos: 'GK' },
-        { id: 'dc1', label: 'DC', top: 75, left: 25, pos: 'DF' },
-        { id: 'dc2', label: 'DC', top: 75, left: 50, pos: 'DF' },
-        { id: 'dc3', label: 'DC', top: 75, left: 75, pos: 'DF' },
-        { id: 'ml', label: 'ML', top: 45, left: 15, pos: 'MF' },
-        { id: 'mc1', label: 'MC', top: 45, left: 35, pos: 'MF' },
-        { id: 'mc2', label: 'MC', top: 45, left: 50, pos: 'MF' },
-        { id: 'mc3', label: 'MC', top: 45, left: 65, pos: 'MF' },
-        { id: 'mr', label: 'MR', top: 45, left: 85, pos: 'MF' },
+        { id: 'gk', label: 'GK', top: 88, left: 50, pos: 'GK' },
+        { id: 'dc1', label: 'DC', top: 64, left: 25, pos: 'DF' },
+        { id: 'dc2', label: 'DC', top: 64, left: 50, pos: 'DF' },
+        { id: 'dc3', label: 'DC', top: 64, left: 75, pos: 'DF' },
+        { id: 'ml', label: 'ML', top: 38, left: 15, pos: 'MF' },
+        { id: 'mc1', label: 'MC', top: 38, left: 35, pos: 'MF' },
+        { id: 'mc2', label: 'MC', top: 38, left: 50, pos: 'MF' },
+        { id: 'mc3', label: 'MC', top: 38, left: 65, pos: 'MF' },
+        { id: 'mr', label: 'MR', top: 38, left: 85, pos: 'MF' },
         { id: 'fc1', label: 'FC', top: 15, left: 35, pos: 'FW' },
         { id: 'fc2', label: 'FC', top: 15, left: 65, pos: 'FW' },
       ];
     case '5-3-2':
       return [
-        { id: 'gk', label: 'GK', top: 90, left: 50, pos: 'GK' },
-        { id: 'dl', label: 'DL', top: 72, left: 15, pos: 'DF' },
-        { id: 'dc1', label: 'DC', top: 75, left: 35, pos: 'DF' },
-        { id: 'dc2', label: 'DC', top: 75, left: 50, pos: 'DF' },
-        { id: 'dc3', label: 'DC', top: 75, left: 65, pos: 'DF' },
-        { id: 'dr', label: 'DR', top: 72, left: 85, pos: 'DF' },
-        { id: 'mc1', label: 'MC', top: 45, left: 30, pos: 'MF' },
-        { id: 'mc2', label: 'MC', top: 45, left: 50, pos: 'MF' },
-        { id: 'mc3', label: 'MC', top: 45, left: 70, pos: 'MF' },
+        { id: 'gk', label: 'GK', top: 88, left: 50, pos: 'GK' },
+        { id: 'dl', label: 'DL', top: 62, left: 15, pos: 'DF' },
+        { id: 'dc1', label: 'DC', top: 64, left: 35, pos: 'DF' },
+        { id: 'dc2', label: 'DC', top: 64, left: 50, pos: 'DF' },
+        { id: 'dc3', label: 'DC', top: 64, left: 75, pos: 'DF' },
+        { id: 'dr', label: 'DR', top: 62, left: 85, pos: 'DF' },
+        { id: 'mc1', label: 'MC', top: 38, left: 30, pos: 'MF' },
+        { id: 'mc2', label: 'MC', top: 38, left: 50, pos: 'MF' },
+        { id: 'mc3', label: 'MC', top: 38, left: 70, pos: 'MF' },
         { id: 'fc1', label: 'FC', top: 15, left: 35, pos: 'FW' },
         { id: 'fc2', label: 'FC', top: 15, left: 65, pos: 'FW' },
       ];
     case '4-5-1':
       return [
-        { id: 'gk', label: 'GK', top: 90, left: 50, pos: 'GK' },
-        { id: 'dl', label: 'DL', top: 72, left: 15, pos: 'DF' },
-        { id: 'dc1', label: 'DC', top: 75, left: 38, pos: 'DF' },
-        { id: 'dc2', label: 'DC', top: 75, left: 62, pos: 'DF' },
-        { id: 'dr', label: 'DR', top: 72, left: 85, pos: 'DF' },
-        { id: 'ml', label: 'ML', top: 45, left: 15, pos: 'MF' },
-        { id: 'mc1', label: 'MC', top: 48, left: 33, pos: 'MF' },
-        { id: 'mc2', label: 'MC', top: 48, left: 50, pos: 'MF' },
-        { id: 'mc3', label: 'MC', top: 48, left: 66, pos: 'MF' },
-        { id: 'mr', label: 'MR', top: 45, left: 85, pos: 'MF' },
+        { id: 'gk', label: 'GK', top: 88, left: 50, pos: 'GK' },
+        { id: 'dl', label: 'DL', top: 62, left: 15, pos: 'DF' },
+        { id: 'dc1', label: 'DC', top: 64, left: 38, pos: 'DF' },
+        { id: 'dc2', label: 'DC', top: 64, left: 62, pos: 'DF' },
+        { id: 'dr', label: 'DR', top: 62, left: 85, pos: 'DF' },
+        { id: 'ml', label: 'ML', top: 38, left: 15, pos: 'MF' },
+        { id: 'mc1', label: 'MC', top: 41, left: 33, pos: 'MF' },
+        { id: 'mc2', label: 'MC', top: 41, left: 50, pos: 'MF' },
+        { id: 'mc3', label: 'MC', top: 41, left: 66, pos: 'MF' },
+        { id: 'mr', label: 'MR', top: 38, left: 85, pos: 'MF' },
         { id: 'fc', label: 'FC', top: 15, left: 50, pos: 'FW' },
       ];
     case '4-4-2':
     default:
       return [
-        { id: 'gk', label: 'GK', top: 90, left: 50, pos: 'GK' },
-        { id: 'dl', label: 'DL', top: 72, left: 15, pos: 'DF' },
-        { id: 'dc1', label: 'DC', top: 75, left: 38, pos: 'DF' },
-        { id: 'dc2', label: 'DC', top: 75, left: 62, pos: 'DF' },
-        { id: 'dr', label: 'DR', top: 72, left: 85, pos: 'DF' },
-        { id: 'ml', label: 'ML', top: 45, left: 15, pos: 'MF' },
-        { id: 'mc1', label: 'MC', top: 45, left: 38, pos: 'MF' },
-        { id: 'mc2', label: 'MC', top: 45, left: 62, pos: 'MF' },
-        { id: 'mr', label: 'MR', top: 45, left: 85, pos: 'MF' },
+        { id: 'gk', label: 'GK', top: 88, left: 50, pos: 'GK' },
+        { id: 'dl', label: 'DL', top: 62, left: 15, pos: 'DF' },
+        { id: 'dc1', label: 'DC', top: 64, left: 38, pos: 'DF' },
+        { id: 'dc2', label: 'DC', top: 64, left: 62, pos: 'DF' },
+        { id: 'dr', label: 'DR', top: 62, left: 85, pos: 'DF' },
+        { id: 'ml', label: 'ML', top: 38, left: 15, pos: 'MF' },
+        { id: 'mc1', label: 'MC', top: 38, left: 38, pos: 'MF' },
+        { id: 'mc2', label: 'MC', top: 38, left: 62, pos: 'MF' },
+        { id: 'mr', label: 'MR', top: 38, left: 85, pos: 'MF' },
         { id: 'fc1', label: 'FC', top: 15, left: 35, pos: 'FW' },
         { id: 'fc2', label: 'FC', top: 15, left: 65, pos: 'FW' },
       ];
@@ -207,7 +207,10 @@ export function simulateMatch(
   const gkShotsFaced: Record<string, number> = {};
   const gkGoalsConceded: Record<string, number> = {};
 
-  const attendance = currentResult ? currentResult.attendance : Math.floor(homeTeam.stadiumCapacity * (0.6 + (homeTeam.reputation / 250) + (Math.random() * 0.2)));
+  // attendance: base 60% capacity, plus reputation bonus, plus a dynamic "form/buzz" multiplier
+  const formBuzz = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
+  const attendance = currentResult ? currentResult.attendance : Math.round(homeTeam.stadiumCapacity * (0.55 + (homeTeam.reputation / 200)) * formBuzz);
+  
   const maverickMod = userPersonality === 'Maverick' ? 1.15 : 1.0;
   const chanceProbStyleMod = (att: PlayStyle, def: PlayStyle) => {
     let mod = 1.0;
@@ -222,16 +225,24 @@ export function simulateMatch(
 
     if (currentHome.length === 0 || currentAway.length === 0) continue;
 
+    // Red Card Structural Penalty (tactical strain of missing players)
+    const homeRedCount = cards.filter(c => c.minute < min && c.type === 'RED' && activeHome.some(p => p.id === c.playerId)).length;
+    const awayRedCount = cards.filter(c => c.minute < min && c.type === 'RED' && activeAway.some(p => p.id === c.playerId)).length;
+    
+    // Multipliers: 0 reds = 1.0, 1 red = 0.90, 2+ reds = 0.75
+    const homeRedPenalty = homeRedCount === 0 ? 1.0 : homeRedCount === 1 ? 0.90 : 0.75;
+    const awayRedPenalty = awayRedCount === 0 ? 1.0 : awayRedCount === 1 ? 0.90 : 0.75;
+
     const zones = {
       home: { 
-        DEF: getZoneStrength(currentHome, homeTeam, 'DEF', homeTeam.isUserTeam ? userPersonality : undefined, min),
-        MID: getZoneStrength(currentHome, homeTeam, 'MID', homeTeam.isUserTeam ? userPersonality : undefined, min),
-        ATT: getZoneStrength(currentHome, homeTeam, 'ATT', homeTeam.isUserTeam ? userPersonality : undefined, min)
+        DEF: getZoneStrength(currentHome, homeTeam, 'DEF', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty,
+        MID: getZoneStrength(currentHome, homeTeam, 'MID', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty,
+        ATT: getZoneStrength(currentHome, homeTeam, 'ATT', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty
       },
       away: { 
-        DEF: getZoneStrength(currentAway, awayTeam, 'DEF', awayTeam.isUserTeam ? userPersonality : undefined, min),
-        MID: getZoneStrength(currentAway, awayTeam, 'MID', awayTeam.isUserTeam ? userPersonality : undefined, min),
-        ATT: getZoneStrength(currentAway, awayTeam, 'ATT', awayTeam.isUserTeam ? userPersonality : undefined, min)
+        DEF: getZoneStrength(currentAway, awayTeam, 'DEF', awayTeam.isUserTeam ? userPersonality : undefined, min) * awayRedPenalty,
+        MID: getZoneStrength(currentAway, awayTeam, 'MID', awayTeam.isUserTeam ? userPersonality : undefined, min) * awayRedPenalty,
+        ATT: getZoneStrength(currentAway, awayTeam, 'ATT', awayTeam.isUserTeam ? userPersonality : undefined, min) * awayRedPenalty
       }
     };
 
@@ -345,7 +356,7 @@ export function simulateMatch(
         if (isDirectRed || existingYellow) {
           cards.push({ playerId: picked.player.id, type: 'RED', minute: min });
           redCarded.add(picked.player.id);
-          applyRating(picked.player.id, -0.6);
+          applyRating(picked.player.id, -0.8);
           events.push({
             minute: min,
             type: 'RED',
@@ -355,7 +366,7 @@ export function simulateMatch(
           });
         } else {
           cards.push({ playerId: picked.player.id, type: 'YELLOW', minute: min });
-          applyRating(picked.player.id, -0.25);
+          applyRating(picked.player.id, -0.3);
           events.push({
             minute: min,
             type: 'YELLOW',

@@ -1,10 +1,10 @@
 import { Player, Team, Position, Side, Fixture, PlayStyle, StaffMember } from '@/types/game';
 import { DIVISIONS } from '@/data/divisions';
-import { FIRSTNAME_POOL, SURNAME_POOL } from '@/data/player-names';
+import { FIRSTNAME_POOL, SURNAME_POOL, NATIONALITY_POOLS } from '@/data/player-names';
 import { TEAM_DEFINITIONS } from '@/data/teams';
 import { STAFF_ROLES, generateStaffMember } from '@/data/staff-config';
 
-export { FIRSTNAME_POOL, SURNAME_POOL };
+export { NATIONALITY_POOLS };
 
 /**
  * Round-robin fixture generation so every week 1..38 has valid fixtures (no empty weeks).
@@ -55,16 +55,23 @@ export function generateInitialData() {
         staffWages += sm.wage;
       }
     });
+    // Dynamic budgets based on division bands
+    let budget = 0;
+    if (def.division === 1) budget = (20 + Math.random() * 40) * 1000000;
+    else if (def.division === 2) budget = (5 + Math.random() * 10) * 1000000;
+    else if (def.division === 3) budget = (1 + Math.random() * 2) * 1000000;
+    else budget = (0.25 + Math.random() * 0.75) * 1000000;
+
     return {
       id: `team-${i}`,
       name: def.name,
-      stadium: def.stadium ?? `${def.name} Grounds`,
+      stadium: def.stadium ?? `${def.name} Stadium`,
       stadiumCapacity: def.stadiumCapacity,
       color: def.color,
       homeTextColor: def.homeTextColor,
       awayColor: def.awayColor,
       awayTextColor: def.awayTextColor,
-      budget: (5 - def.division) * 10000000 + Math.random() * 10000000,
+      budget,
       weeklyWages: staffWages,
       points: 0,
       played: 0,
@@ -90,14 +97,77 @@ export function generateInitialData() {
   const sideBias: Side[] = ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'L', 'R', 'LC', 'RC'];
 
   teams.forEach(team => {
-    const positions = ['GK', 'GK', 'DF', 'DF', 'DF', 'DF', 'DF', 'DF', 'MF', 'MF', 'MF', 'MF', 'MF', 'MF', 'FW', 'FW', 'FW', 'FW', 'DM', 'DF', 'MF', 'FW'];
-    positions.forEach((pos, i) => {
+    const roles = ['GK', 'GK', 'DF', 'DF', 'DF', 'DF', 'DF', 'DF', 'MF', 'MF', 'MF', 'MF', 'MF', 'MF', 'FW', 'FW', 'FW', 'FW', 'DM', 'DF', 'MF', 'FW'];
+    
+    // Track specialists to ensure coverage
+    const coverage = { GK: false, DF: false, MF: false, FW: false };
+
+    roles.forEach((pos, i) => {
+      // Pick nationality (weighted toward England)
+      const natKeys = Object.keys(NATIONALITY_POOLS);
+      const isInternational = Math.random() < 0.45; // 45% chance of international player
+      const nationality = isInternational 
+        ? natKeys[Math.floor(Math.random() * (natKeys.length - 1)) + 1] // Any but England
+        : "England";
+      
+      const pool = NATIONALITY_POOLS[nationality];
+      const firstName = pool.firstNames[Math.floor(Math.random() * pool.firstNames.length)];
+      const lastName = pool.lastNames[Math.floor(Math.random() * pool.lastNames.length)];
+
       const age = 17 + Math.floor(Math.random() * 18);
-      const potential = 10 + Math.floor(Math.random() * 10);
-      const attrBase = Math.max(5, potential - (35 - age) / 2) - (team.division * 2);
-      const attr = () => Math.max(1, Math.floor(Math.random() * 5) + attrBase);
+      
+      // Specialist boost for first player in each core position
+      let specialistBoost = 0;
+      const coverageKey = pos === 'DM' ? 'MF' : pos as keyof typeof coverage;
+      if (!coverage[coverageKey]) {
+        coverage[coverageKey] = true;
+        specialistBoost = 2;
+      }
+
+      // Potential and attribute scaling factors in division AND reputation
+      const potential = 10 + Math.floor(Math.random() * 10) + (team.reputation / 20);
+      const attrBase = Math.max(4, potential - (35 - age) / 2) - (team.division * 1.5) + specialistBoost;
+      const attr = (isCore: boolean = false) => {
+        const base = Math.floor(Math.random() * 5) + attrBase;
+        return Math.max(1, isCore ? base + 2 : base);
+      };
+
       const player: Player = {
-        id: `p-${team.id}-${i}`, name: `${FIRSTNAME_POOL[Math.floor(Math.random() * FIRSTNAME_POOL.length)]} ${SURNAME_POOL[Math.floor(Math.random() * SURNAME_POOL.length)]}`, age, position: pos as Position, side: pos === 'GK' ? 'C' : sideBias[Math.floor(Math.random() * sideBias.length)], attributes: { pace: attr(), stamina: attr(), skill: attr(), shooting: attr(), passing: attr(), heading: attr(), influence: attr(), goalkeeping: pos === 'GK' ? attr() + 6 : 1, consistency: attr(), dirtiness: Math.floor(Math.random() * 20), injuryProne: Math.floor(Math.random() * 20), temperament: attr(), potential, professionalism: 5 + Math.floor(Math.random() * 15) }, fitness: 90 + Math.floor(Math.random() * 10), morale: 70 + Math.floor(Math.random() * 30), condition: 100, status: 'FIT', value: (5 - team.division) * 1000000 + Math.floor(Math.random() * 1000000), wage: (5 - team.division) * 5000 + Math.floor(Math.random() * 5000), contractYears: 1 + Math.floor(Math.random() * 4), clubId: team.id, isListed: false, suspensionWeeks: 0, injury: null, seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0, manOfTheMatch: 0 }, history: []
+        id: `p-${team.id}-${i}`, 
+        name: `${firstName} ${lastName}`,
+        nationality,
+        age, 
+        position: pos as Position, 
+        side: pos === 'GK' ? 'C' : sideBias[Math.floor(Math.random() * sideBias.length)], 
+        attributes: { 
+          pace: attr(), 
+          stamina: attr(), 
+          skill: attr(), 
+          shooting: attr(pos === 'FW'), 
+          passing: attr(pos === 'MF'), 
+          heading: attr(pos === 'DF'), 
+          influence: attr(), 
+          goalkeeping: pos === 'GK' ? Math.max(10, attrBase + 8) : 1, 
+          consistency: attr(), 
+          dirtiness: Math.floor(Math.random() * 20), 
+          injuryProne: Math.floor(Math.random() * 20), 
+          temperament: attr(), 
+          potential, 
+          professionalism: 5 + Math.floor(Math.random() * 15) 
+        }, 
+        fitness: 90 + Math.floor(Math.random() * 10), 
+        morale: 70 + Math.floor(Math.random() * 30), 
+        condition: 100, 
+        status: 'FIT', 
+        value: (5 - team.division) * 1000000 + (team.reputation * 10000) + Math.floor(Math.random() * 1000000), 
+        wage: (5 - team.division) * 5000 + (team.reputation * 50) + Math.floor(Math.random() * 5000), 
+        contractYears: 1 + Math.floor(Math.random() * 4), 
+        clubId: team.id, 
+        isListed: false, 
+        suspensionWeeks: 0, 
+        injury: null, 
+        seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0, manOfTheMatch: 0 }, 
+        history: []
       };
       players.push(player);
       if (i < 16) team.lineup.push(player.id);

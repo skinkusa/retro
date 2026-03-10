@@ -2,12 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData, LastView } from '@/types/game';
-import { generateInitialData, generateFixtures, FIRSTNAME_POOL, SURNAME_POOL } from '@/lib/game-data';
+import { generateInitialData, generateFixtures } from '@/lib/game-data';
 import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes } from '@/lib/game-engine';
 import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
 import { STORAGE_KEY, OVERRIDES_KEY } from '@/lib/constants';
+import { STAFF_ROLES } from '@/data/staff-config';
+import { NATIONALITY_POOLS } from '@/data/player-names';
 
 interface GameContextType {
   state: GameState;
@@ -81,7 +83,15 @@ function getInitialState(): GameState {
     if (!saved) return DEFAULT_STATE;
     const data = JSON.parse(saved);
     const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
-    return { ...data, isGameStarted: true, teams, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null };
+    const natKeys = Object.keys(NATIONALITY_POOLS);
+    const players = (data.players || []).map((p: Player) => {
+      if (p.nationality) return p;
+      const seed = p.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const isInt = (seed % 100) < 35;
+      const nat = isInt ? natKeys[(seed % (natKeys.length - 1)) + 1] : 'England';
+      return { ...p, nationality: nat };
+    });
+    return { ...data, isGameStarted: true, teams, players, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null };
   } catch {
     return DEFAULT_STATE;
   }
@@ -98,7 +108,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       try {
         const data = JSON.parse(saved);
         const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
-        setState({ ...data, isGameStarted: true, teams, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null });
+        const natKeys = Object.keys(NATIONALITY_POOLS);
+        const players = (data.players || []).map((p: Player) => {
+          if (p.nationality) return p;
+          const seed = p.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const isInt = (seed % 100) < 35;
+          const nat = isInt ? natKeys[(seed % (natKeys.length - 1)) + 1] : 'England';
+          return { ...p, nationality: nat };
+        });
+        setState({ ...data, isGameStarted: true, teams, players, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null });
         return;
       } catch (_e) { /* corrupted save: fall through to fresh data */ }
     }
@@ -114,11 +132,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, teams: finalTeams, players, fixtures, availableStaff, cupEntrants }));
   }, []);
 
-  const getBestSquadForTeam = useCallback((team: Team, allPlayers: Player[]): string[] => {
+  // Auto-save logic: persist state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !state.isGameStarted || !state.userTeamId) return;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Also sync team name overrides for the editor
+      const overrides = Object.fromEntries(state.teams.map(t => [t.id, t.name]));
+      localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+    } catch (e) {
+      console.error("Auto-save error:", e);
+    }
+  }, [state]);
+
+  const getBestSquadForTeam = useCallback((team: Team, allPlayers: Player[]): (string | null)[] => {
     const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
     const requirements = getFormationRequirements(team.formation);
     const sortedAvail = [...healthyPlayers].sort((a, b) => b.attributes.skill - a.attributes.skill);
-    const picked: string[] = [];
+    const picked: (string | null)[] = [];
     const used = new Set<string>();
 
     requirements.forEach(pos => {
@@ -131,6 +163,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
 
     sortedAvail.forEach(p => { if (picked.length < 16 && !used.has(p.id)) { picked.push(p.id); used.add(p.id); } });
+    while (picked.length < 16) picked.push(null);
     return picked;
   }, []);
 
@@ -139,8 +172,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     (p.position === 'MF' && req === 'FW') ||
     (p.position === 'DM' && (req === 'DF' || req === 'MF'));
 
-  const normalizeLineupForTeam = useCallback((team: Team, allPlayers: Player[], selectedIds: string[]): string[] => {
-    const pool = selectedIds.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[];
+  const normalizeLineupForTeam = useCallback((team: Team, allPlayers: Player[], selectedIds: (string | null)[]): (string | null)[] => {
+    const pool = selectedIds
+      .filter((id): id is string => id !== null)
+      .map(id => allPlayers.find(p => p.id === id))
+      .filter(Boolean) as Player[];
     const uniq = new Map(pool.map(p => [p.id, p]));
     const selected = Array.from(uniq.values());
 
@@ -174,7 +210,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       .slice(0, 5)
       .map(p => p.id);
 
-    return [...starters.slice(0, 11), ...subs.slice(0, 5)];
+    const finalLineup: (string | null)[] = [...starters];
+    while (finalLineup.length < 11) finalLineup.push(null);
+    finalLineup.push(...subs);
+    while (finalLineup.length < 16) finalLineup.push(null);
+
+    return finalLineup;
   }, []);
 
   const togglePlayerLineup = useCallback((pId: string) => {
@@ -185,33 +226,39 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const p = s.players.find(x => x.id === pId);
       if (!p) return s;
 
-      const currentlySelected = new Set(t.lineup);
+      const currentLineup = [...t.lineup];
+      const pIdx = currentLineup.indexOf(pId);
+
       const blocked = !!(p.injury || p.suspensionWeeks > 0 || p.status === 'INJURED' || p.status === 'SUSPENDED');
 
-      if (currentlySelected.has(pId)) {
-        currentlySelected.delete(pId);
-        const next = normalizeLineupForTeam(t, s.players, Array.from(currentlySelected));
-        return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: next } : x) };
+      if (pIdx !== -1) {
+        currentLineup[pIdx] = null;
+        return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: currentLineup } : x) };
       }
 
       if (blocked) return s;
 
-      if (currentlySelected.size < 16) {
-        currentlySelected.add(pId);
-        const next = normalizeLineupForTeam(t, s.players, Array.from(currentlySelected));
-        return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: next } : x) };
+      const firstEmpty = currentLineup.indexOf(null);
+      if (firstEmpty !== -1) {
+        currentLineup[firstEmpty] = pId;
+        return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: currentLineup } : x) };
       }
 
-      const current = t.lineup.slice(0, 16);
-      const benchIds = current.slice(11, 16);
-      const benchPlayers = benchIds.map(id => s.players.find(pp => pp.id === id)).filter(Boolean) as Player[];
-      if (benchPlayers.length === 0) return s;
+      const benchIndices = [11, 12, 13, 14, 15];
+      const benchPlayers = benchIndices
+        .map(idx => currentLineup[idx])
+        .filter(Boolean)
+        .map(id => s.players.find(pp => pp.id === id))
+        .filter(Boolean) as Player[];
 
-      const worstBench = [...benchPlayers].sort((a, b) => a.attributes.skill - b.attributes.skill)[0];
-      currentlySelected.delete(worstBench.id);
-      currentlySelected.add(pId);
-      const next = normalizeLineupForTeam(t, s.players, Array.from(currentlySelected));
-      return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: next } : x) };
+      if (benchPlayers.length > 0) {
+        const worstBench = [...benchPlayers].sort((a, b) => a.attributes.skill - b.attributes.skill)[0];
+        const worstIdx = currentLineup.indexOf(worstBench.id);
+        currentLineup[worstIdx] = pId;
+        return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: currentLineup } : x) };
+      }
+
+      return s;
     });
   }, [normalizeLineupForTeam]);
 
@@ -225,9 +272,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (blocked) return s;
       if (slotIndex < 0 || slotIndex > 15) return s;
 
-      let lineup = t.lineup.filter(id => id !== playerId);
-      lineup.splice(slotIndex, 0, playerId);
-      lineup = lineup.slice(0, 16);
+      const lineup = [...t.lineup];
+      if (lineup.length < 16) while(lineup.length < 16) lineup.push(null);
+      
+      // Remove from any existing slot
+      for(let i=0; i<16; i++) if (lineup[i] === playerId) lineup[i] = null;
+      
+      lineup[slotIndex] = playerId;
 
       return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup } : x) };
     });
@@ -397,8 +448,8 @@ setState(s => ({
         const aTeam = updatedTeamsMap.get(f.awayTeamId)!;
         if (hTeam.id !== s.userTeamId) hTeam.lineup = getBestSquadForTeam(hTeam, s.players);
         if (aTeam.id !== s.userTeamId) aTeam.lineup = getBestSquadForTeam(aTeam, s.players);
-        const hStarters = s.players.filter(p => hTeam.lineup.slice(0, 11).includes(p.id));
-        const aStarters = s.players.filter(p => aTeam.lineup.slice(0, 11).includes(p.id));
+        const hStarters = s.players.filter(p => hTeam.lineup.slice(0, 11).filter((id): id is string => id !== null).includes(p.id));
+        const aStarters = s.players.filter(p => aTeam.lineup.slice(0, 11).filter((id): id is string => id !== null).includes(p.id));
         const result = simulateMatch(hTeam, aTeam, hStarters, aStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
         const fIdx = updatedFixtures.findIndex(uf => uf.id === f.id);
         updatedFixtures[fIdx] = { ...f, result };
@@ -588,9 +639,9 @@ setState(s => ({
           const awayTeam = teamsMap.get(f.awayTeamId)!;
           if (homeTeam.id !== s.userTeamId) homeTeam.lineup = getBestSquadForTeam(homeTeam, s.players).slice(0, 11);
           if (awayTeam.id !== s.userTeamId) awayTeam.lineup = getBestSquadForTeam(awayTeam, s.players).slice(0, 11);
-          const homeStarters = s.players.filter(p => p.clubId === f.homeTeamId && homeTeam.lineup.includes(p.id));
-          const awayStarters = s.players.filter(p => p.clubId === f.awayTeamId && awayTeam.lineup.includes(p.id));
-          const result = simulateMatch(homeTeam, awayTeam, homeStarters, awayStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
+          const hStarters = s.players.filter(p => p.clubId === f.homeTeamId && (homeTeam.lineup as (string | null)[]).slice(0, 11).includes(p.id));
+          const aStarters = s.players.filter(p => p.clubId === f.awayTeamId && (awayTeam.lineup as (string | null)[]).slice(0, 11).includes(p.id));
+          const result = simulateMatch(homeTeam, awayTeam, hStarters, aStarters, [], [], false, 1, null, (f.homeTeamId === s.userTeamId || f.awayTeamId === s.userTeamId) ? s.manager?.personality : undefined, s.enginePreset === 'arcade' ? ARCADE_ENGINE_CONFIG : undefined);
           const idx = fixtures.findIndex(x => x.id === f.id);
           if (idx >= 0) fixtures[idx] = { ...f, result };
         });
@@ -659,7 +710,7 @@ setState(s => ({
     markMessageRead: (mId: string) => setState(s => ({ ...s, messages: s.messages.map(m => m.id === mId ? { ...m, read: true } : m) })), 
     hireStaff, fireStaff, 
     togglePlayerLineup, swapPlayers, addPlayerToSlot,
-    clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: [] } : t) })),
+    clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: Array(16).fill(null) } : t) })),
     autoPickLineup,
     applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })),
     quitToMainMenu: () => setState(s => ({ ...s, isGameStarted: false, currentMatchFixtureId: null })),

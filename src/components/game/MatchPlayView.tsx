@@ -1,9 +1,10 @@
 "use client";
 
-import { Fixture, Team } from '@/types/game';
+import { Fixture, Team, MatchEvent } from '@/types/game';
 import { Button } from '@/components/ui/button';
-import { Pause } from 'lucide-react';
+import { Pause, TrendingUp, Zap, Shield, Target, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 export interface MatchPlayViewProps {
   fixture: Fixture;
@@ -24,10 +25,7 @@ export interface MatchPlayViewProps {
   onSpeedToggle: () => void;
   onPause: () => void;
   getPlayerName: (id: string) => string;
-  homeScorers: Array<{ playerId: string; minute: number }>;
-  awayScorers: Array<{ playerId: string; minute: number }>;
-  homeCards: Array<{ playerId: string; minute: number; type: string }>;
-  awayCards: Array<{ playerId: string; minute: number; type: string }>;
+  allEvents: MatchEvent[];
 }
 
 export function MatchPlayView({
@@ -49,193 +47,228 @@ export function MatchPlayView({
   onSpeedToggle,
   onPause,
   getPlayerName,
-  homeScorers,
-  awayScorers,
-  homeCards,
-  awayCards,
+  allEvents,
 }: MatchPlayViewProps) {
-  const StrengthBar = ({ value, label, color }: { value: number; label: string; color?: string }) => (
-    <div className="flex flex-col items-center gap-0.5 w-full max-w-[56px] md:max-w-[72px]">
-      <span className="text-[12px] md:text-base font-black text-white uppercase">{label}</span>
-      <div className="w-full h-20 md:h-24 bg-black/80 border border-white/10 relative overflow-hidden flex flex-col justify-end rounded-md shadow-inner">
+
+  const filteredFeed = useMemo(() => {
+    return allEvents
+      .filter(e => e.type !== 'COMMENTARY')
+      .sort((a, b) => b.minute - a.minute);
+  }, [allEvents]);
+
+  const StrengthBar = ({ value, label, icon: Icon, color, teamSide }: { value: number; label: string; icon: any; color: string; teamSide: 'home' | 'away' }) => (
+    <div className="flex flex-col gap-1.5 w-full">
+      <div className="flex justify-between items-center px-1">
+        <div className="flex items-center gap-1.5 opacity-80">
+          <Icon size={12} className="text-white/60" />
+          <span className="text-[10px] sm:text-[12px] font-black text-white/70 uppercase tracking-widest">{label}</span>
+        </div>
+        <span className="text-[10px] sm:text-[12px] font-mono font-black text-white/90">{value}</span>
+      </div>
+      <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/10 p-[1px]">
         <div
-          className="w-full transition-all duration-700"
-          style={{ height: `${Math.min(100, (value / 50) * 100)}%`, backgroundColor: color || '#26D975' }}
+          className="h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+          style={{ 
+            width: `${Math.min(100, (value / 50) * 100)}%`, 
+            backgroundColor: color,
+            boxShadow: `0 0 12px ${color}44`
+          }}
         />
       </div>
     </div>
   );
 
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'GOAL': return '⚽';
+      case 'YELLOW': return '🟨';
+      case 'RED': return '🟥';
+      case 'SUB': return '🔁';
+      case 'INJURY': return '✚';
+      default: return '•';
+    }
+  };
+
   return (
-    <>
-      {/* 1. Match header: league + stadium (left/center); controls (right). On mobile, commentary in same row. */}
-      <div className="relative z-10 p-2.5 md:p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-2 bg-black/85 border-b border-white/5 shrink-0">
-        <div className="bg-primary text-primary-foreground px-4 py-0.5 text-[10px] md:text-lg font-black shadow-lg border border-white/20 uppercase tracking-[0.2em] rounded-md opacity-90 md:opacity-90 w-fit">
-          {fixture.competition} – {homeTeam.stadium.toUpperCase()}
+    <div className="flex-1 flex flex-col min-h-0 bg-[#080a0c] text-white overflow-hidden relative">
+      {/* Background radial glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(38,217,117,0.05)_0%,transparent_70%)] pointer-events-none" />
+
+      {/* 1. TOP HEADER */}
+      <div className="relative z-10 px-4 py-3 flex items-center justify-between border-b border-white/10 bg-black/40 backdrop-blur-md">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-black text-primary/80 tracking-[0.2em] uppercase leading-none">{fixture.competition}</span>
+          <span className="text-[14px] sm:text-[16px] font-black text-white/90 uppercase mt-0.5 tracking-tight">{homeTeam.stadium}</span>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto md:flex-initial">
-          <div
-            className={cn(
-              'bg-black/90 backdrop-blur-md px-4 py-2.5 font-black flex-1 text-center uppercase tracking-tight shadow-2xl flex items-center justify-center min-h-[48px] rounded-lg border border-white/10',
-              'text-[17px] sm:text-[18px] md:hidden'
-            )}
-            style={{ color: commentaryColor }}
-          >
-            {activeEventText}
-          </div>
+        
+        <div className="flex items-center gap-2">
           <Button
             onClick={onSpeedToggle}
             className={cn(
-              'h-9 md:h-10 px-3 md:px-4 text-sm md:text-base font-black retro-button shrink-0 transition-all',
-              playbackSpeed === 2 ? 'bg-accent text-accent-foreground border-accent' : 'bg-black/70 text-white border-white/30 hover:bg-white/10'
+              'h-11 px-5 rounded-xl font-black transition-all border-2 text-[16px]',
+              playbackSpeed === 2 
+                ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(38,217,117,0.2)]' 
+                : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
             )}
-            title={playbackSpeed === 2 ? 'Switch to 1x speed' : 'Play at 2x speed'}
           >
             ×{playbackSpeed}
           </Button>
           <Button
             onClick={onPause}
-            className="h-9 md:h-10 px-5 text-sm md:text-base bg-red-600 hover:bg-red-700 text-white font-black retro-button shadow-lg transition-all active:scale-95 shrink-0"
+            className="h-11 px-5 rounded-xl bg-red-500/10 border-2 border-red-500/40 text-red-500 hover:bg-red-500 hover:text-white font-black transition-all shadow-[0_4px_15px_rgba(239,68,68,0.2)] flex items-center gap-2"
           >
-            <Pause size={18} className="mr-1" /> PAUSE
+            <Pause size={18} fill="currentColor" />
+            <span className="hidden sm:inline uppercase tracking-widest text-[14px]">Pause</span>
           </Button>
         </div>
       </div>
 
-      {/* 2. Scoreboard – visual center; on md: score 56–64px, time under score, team names 22–26px */}
-      <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 md:px-8 mt-3 md:mt-3 gap-3 md:gap-2 flex-1 min-h-0">
-        <div className="match-teams-row w-full flex items-center justify-between gap-4 sm:gap-6 md:gap-8">
-          <div className="flex-1 flex flex-col items-end min-w-0">
-            <div
-              className="match-team-name w-full min-h-[2.75rem] sm:min-h-[3rem] border-4 border-white/30 flex items-center justify-center font-black shadow-2xl rounded-lg uppercase leading-tight text-center px-1 overflow-hidden md:text-2xl md:min-h-[2.5rem]"
-              style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}
-            >
-              <span className="truncate block w-full">{homeTeam.name}</span>
-            </div>
-            <div className="flex items-center gap-4 sm:gap-6 mt-2 gap-2 md:gap-3">
-              <div className="flex flex-col items-end w-[200px] sm:w-[220px] shrink-0">
-                <span className="text-[13px] md:text-base font-black text-white/90 uppercase">Shots: {homeShots}</span>
-                <div className="text-[10px] md:text-xs font-black text-accent uppercase text-right leading-tight w-full mt-1 min-h-[3.5rem] max-h-[5rem] md:max-h-[6rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pr-0.5">
-                  {homeScorers.map((s) => (
-                    <div key={`${s.playerId}-${s.minute}`}>
-                      {getPlayerName(s.playerId)} {s.minute}&apos;
-                    </div>
-                  ))}
-                </div>
-                <div className="text-[10px] md:text-xs font-black uppercase text-right leading-tight w-full mt-0.5 min-h-[2rem] max-h-[3rem] md:max-h-[4rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pr-0.5">
-                  {homeCards.map((c) => (
-                    <div
-                      key={`card-${c.playerId}-${c.minute}-${c.type}`}
-                      className={c.type === 'RED' ? 'text-red-400' : 'text-yellow-400'}
-                    >
-                      {c.type} {c.minute}&apos; {getPlayerName(c.playerId)}
-                    </div>
-                  ))}
-                </div>
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 sm:space-y-6">
+        
+        {/* 2. SCOREBOARD BLOCK */}
+        <div className="relative z-10 w-full max-w-3xl mx-auto bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-[28px] p-4 sm:p-5 shadow-2xl overflow-hidden group">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-xl" />
+          
+          <div className="relative flex items-center justify-between gap-2 sm:gap-4">
+            {/* Home Side */}
+            <div className="flex-1 flex items-center justify-end gap-2 sm:gap-3 min-w-0">
+              <span className="text-[14px] sm:text-[18px] font-black uppercase text-right tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{homeTeam.name}</span>
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/10 flex items-center justify-center shadow-inner shrink-0"
+                style={{ backgroundColor: homeTeam.color }}
+              >
+                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{homeTeam.name[0]}</span>
               </div>
-              <span className="text-6xl sm:text-7xl max-md:text-sm md:hidden font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">
-                {currentHomeGoals}
-              </span>
             </div>
-          </div>
 
-          {/* Center: on mobile = minute only; on desktop = score + minute */}
-          <div className="flex flex-col items-center shrink-0 gap-0.5">
-            <div className="hidden md:block bg-black border-4 border-accent p-3 rounded-xl shadow-[0_0_30px_rgba(38,217,117,0.2)]">
-              <div className="text-[56px] md:text-[60px] font-black text-white tabular-nums leading-none tracking-tighter text-center">
-                {currentHomeGoals} – {currentAwayGoals}
+            {/* Score Center */}
+            <div className="flex flex-col items-center gap-1 shrink-0 px-2 sm:px-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="text-3xl sm:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">{currentHomeGoals}</span>
+                <span className="text-lg sm:text-xl font-black text-white/20">-</span>
+                <span className="text-3xl sm:text-5xl font-black tabular-nums tracking-tighter text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">{currentAwayGoals}</span>
+              </div>
+              {/* Clock Pill Integrated */}
+              <div className="bg-primary/20 border border-primary/40 px-3 py-0.5 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(38,217,117,0.15)] flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[13px] sm:text-[15px] font-black text-primary tabular-nums tracking-widest">{currentMinute}&apos;</span>
               </div>
             </div>
-            <div className="bg-black border-4 border-accent p-3 max-md:p-1 max-md:rounded-md max-md:border-2 rounded-xl shadow-[0_0_30px_rgba(38,217,117,0.2)] md:border-0 md:bg-transparent md:shadow-none md:p-0">
-              <div className="text-4xl sm:text-5xl max-md:text-base max-md:w-8 font-black text-red-600 md:text-[22px] md:text-white tabular-nums leading-none tracking-tighter w-[72px] sm:w-[85px] md:w-auto text-center">
-                {currentMinute.toString().padStart(3, '0')}&apos;
-              </div>
-            </div>
-          </div>
 
-          <div className="flex-1 flex flex-col items-start min-w-0">
-            <div
-              className="match-team-name w-full min-h-[2.75rem] sm:min-h-[3rem] border-4 border-white/30 flex items-center justify-center font-black shadow-2xl rounded-lg uppercase leading-tight text-center px-1 overflow-hidden md:text-2xl md:min-h-[2.5rem]"
-              style={{ backgroundColor: awayKitColor, color: awayKitText }}
-            >
-              <span className="truncate block w-full">{awayTeam.name}</span>
-            </div>
-            <div className="flex items-center gap-4 sm:gap-6 mt-2 gap-2 md:gap-3">
-              <span className="text-6xl sm:text-7xl max-md:text-sm md:hidden font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] shrink-0">
-                {currentAwayGoals}
-              </span>
-              <div className="flex flex-col items-start w-[200px] sm:w-[220px] shrink-0">
-                <span className="text-[13px] md:text-base font-black text-white/90 uppercase">Shots: {awayShots}</span>
-                <div className="text-[10px] md:text-xs font-black text-accent uppercase text-left leading-tight w-full mt-1 min-h-[3.5rem] max-h-[5rem] md:max-h-[6rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pl-0.5">
-                  {awayScorers.map((s) => (
-                    <div key={`${s.playerId}-${s.minute}`}>
-                      {getPlayerName(s.playerId)} {s.minute}&apos;
-                    </div>
-                  ))}
-                </div>
-                <div className="text-[10px] md:text-xs font-black uppercase text-left leading-tight w-full mt-0.5 min-h-[2rem] max-h-[3rem] md:max-h-[4rem] overflow-y-auto overflow-x-hidden grid grid-cols-2 gap-x-2 gap-y-0.5 pl-0.5">
-                  {awayCards.map((c) => (
-                    <div
-                      key={`card-${c.playerId}-${c.minute}-${c.type}`}
-                      className={c.type === 'RED' ? 'text-red-400' : 'text-yellow-400'}
-                    >
-                      {c.type} {c.minute}&apos; {getPlayerName(c.playerId)}
-                    </div>
-                  ))}
-                </div>
+            {/* Away Side */}
+            <div className="flex-1 flex items-center justify-start gap-2 sm:gap-3 min-w-0">
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/10 flex items-center justify-center shadow-inner shrink-0"
+                style={{ backgroundColor: awayKitColor }}
+              >
+                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{awayTeam.name[0]}</span>
               </div>
+              <span className="text-[14px] sm:text-[18px] font-black uppercase text-left tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{awayTeam.name}</span>
             </div>
           </div>
         </div>
 
-        {/* 3. Commentary panel – desktop only, below scoreboard; pushed down to give more room for scorers */}
-        <div
-          className="hidden md:block w-full max-w-4xl mt-6 md:mt-8 py-3 px-4 bg-black/90 border border-primary/20 rounded-lg ring-1 ring-white/10 min-h-0 max-h-[4rem] flex items-center justify-center"
-          style={{ color: commentaryColor }}
-        >
-          <span className="text-xl font-black uppercase tracking-tight text-center truncate w-full">
-            {activeEventText}
-          </span>
+        {/* 3. EVENT FEED (Horizontal scrolling compact mode or vertical list) */}
+        {filteredFeed.length > 0 && (
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-3 max-h-[140px] overflow-auto custom-scrollbar shadow-inner">
+              <div className="space-y-2">
+                {filteredFeed.map((e, idx) => (
+                  <div key={`${e.minute}-${e.type}-${idx}`} className="flex items-center justify-between py-1.5 px-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors rounded-lg group/event">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[13px] font-black text-white/40 tabular-nums w-8">{e.minute}&apos;</span>
+                      <span className="text-[16px] sm:text-[17px] leading-none">{getEventIcon(e.type)}</span>
+                      <span className="text-[14px] sm:text-[16px] font-black uppercase text-white/90 group-data-[team=away]:text-right">
+                        {e.type === 'SUB' ? `${getPlayerName(e.playerId!)} → ${getPlayerName(e.subPlayerId!)}` : getPlayerName(e.playerId!)}
+                      </span>
+                    </div>
+                    {e.teamId && (
+                      <div className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]" style={{ backgroundColor: e.teamId === homeTeam.id ? homeTeam.color : awayKitColor }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. COMMENTARY PANEL */}
+        <div className="w-full max-w-3xl mx-auto relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000" />
+          <div 
+            className="relative bg-black/80 backdrop-blur-2xl border-2 border-white/10 rounded-2xl p-6 sm:p-8 flex items-center justify-center min-h-[100px] shadow-2xl"
+            style={{ borderColor: `${commentaryColor}44` }}
+          >
+            <p 
+              className="text-[18px] sm:text-[22px] font-black uppercase italic text-center tracking-tight leading-snug drop-shadow-lg transition-all"
+              style={{ color: commentaryColor }}
+            >
+              &ldquo;{activeEventText}&rdquo;
+            </p>
+          </div>
         </div>
 
-        {/* 4. Possession bar – pushed down to give more room for scorers */}
-        <div className="w-full max-w-4xl mt-4 md:mt-6">
-          <div className="h-4 md:h-5 w-full bg-black/80 border-2 border-white/20 rounded-full overflow-hidden flex shadow-2xl">
+        {/* 5. POSSESSION */}
+        <div className="w-full max-w-2xl mx-auto space-y-3">
+          <div className="flex items-center justify-between px-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[14px] font-black text-white">{possession.toFixed(0)}%</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Home</span>
+              </div>
+              <span className="text-[12px] font-black text-white/20 uppercase tracking-[0.3em]">Possession</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Away</span>
+                <span className="text-[14px] font-black text-white">{(100 - possession).toFixed(0)}%</span>
+              </div>
+          </div>
+          <div className="h-2.5 w-full bg-white/5 border border-white/10 rounded-full overflow-hidden flex p-[1px] shadow-inner">
             <div
-              className="h-full transition-all duration-1000 shadow-[inset_-10px_0_20px_rgba(0,0,0,0.2)]"
+              className="h-full rounded-l-full transition-all duration-1000 shadow-[inset_-4px_0_8px_rgba(0,0,0,0.2)]"
               style={{ width: `${possession}%`, backgroundColor: homeTeam.color }}
             />
             <div
-              className="h-full transition-all duration-1000"
+              className="h-full rounded-r-full transition-all duration-1000 shadow-[inset_4px_0_8px_rgba(0,0,0,0.2)]"
               style={{ width: `${100 - possession}%`, backgroundColor: awayKitColor }}
             />
           </div>
-          <div className="flex justify-between px-3 mt-1 text-[12px] md:text-base font-black text-white/80 uppercase tracking-widest items-baseline">
-            <span>POSSESSION: <span className="md:text-lg">{possession.toFixed(0)}%</span></span>
-            <span className="md:text-lg">{(100 - possession).toFixed(0)}%</span>
-          </div>
         </div>
-      </div>
 
-      {/* 5. Team strength bars – grouped under HOME / AWAY on desktop */}
-      <div className="relative z-10 p-4 sm:p-6 md:p-3 grid grid-cols-2 gap-6 sm:gap-10 md:gap-8 shrink-0 bg-black/70">
-        <div className="flex flex-col items-center gap-2">
-          <span className="hidden md:block text-base font-black text-white/90 uppercase tracking-wider">HOME</span>
-          <div className="flex justify-center w-full gap-4 md:gap-6">
-            <StrengthBar value={zones.home.DEF} label="DEF" color={homeTeam.color} />
-            <StrengthBar value={zones.home.MID} label="MID" color={homeTeam.color} />
-            <StrengthBar value={zones.home.ATT} label="ATT" color={homeTeam.color} />
+        {/* 6. TEAM STRENGTH BARS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto pt-4 pb-8">
+          {/* Home Strength */}
+          <div className="space-y-4">
+            <h4 className="px-1 text-[12px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+              <TrendingUp size={14} className="text-white/20" /> {homeTeam.name} Authority
+            </h4>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+              <StrengthBar value={zones.home.DEF} label="Defense" icon={Shield} color={homeTeam.color} teamSide="home" />
+              <StrengthBar value={zones.home.MID} label="Midfield" icon={Activity} color={homeTeam.color} teamSide="home" />
+              <StrengthBar value={zones.home.ATT} label="Attack" icon={Zap} color={homeTeam.color} teamSide="home" />
+            </div>
+            <div className="flex justify-between px-2 pt-1 opacity-60">
+                <span className="text-[10px] font-bold uppercase tracking-wider">Shots: <span className="text-white font-black">{homeShots}</span></span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Goals: <span className="text-white font-black">{currentHomeGoals}</span></span>
+            </div>
+          </div>
+
+          {/* Away Strength */}
+          <div className="space-y-4">
+            <h4 className="px-1 text-[12px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2 md:justify-end">
+              {awayTeam.name} Authority <TrendingUp size={14} className="text-white/20 scale-x-[-1]" />
+            </h4>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+              <StrengthBar value={zones.away.DEF} label="Defense" icon={Shield} color={awayKitColor} teamSide="away" />
+              <StrengthBar value={zones.away.MID} label="Midfield" icon={Activity} color={awayKitColor} teamSide="away" />
+              <StrengthBar value={zones.away.ATT} label="Attack" icon={Zap} color={awayKitColor} teamSide="away" />
+            </div>
+            <div className="flex justify-between px-2 pt-1 opacity-60">
+                <span className="text-[10px] font-bold uppercase tracking-wider">Goals: <span className="text-white font-black">{currentAwayGoals}</span></span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">Shots: <span className="text-white font-black">{awayShots}</span></span>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-2">
-          <span className="hidden md:block text-base font-black text-white/90 uppercase tracking-wider">AWAY</span>
-          <div className="flex justify-center w-full gap-4 md:gap-6">
-            <StrengthBar value={zones.away.DEF} label="DEF" color={awayKitColor} />
-            <StrengthBar value={zones.away.MID} label="MID" color={awayKitColor} />
-            <StrengthBar value={zones.away.ATT} label="ATT" color={awayKitColor} />
-          </div>
-        </div>
+
       </div>
-    </>
+    </div>
   );
 }

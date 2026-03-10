@@ -31,6 +31,7 @@ export interface Injury {
 export interface Player {
   id: string;
   name: string;
+  nationality: string;
   age: number;
   position: Position;
   side: Side;
@@ -111,7 +112,7 @@ export interface Team {
   isUserTeam?: boolean;
   playedHistory: string[];
   staff: StaffMember[];
-  lineup: string[];
+  lineup: (string | null)[];
   qualification?: QualificationType;
   finances: {
     gateReceipts: number;
@@ -160,9 +161,10 @@ export interface Fixture {
 
 export interface MatchEvent {
   minute: number;
-  type: 'GOAL' | 'YELLOW' | 'RED' | 'INJURY' | 'COMMENTARY' | 'PENALTY_SHOOTOUT';
+  type: 'GOAL' | 'YELLOW' | 'RED' | 'INJURY' | 'COMMENTARY' | 'PENALTY_SHOOTOUT' | 'SUB';
   teamId?: string;
   playerId?: string;
+  subPlayerId?: string;
   text: string;
 }
 

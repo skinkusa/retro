@@ -33,32 +33,32 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
   return (
     <Dialog open={!!team} onOpenChange={onClose}>
       <DialogContent className="bg-card border-primary p-0 overflow-hidden max-w-4xl max-h-[90vh] flex flex-col font-mono rounded-2xl">
-        <DialogHeader className="bg-primary p-5 shrink-0 rounded-t-xl">
-          <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-xl font-black tracking-tight">
+        <DialogHeader className="bg-primary p-5 max-[1300px]:p-8 shrink-0 rounded-t-xl">
+          <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-xl max-[1300px]:text-3xl font-black tracking-tight">
             <div className="flex items-center gap-4">
-               <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: team.color }} />
+               <div className="w-4 h-4 max-[1300px]:w-6 max-[1300px]:h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: team.color }} />
                <span>{team.name} Squad</span>
             </div>
-            <span className="text-[12px] opacity-70 font-mono tracking-[0.2em]">SCOUTING ROSTER</span>
+            <span className="text-[12px] max-[1300px]:text-[18px] opacity-70 font-mono tracking-[0.2em]">SCOUTING ROSTER</span>
           </DialogTitle>
           <DialogDescription className="sr-only">Roster for {team.name}.</DialogDescription>
         </DialogHeader>
         
         <div className="p-4 space-y-4 flex-1 min-h-0 overflow-auto">
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 px-3 py-2 bg-muted/50 border border-primary/10 rounded-xl">
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 max-[1300px]:gap-2">
               {(['ALL', 'GK', 'DF', 'MF', 'FW', 'DM'] as const).map(pos => (
                 <Button
                   key={pos}
                   onClick={() => setFilter(pos)}
                   variant={filter === pos ? "default" : "outline"}
-                  className="h-8 text-[10px] px-3 retro-button font-black uppercase tracking-widest rounded-lg"
+                  className="h-8 max-[1300px]:h-12 text-[10px] max-[1300px]:text-[16px] px-3 max-[1300px]:px-5 retro-button font-black uppercase tracking-widest rounded-lg"
                 >
                   {pos}
                 </Button>
               ))}
             </div>
-            <div className="text-[12px] font-black text-primary uppercase tracking-widest px-3 py-1 border border-primary/20 rounded-lg bg-black/20">
+            <div className="text-[12px] max-[1300px]:text-[18px] font-black text-primary uppercase tracking-widest px-3 py-1 max-[1300px]:px-5 max-[1300px]:py-3 border border-primary/20 rounded-lg bg-black/20">
               {filteredPlayers.length} ATHLETES FOUND
             </div>
           </div>
@@ -68,13 +68,13 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
               <Table>
                 <TableHeader>
                   <TableRow className="border-b-2 border-primary/40 bg-primary/20 hover:bg-primary/20">
-                    <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Role</TableHead>
-                    <TableHead className="text-[13px] uppercase py-4 font-black tracking-wide text-white">Player Identity</TableHead>
-                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Age</TableHead>
-                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Morale</TableHead>
-                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Fit</TableHead>
-                    <TableHead className="text-center text-[13px] uppercase py-4 font-black tracking-wide text-white">Skill</TableHead>
-                    <TableHead className="text-right text-[13px] uppercase py-4 font-black tracking-wide text-white">Value</TableHead>
+                    <TableHead className="text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Role</TableHead>
+                    <TableHead className="text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Player Identity</TableHead>
+                    <TableHead className="text-center text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Age</TableHead>
+                    <TableHead className="text-center text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Morale</TableHead>
+                    <TableHead className="text-center text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Fit</TableHead>
+                    <TableHead className="text-center text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Skill</TableHead>
+                    <TableHead className="text-right text-[13px] max-[1300px]:text-[18px] uppercase py-4 max-[1300px]:py-6 font-black tracking-wide text-white">Value</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -88,16 +88,24 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
                         onClick={() => onPlayerClick(p)}
                         className="hover:bg-primary/15 cursor-pointer border-b border-primary/5 group transition-colors"
                       >
-                        <TableCell className="py-3">
+                        <TableCell className="py-3 max-[1300px]:py-6">
                            <div className="flex flex-col">
-                            <span className="font-mono text-cyan text-[13px] font-black leading-none uppercase">
+                            <span className="font-mono text-cyan text-[13px] max-[1300px]:text-[18px] font-black leading-none uppercase">
                               {p.position} ({p.side})
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-[14px] font-black py-3">
+                        <TableCell className="text-[14px] max-[1300px]:text-[22px] font-black py-3">
                           <div className="flex items-center gap-2">
-                            <span className="uppercase text-white group-hover:text-accent transition-colors truncate max-w-[140px]">{p.name}</span>
+                             <span className="text-[12px] max-[1300px]:text-[20px] shrink-0 opacity-100">
+                               {p.nationality === 'France' ? '🇫🇷' : 
+                                p.nationality === 'Germany' ? '🇩🇪' : 
+                                p.nationality === 'Spain' ? '🇪🇸' : 
+                                p.nationality === 'Italy' ? '🇮🇹' : 
+                                p.nationality === 'Brazil' ? '🇧🇷' : 
+                                p.nationality === 'Netherlands' ? '🇳🇱' : '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}
+                             </span>
+                            <span className="uppercase text-white group-hover:text-accent transition-colors truncate max-w-[140px] max-[1300px]:max-w-[300px]">{p.name}</span>
                             <div className="flex gap-1">
                               {isSuspended && (
                                 <Tooltip>
@@ -118,21 +126,21 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center text-[13px] font-mono font-bold py-3 text-white/80">{p.age}</TableCell>
-                        <TableCell className="text-center py-3">
+                        <TableCell className="text-center text-[13px] max-[1300px]:text-[18px] font-mono font-bold py-3 max-[1300px]:py-6 text-white/80">{p.age}</TableCell>
+                        <TableCell className="text-center py-3 max-[1300px]:py-6">
                           <div className="flex justify-center items-center gap-1.5">
-                            <Smile size={12} className={p.morale > 70 ? "text-green-500" : p.morale > 40 ? "text-yellow-500" : "text-red-500"} />
-                            <span className="text-[12px] font-mono font-bold">{p.morale}%</span>
+                            <Smile size={12} className={cn(p.morale > 70 ? "text-green-500" : p.morale > 40 ? "text-yellow-500" : "text-red-500", "max-[1300px]:w-5 max-[1300px]:h-5")} />
+                            <span className="text-[12px] max-[1300px]:text-[18px] font-mono font-bold">{p.morale}%</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center py-3">
+                        <TableCell className="text-center py-3 max-[1300px]:py-6">
                           <div className="flex justify-center items-center gap-1.5">
-                            <HeartPulse size={12} className={p.fitness > 80 ? "text-accent" : "text-red-500"} />
-                            <span className="text-[12px] font-mono font-bold">{p.fitness}%</span>
+                            <HeartPulse size={12} className={cn(p.fitness > 80 ? "text-accent" : "text-red-500", "max-[1300px]:w-5 max-[1300px]:h-5")} />
+                            <span className="text-[12px] max-[1300px]:text-[18px] font-mono font-bold">{p.fitness}%</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center text-[15px] font-mono text-primary font-black py-3">{p.attributes.skill}</TableCell>
-                        <TableCell className="text-right font-mono text-[13px] font-black py-3 text-accent">{formatMoney(p.value)}</TableCell>
+                        <TableCell className="text-center text-[15px] max-[1300px]:text-[22px] font-mono text-primary font-black py-3 max-[1300px]:py-6">{p.attributes.skill}</TableCell>
+                        <TableCell className="text-right font-mono text-[13px] max-[1300px]:text-[18px] font-black py-3 max-[1300px]:py-6 text-accent">{formatMoney(p.value)}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -145,7 +153,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
         <div className="p-4 bg-muted/20 border-t border-primary/20 shrink-0">
           <Button 
             onClick={onClose}
-            className="w-full bg-primary text-primary-foreground font-black retro-button h-14 uppercase text-[15px] tracking-[0.3em] rounded-xl shadow-lg"
+            className="w-full bg-primary text-primary-foreground font-black retro-button h-14 max-[1300px]:h-20 uppercase text-[15px] max-[1300px]:text-[24px] tracking-[0.3em] rounded-xl shadow-lg"
           >
             DISMISS PROFILE
           </Button>
