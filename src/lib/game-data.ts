@@ -81,7 +81,7 @@ export function generateInitialData() {
       goalsFor: 0,
       goalsAgainst: 0,
       division: def.division,
-      reputation: 90 - (def.division * 15) + Math.floor(Math.random() * 10),
+      reputation: def.reputation ?? (90 - (def.division * 15) + Math.floor(Math.random() * 10)),
       formation: def.formation || '4-4-2',
       playStyle: def.style || 'Pass to Feet',
       preferredFormation: def.formation || '4-4-2',
