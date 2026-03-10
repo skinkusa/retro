@@ -8,6 +8,7 @@ import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
 import { STORAGE_KEY, OVERRIDES_KEY } from '@/lib/constants';
+import LZString from 'lz-string';
 import { STAFF_ROLES } from '@/data/staff-config';
 import { NATIONALITY_POOLS } from '@/data/player-names';
 
@@ -97,16 +98,64 @@ function getInitialState(): GameState {
   }
 }
 
+
+// ---------------------------------------------------------------------------
+// Save helpers — keep localStorage well under the ~5MB quota
+// ---------------------------------------------------------------------------
+const KEEP_EVENT_TYPES = new Set(['GOAL', 'RED', 'INJURY', 'SUB', 'PENALTY_SHOOTOUT']);
+
+function slimFixtures(fixtures: Fixture[]): Fixture[] {
+  return fixtures.map(f => {
+    if (!f.result) return f;
+    return {
+      ...f,
+      result: {
+        homeGoals: f.result.homeGoals,
+        awayGoals: f.result.awayGoals,
+        ...(f.result.homePens !== undefined && { homePens: f.result.homePens, awayPens: f.result.awayPens }),
+        attendance: f.result.attendance,
+        scorers: f.result.scorers,
+        cards: f.result.cards,
+        injuries: [],
+        ratings: {},
+        events: f.result.events?.filter(e => KEEP_EVENT_TYPES.has(e.type)) ?? [],
+        shotTakers: undefined,
+        sotTakers: undefined,
+      }
+    };
+  });
+}
+
+function slimPlayers(players: Player[]): Player[] {
+  return players.map(p => ({ ...p, history: p.history ? p.history.slice(-5) : [] }));
+}
+
+function buildSaveable(state: GameState): GameState {
+  return { ...state, fixtures: slimFixtures(state.fixtures), players: slimPlayers(state.players) };
+}
+
+function compressedSave(data: GameState): string {
+  return LZString.compressToUTF16(JSON.stringify(buildSaveable(data)));
+}
+
+function parseStoredSave(raw: string): GameState {
+  // New format: LZ-compressed
+  const decompressed = LZString.decompressFromUTF16(raw);
+  if (decompressed) return JSON.parse(decompressed) as GameState;
+  // Legacy format: plain JSON — parse and we'll re-save as compressed
+  return JSON.parse(raw) as GameState;
+}
+
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const [state, setState] = useState<GameState>(getInitialState);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
       try {
-        const data = JSON.parse(saved);
+        const data = parseStoredSave(raw);
         const teams = (data.teams || []).map((t: Team) => ({ ...t, isUserTeam: t.id === data.userTeamId }));
         const natKeys = Object.keys(NATIONALITY_POOLS);
         const players = (data.players || []).map((p: Player) => {
@@ -116,7 +165,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           const nat = isInt ? natKeys[(seed % (natKeys.length - 1)) + 1] : 'England';
           return { ...p, nationality: nat };
         });
-        setState({ ...data, isGameStarted: true, teams, players, enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null });
+        // Slim and re-save immediately in case this is an old bloated save
+        const migratedState: GameState = { ...data, isGameStarted: true, teams, players: slimPlayers(players), fixtures: slimFixtures(data.fixtures || []), enginePreset: data.enginePreset ?? 'realistic', currentMatchFixtureId: null };
+        try { localStorage.setItem(STORAGE_KEY, compressedSave(migratedState)); } catch (_) { /* quota: will retry on next autosave */ }
+        setState(migratedState);
         return;
       } catch (_e) { /* corrupted save: fall through to fresh data */ }
     }
@@ -132,64 +184,28 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, teams: finalTeams, players, fixtures, availableStaff, cupEntrants }));
   }, []);
 
-  // Auto-save logic: persist state to localStorage whenever it changes.
-  // We slim the state first to stay well within the ~5MB quota:
-  //   - Fixture events: keep only GOAL/RED/INJURY/SUB (drop ~90 COMMENTARY events per match)
-  //   - Player history: cap at last 5 seasons
+  // Auto-save: slim + compress before writing to keep well under the ~5MB quota
   useEffect(() => {
     if (typeof window === 'undefined' || !state.isGameStarted || !state.userTeamId) return;
-
     try {
-      const KEEP_EVENT_TYPES = new Set(['GOAL', 'RED', 'INJURY', 'SUB', 'PENALTY_SHOOTOUT']);
-      const saveable = {
-        ...state,
-        fixtures: state.fixtures.map(f => {
-          if (!f.result) return f;
-          return {
-            ...f,
-            result: {
-              ...f.result,
-              // Strip verbose commentary; keep only meaningful events
-              events: f.result.events.filter(e => KEEP_EVENT_TYPES.has(e.type)),
-              // shotTakers/sotTakers logs can be large; drop them (stats already accumulated)
-              shotTakers: undefined,
-              sotTakers: undefined,
-            }
-          };
-        }),
-        players: state.players.map(p => ({
-          ...p,
-          // Cap history to last 5 seasons
-          history: p.history ? p.history.slice(-5) : [],
-        })),
-      };
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saveable));
+      localStorage.setItem(STORAGE_KEY, compressedSave(state));
       const overrides = Object.fromEntries(state.teams.map(t => [t.id, t.name]));
       localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-        // Last-ditch: try saving only critical fields (teams/players/fixtures summaries)
+        // Last-resort attempt with maximum stripping
         try {
-          const minimal = {
-            ...state,
-            fixtures: state.fixtures.map(f => f.result
-              ? { ...f, result: { homeGoals: f.result.homeGoals, awayGoals: f.result.awayGoals, attendance: f.result.attendance, ratings: {}, scorers: f.result.scorers, cards: f.result.cards, injuries: f.result.injuries, events: [] } }
-              : f
-            ),
-            players: state.players.map(p => ({ ...p, history: [] })),
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
-          console.warn('[AutoSave] Quota tight — saved minimal state. Consider starting a new season to free space.');
+          const minimal = { ...state, fixtures: state.fixtures.map(f => f.result ? { ...f, result: { homeGoals: f.result.homeGoals, awayGoals: f.result.awayGoals, attendance: f.result.attendance, scorers: [], cards: [], injuries: [], ratings: {}, events: [] } } : f), players: state.players.map(p => ({ ...p, history: [] })) };
+          localStorage.setItem(STORAGE_KEY, LZString.compressToUTF16(JSON.stringify(minimal)));
+          console.warn('[AutoSave] Quota tight — saved minimal state.');
         } catch (_e2) {
-          console.error('[AutoSave] Could not save even minimal state — localStorage full.');
+          console.error('[AutoSave] Could not save even minimal state.');
         }
       } else {
         console.error('[AutoSave] Unexpected save error:', e);
       }
     }
   }, [state]);
-
 
   const getBestSquadForTeam = useCallback((team: Team, allPlayers: Player[]): (string | null)[] => {
     const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
@@ -751,16 +767,7 @@ setState(s => ({
     state, startGame, simulateWeek, advanceWeek,
     saveGame: () => {
       try {
-        const KEEP_EVENT_TYPES = new Set(['GOAL', 'RED', 'INJURY', 'SUB', 'PENALTY_SHOOTOUT']);
-        const saveable = {
-          ...state,
-          fixtures: state.fixtures.map(f => {
-            if (!f.result) return f;
-            return { ...f, result: { ...f.result, events: f.result.events.filter(e => KEEP_EVENT_TYPES.has(e.type)), shotTakers: undefined, sotTakers: undefined } };
-          }),
-          players: state.players.map(p => ({ ...p, history: p.history ? p.history.slice(-5) : [] })),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saveable));
+        localStorage.setItem(STORAGE_KEY, compressedSave(state));
         const overrides = Object.fromEntries(state.teams.map(t => [t.id, t.name]));
         localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
         toast({ title: "SAVED" });
