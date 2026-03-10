@@ -3,7 +3,7 @@ import Script from 'next/script';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
-const GA_ID = 'G-9NKK8JNLRH';
+const GA_ID = 'G-KKV7QNZG1V';
 
 const inter = Inter({ subsets: ['latin'] });
 
