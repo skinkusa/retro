@@ -101,7 +101,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
         <div className="flex justify-between items-center py-1 max-[1300px]:py-1.5 border-b border-white/5 cursor-help hover:bg-white/5 transition-colors px-1">
           <span className="text-[11px] max-[1300px]:text-[14px] uppercase text-muted-foreground font-black tracking-tight">{label}</span>
           <span className={`font-mono text-[13px] max-[1300px]:text-[18px] font-black ${value >= 15 ? 'text-accent' : value >= 10 ? 'text-primary' : 'text-white'}`}>
-            {value}
+            {typeof value === 'number' ? value.toFixed(1) : value}
           </span>
         </div>
       </TooltipTrigger>

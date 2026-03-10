@@ -146,7 +146,7 @@ export function SquadList({ players, currentMatchRatings, onPlayerSwap, activeSw
           </div>
         </TableCell>
         <TableCell className={cn("text-center text-[13px] max-[1300px]:text-[20px] font-mono font-black py-2", p.fitness < 80 ? 'text-red-500' : '')}>{p.fitness}%</TableCell>
-        <TableCell className="text-center text-[16px] max-[1300px]:text-[24px] font-mono text-primary font-black py-2 pr-3">{p.attributes.skill}</TableCell>
+        <TableCell className="text-center text-[16px] max-[1300px]:text-[24px] font-mono text-primary font-black py-2 pr-3">{group === 'STARTER' ? p.attributes.skill : p.attributes.skill.toFixed(1)}</TableCell>
       </TableRow>
     );
   };
