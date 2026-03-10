@@ -1,9 +1,13 @@
 import type {NextConfig} from 'next';
 import path from 'path';
 
+const isGhPages = process.env.DEPLOY_TARGET === 'ghpages';
+
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  /* Ensure correct dependency tracing when multiple lockfiles exist (e.g. parent dir on Vercel) */
+  output: isGhPages ? 'export' : 'standalone',
+  // GitHub Pages serves from /retro (the repo name)
+  basePath: isGhPages ? '/retro' : '',
+  /* Ensure correct dependency tracing when multiple lockfiles exist */
   outputFileTracingRoot: path.join(process.cwd()),
   typescript: {
     ignoreBuildErrors: false,
@@ -12,6 +16,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false,
   },
   images: {
+    // GH Pages can't use Next.js image optimisation (requires a server)
+    unoptimized: isGhPages ? true : false,
     remotePatterns: [
       {
         protocol: 'https',
