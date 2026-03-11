@@ -224,7 +224,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
       ? awayKitColor
       : 'hsl(var(--accent))';
 
-  const getPlayerName = (id: string) => state.players.find(p => p.id === id)?.name ?? 'Unknown';
+  const getPlayerName = (id: string) =>
+    homeLineup.find(p => p.id === id)?.name
+    ?? awayLineup.find(p => p.id === id)?.name
+    ?? state.players.find(p => p.id === id)?.name
+    ?? 'Unknown';
 
   const TeamLineupTable = ({ teamPlayers, compact }: { teamPlayers: Player[], compact?: boolean }) => (
     <div className={cn(
@@ -323,7 +327,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
   const goalBannerTeamId = activeAlert?.type === 'GOAL' ? activeAlert.teamId : null;
   const goalBannerColor = goalBannerTeamId === homeTeam.id ? homeTeam.color : goalBannerTeamId === awayTeam.id ? awayKitColor : undefined;
-  const goalScorerName = activeAlert?.type === 'GOAL' && activeAlert.playerId ? state.players.find(p => p.id === activeAlert.playerId)?.name : null;
+  const goalScorerName = activeAlert?.type === 'GOAL' && activeAlert.playerId ? getPlayerName(activeAlert.playerId) : null;
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 pt-[max(env(safe-area-inset-top,0.5rem),0.5rem)] pb-[max(env(safe-area-inset-bottom,0.5rem),0.5rem)] md:p-2 md:pt-2 md:pb-2 font-mono z-[100] backdrop-blur-sm overflow-y-auto">
@@ -344,14 +348,18 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
             title="Lineups"
             zIndex="z-[600]"
             className="bg-black/98 animate-in fade-in duration-500"
-            primaryButton={{ label: 'KICK OFF MATCH', onClick: () => setShowLineups(false) }}
+            primaryButton={{
+              label: fixture.result ? 'KICK OFF MATCH' : 'Preparing match...',
+              onClick: () => fixture.result && setShowLineups(false),
+              disabled: !fixture.result,
+            }}
             secondaryButton={{ label: 'Tactical Setup', onClick: () => setIsPaused(true) }}
           >
             <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-h-0 overflow-auto">
               <div className="shrink-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 text-center mb-2 max-[1300px]:mb-4">
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}>{homeTeam.name}</span>
+                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: homeTeam.color, color: homeTeam.homeTextColor ?? '#ffffff' }}>{homeTeam?.name || homeTeam?.id || 'Home'}</span>
                 <div className="text-xl sm:text-3xl md:text-4xl font-black text-accent tracking-tighter italic px-2">VS</div>
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: awayKitColor, color: awayKitText }}>{awayTeam.name}</span>
+                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: awayKitColor, color: awayKitText }}>{awayTeam?.name || awayTeam?.id || 'Away'}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5 sm:gap-4 max-[1300px]:gap-6 py-1 sm:py-2 flex-1 min-h-0 overflow-hidden text-sm max-[1300px]:text-[18px]">
                 <TeamLineupTable teamPlayers={homeLineup} compact />
@@ -362,7 +370,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         )}
 
         {isPaused && (
-          <div className="absolute inset-0 z-[400] bg-black/98 backdrop-blur-2xl flex flex-col p-2 sm:p-3 overflow-hidden animate-in fade-in duration-300">
+          <div className="absolute inset-0 z-[700] bg-black/98 backdrop-blur-2xl flex flex-col p-2 sm:p-3 overflow-hidden animate-in fade-in duration-300">
             <div className="flex justify-between items-center mb-2 border-b-2 border-primary pb-2 shrink-0">
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -502,9 +510,9 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           >
             <div className="flex flex-col gap-1 sm:gap-2 flex-1 min-h-0 overflow-auto">
               <div className="shrink-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 text-center">
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none">{homeTeam.name}</span>
+                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none">{homeTeam?.name || homeTeam?.id || 'Home'}</span>
                 <div className="text-2xl sm:text-4xl md:text-5xl font-black text-accent drop-shadow-[0_0_20px_rgba(38,217,117,0.4)] tabular-nums">{currentHomeGoals} – {currentAwayGoals}</div>
-                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none">{awayTeam.name}</span>
+                <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none">{awayTeam?.name || awayTeam?.id || 'Away'}</span>
               </div>
               {isFinished && manOfTheMatch && (
                 <div className="shrink-0 pt-1 sm:pt-2 flex justify-center">

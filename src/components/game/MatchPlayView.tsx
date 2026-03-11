@@ -95,6 +95,9 @@ export function MatchPlayView({
     }
   };
 
+  const homeName = homeTeam?.name || homeTeam?.id || 'Home';
+  const awayName = awayTeam?.name || awayTeam?.id || 'Away';
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#080a0c] text-white overflow-hidden relative">
       {/* Background radial glow */}
@@ -145,12 +148,12 @@ export function MatchPlayView({
           <div className="relative flex items-center justify-between gap-2 sm:gap-4">
             {/* Home Side */}
             <div className="flex-1 flex items-center justify-end gap-2 sm:gap-3 min-w-0">
-              <span className="text-[14px] sm:text-[18px] font-black uppercase text-right tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{homeTeam.name}</span>
+              <span className="text-[14px] sm:text-[18px] font-black uppercase text-right tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{homeName}</span>
               <div 
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/10 flex items-center justify-center shadow-inner shrink-0"
                 style={{ backgroundColor: homeTeam.color }}
               >
-                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{homeTeam.name[0]}</span>
+                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{homeName[0]}</span>
               </div>
             </div>
 
@@ -174,9 +177,9 @@ export function MatchPlayView({
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/10 flex items-center justify-center shadow-inner shrink-0"
                 style={{ backgroundColor: awayKitColor }}
               >
-                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{awayTeam.name[0]}</span>
+                <span className="text-lg sm:text-xl font-black text-white/20 select-none">{awayName[0]}</span>
               </div>
-              <span className="text-[14px] sm:text-[18px] font-black uppercase text-left tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{awayTeam.name}</span>
+              <span className="text-[14px] sm:text-[18px] font-black uppercase text-left tracking-tight leading-tight truncate text-white lg:whitespace-normal lg:overflow-visible l-team">{awayName}</span>
             </div>
           </div>
         </div>
@@ -251,7 +254,7 @@ export function MatchPlayView({
           {/* Home Strength */}
           <div className="space-y-4">
             <h4 className="px-1 text-[12px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
-              <TrendingUp size={14} className="text-white/20" /> {homeTeam.name} Authority
+              <TrendingUp size={14} className="text-white/20" /> {homeName} Authority
             </h4>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
               <StrengthBar value={zones.home.DEF} label="Defense" icon={Shield} color={homeTeam.color} teamSide="home" />
@@ -267,7 +270,7 @@ export function MatchPlayView({
           {/* Away Strength */}
           <div className="space-y-4">
             <h4 className="px-1 text-[12px] font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2 md:justify-end">
-              {awayTeam.name} Authority <TrendingUp size={14} className="text-white/20 scale-x-[-1]" />
+              {awayName} Authority <TrendingUp size={14} className="text-white/20 scale-x-[-1]" />
             </h4>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
               <StrengthBar value={zones.away.DEF} label="Defense" icon={Shield} color={awayKitColor} teamSide="away" />

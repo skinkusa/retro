@@ -13,7 +13,7 @@ export interface MatchOverlayTemplateProps {
   /** Main content (lineups grid, or score + ratings, etc.). */
   children: ReactNode;
   /** Primary action button. */
-  primaryButton: { label: string; onClick: () => void };
+  primaryButton: { label: string; onClick: () => void; disabled?: boolean };
   /** Optional secondary button (e.g. Tactical Review). When set, uses half/full-time layout (mobile top row, desktop bottom row). */
   secondaryButton?: { label: string; onClick: () => void };
   /** Tailwind z-index class (e.g. z-[500], z-[600]). */
@@ -72,7 +72,8 @@ export function MatchOverlayTemplate({
           <div className="flex justify-center pt-4 pb-4 shrink-0">
             <Button
               onClick={primaryButton.onClick}
-              className="h-14 sm:h-16 px-12 sm:px-20 bg-accent text-accent-foreground font-black uppercase text-xl sm:text-2xl shadow-[8px_8px_0_0_rgba(38,217,117,0.3)] hover:scale-[1.05] transition-transform"
+              disabled={primaryButton.disabled}
+              className="h-14 sm:h-16 px-12 sm:px-20 bg-accent text-accent-foreground font-black uppercase text-xl sm:text-2xl shadow-[8px_8px_0_0_rgba(38,217,117,0.3)] hover:scale-[1.05] transition-transform disabled:opacity-60 disabled:pointer-events-none"
             >
               {primaryButton.label}
             </Button>
@@ -90,7 +91,8 @@ export function MatchOverlayTemplate({
             </Button>
             <Button
               onClick={primaryButton.onClick}
-              className="h-10 sm:h-14 max-[1300px]:h-20 w-full sm:w-auto font-black uppercase text-sm sm:text-lg max-[1300px]:text-[24px] bg-primary text-primary-foreground shadow-xl hover:scale-[1.02] transition-transform"
+              disabled={primaryButton.disabled}
+              className="h-10 sm:h-14 max-[1300px]:h-20 w-full sm:w-auto font-black uppercase text-sm sm:text-lg max-[1300px]:text-[24px] bg-primary text-primary-foreground shadow-xl hover:scale-[1.02] transition-transform disabled:opacity-60 disabled:pointer-events-none"
             >
               {primaryButton.label}
             </Button>
