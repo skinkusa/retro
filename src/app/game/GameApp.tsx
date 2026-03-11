@@ -121,8 +121,8 @@ function StartMenu() {
             <div className="max-h-[300px] max-[1300px]:max-h-[250px] overflow-auto border-4 border-primary/20 p-2 space-y-0.5 md:space-y-1 bg-black/40 backdrop-blur-sm rounded-2xl shadow-inner custom-scrollbar">
               {state.teams.filter(t => t.division === selectedDiv).map(t => (
                 <button key={t.id} onClick={() => setSelectedTeam(t.id)} className={`w-full text-left px-3 md:px-6 py-2 md:py-3 text-base md:text-xl border-4 border-transparent hover:bg-primary/20 transition-all flex justify-between items-center rounded-xl shadow-sm ${selectedTeam === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-black/20'}`}>
-                  <span className="font-black uppercase tracking-tight truncate max-w-[70%] max-[1300px]:text-[18px]">{t.name}</span>
-                  <span className="opacity-60 text-[12px] md:text-[16px] max-[1300px]:text-[14px] font-mono font-black shrink-0">REP: {t.reputation}</span>
+                  <span className="font-black uppercase tracking-tight truncate flex-1 min-w-0 max-[1300px]:text-[18px]">{t.name}</span>
+                  <span className="opacity-60 text-[12px] md:text-[16px] max-[1300px]:text-[14px] font-mono font-black shrink-0 ml-2">REP: {t.reputation}</span>
                 </button>
               ))}
             </div>
@@ -207,7 +207,7 @@ function GameContent() {
     if (d >= 1 && d <= 4) setViewingDiv(d);
   }, [state.isGameStarted, state.lastView]);
 
-  useEffect(() => { if (state.userTeamId && !state.lastView) { const ut = state.teams.find(t => t.id === state.userTeamId); if (ut) setViewingDiv(ut.division); }   }, [state.userTeamId, state.teams, state.lastView]);
+  useEffect(() => { if (state.userTeamId && !state.lastView) { const ut = state.teams.find(t => t.id === state.userTeamId); if (ut) setViewingDiv(ut.division); } }, [state.userTeamId, state.teams, state.lastView]);
 
   const goToTab = useCallback((tab: 'HUB' | 'SQUAD' | 'WORLD' | 'MARKET' | 'CLUB') => {
     setActiveTab(tab);
@@ -264,7 +264,7 @@ function GameContent() {
               <p className="text-lg text-white font-bold leading-tight uppercase tracking-tight opacity-90">The board has terminated your contract following a period of unacceptable results.</p>
               <div className="pt-4 border-t-2 border-white/10">
                 <p className="text-xs text-muted-foreground uppercase mb-4">You must find a new position to continue your career.</p>
-                <Button 
+                <Button
                   onClick={() => { goToTab('CLUB'); goToClubSubView('MANAGER'); }}
                   className="w-full h-16 bg-accent text-accent-foreground font-black text-xl uppercase tracking-widest rounded-xl shadow-2xl hover:scale-105 transition-transform"
                 >
@@ -294,9 +294,9 @@ function GameContent() {
                   return (
                     <div key={f.id} className={cn("flex items-center gap-2 sm:gap-3 p-3 sm:p-3 rounded-xl sm:rounded-xl border-2", isUserFixture ? "bg-accent/10 border-accent/50" : "bg-white/5 border-white/10")}>
                       <span className="w-12 text-center font-black text-muted-foreground tabular-nums text-base max-[1300px]:text-xl">{f.week}</span>
-                      <span className={cn("flex-1 font-black uppercase text-right truncate text-sm sm:text-base max-[1300px]:text-xl", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
+                      <span className={cn("flex-1 min-w-0 font-black uppercase text-right truncate text-sm sm:text-base max-[1300px]:text-xl", f.homeTeamId === userTeam.id && "text-accent")}>{home?.name}</span>
                       <span className="text-center font-black text-lg sm:text-lg w-10 sm:w-14 shrink-0 max-[1300px]:text-2xl">{f.result ? `${f.result.homeGoals}-${f.result.awayGoals}` : 'v'}</span>
-                      <span className={cn("flex-1 font-black uppercase text-left truncate text-sm sm:text-base max-[1300px]:text-xl", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
+                      <span className={cn("flex-1 min-w-0 font-black uppercase text-left truncate text-sm sm:text-base max-[1300px]:text-xl", f.awayTeamId === userTeam.id && "text-accent")}>{away?.name}</span>
                       {isUserFixture && !f.result && (
                         <Button onClick={() => { startMatch(f.id); setShowMatchDayScreen(false); }} disabled={!isLineupValid} className="h-10 sm:h-10 px-4 sm:px-4 text-base sm:text-base bg-accent text-accent-foreground font-black uppercase shrink-0 rounded-lg sm:rounded-lg hover:scale-105 transition-transform"><PlayCircle size={18} className="mr-1.5 sm:mr-1.5" /> Play</Button>
                       )}
@@ -346,7 +346,7 @@ function GameContent() {
               <div className="space-y-2 max-[1300px]:space-y-4">
                 {state.teams.filter(t => t.division === userTeam.division).slice(0, 3).map((t, i) => (
                   <div key={t.id} className={`flex justify-between items-center py-2 px-4 max-[1300px]:py-3 max-[1300px]:px-6 rounded-xl border ${t.id === userTeam.id ? 'bg-accent/10 border-accent text-accent font-black' : 'bg-black/20 border-white/5'}`}>
-                    <span className="text-[16px] max-[1300px]:text-[18px] uppercase font-black truncate min-w-0">{i + 1}. {t.name}</span>
+                    <span className="text-[16px] max-[1300px]:text-[18px] uppercase font-black truncate min-w-0 flex-1">{i + 1}. {t.name}</span>
                     <span className="font-black text-[16px] max-[1300px]:text-[18px] whitespace-nowrap shrink-0 ml-4">{t.points} PTS</span>
                   </div>
                 ))}
@@ -360,11 +360,11 @@ function GameContent() {
               {nextFixture ? (
                 <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-4 md:gap-10">
                   <div className="flex-1 flex justify-center items-center gap-4 sm:gap-4 md:gap-6 min-w-0 py-2 sm:py-1">
-                    <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-black uppercase text-white truncate text-right flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
+                    <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-black uppercase text-white truncate text-right flex-1 min-w-0 tracking-tighter">{state.teams.find(t => t.id === nextFixture.homeTeamId)?.name}</span>
                     <div className="bg-primary/20 px-3 py-1 sm:px-3 sm:py-1 md:px-4 md:py-1.5 rounded-lg sm:rounded-lg md:rounded-xl border border-primary/40 sm:border-2 font-black text-primary text-sm sm:text-sm md:text-base shrink-0">VS</div>
-                    <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-black uppercase text-white truncate text-left flex-1 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
+                    <span className="text-base sm:text-lg md:text-xl lg:text-3xl font-black uppercase text-white truncate text-left flex-1 min-w-0 tracking-tighter">{state.teams.find(t => t.id === nextFixture.awayTeamId)?.name}</span>
                   </div>
-                  <Button onClick={() => setShowMatchDayScreen(true)} disabled={!isLineupValid} className="w-full sm:w-auto sm:max-w-[25%] md:w-56 md:max-w-none h-12 sm:h-9 md:h-14 max-[1300px]:h-24 bg-accent text-accent-foreground retro-button font-black text-base md:text-xl max-[1300px]:text-[28px] rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl hover:scale-[1.05] transition-transform animate-pulse shrink-0 px-4 md:px-4"><PlayCircle size={24} className="mr-2 md:mr-2 w-6 h-6 md:w-8 md:h-8 shrink-0 inline-block md:block" /> PLAY MATCH</Button>
+                  <Button onClick={() => startMatch(nextFixture.id)} disabled={!isLineupValid} className="w-full sm:w-auto sm:max-w-[25%] md:w-56 md:max-w-none h-12 sm:h-9 md:h-14 max-[1300px]:h-24 bg-accent text-accent-foreground retro-button font-black text-base md:text-xl max-[1300px]:text-[28px] rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl hover:scale-[1.05] transition-transform animate-pulse shrink-0 px-4 md:px-4"><PlayCircle size={24} className="mr-2 md:mr-2 w-6 h-6 md:w-8 md:h-8 shrink-0 inline-block md:block" /> PLAY MATCH</Button>
                 </div>
               ) : <div className="text-base sm:text-xl max-[1300px]:text-3xl font-black text-muted-foreground uppercase italic py-4 sm:py-8 tracking-[0.3em]">Season Concluded</div>}
             </div>
@@ -372,18 +372,18 @@ function GameContent() {
               <h3 className="text-[14px] max-[1300px]:text-[20px] font-black text-primary uppercase mb-3 border-b-2 border-primary/10 pb-1.5">Weekly Headlines</h3>
               <div className="headlines-scroll space-y-3 max-[1300px]:space-y-5 max-h-[220px] max-[1300px]:max-h-[400px] overflow-auto custom-scrollbar pr-2">
                 {currentWeekNews.length > 0 ? currentWeekNews.map(m => {
-                const bid = m.bidId ? state.transferMarket.incomingBids.find(b => b.id === m.bidId) : null;
-                const offerPlayer = bid ? state.players.find(p => p.id === bid.playerId) : null;
-                return (
-                  <div key={m.id} className="p-4 max-[1300px]:p-6 border-l-8 border-primary bg-primary/10 rounded-r-2xl">
-                    <span className="font-black block text-primary uppercase mb-1 text-[18px] max-[1300px]:text-[24px] italic underline">{m.title}</span>
-                    <span className="text-white text-[16px] max-[1300px]:text-[20px] font-bold leading-tight line-clamp-3">{getMessageDisplayContent(m, id => state.teams.find(t => t.id === id)?.name ?? 'Unknown')}</span>
-                    {offerPlayer && (
-                      <Button onClick={(e) => { e.stopPropagation(); setViewingPlayer(offerPlayer); setOpenToTab('contract'); }} variant="outline" size="sm" className="mt-2 h-9 max-[1300px]:h-12 text-[11px] max-[1300px]:text-[16px] font-black uppercase border-primary/50 bg-primary/10 hover:bg-primary/30 text-primary rounded-lg">View contract</Button>
-                    )}
-                  </div>
-                );
-              }) : <div className="text-center py-12 text-muted-foreground uppercase font-black opacity-40 italic tracking-[0.2em] max-[1300px]:text-xl">Silent week in the football world.</div>}
+                  const bid = m.bidId ? state.transferMarket.incomingBids.find(b => b.id === m.bidId) : null;
+                  const offerPlayer = bid ? state.players.find(p => p.id === bid.playerId) : null;
+                  return (
+                    <div key={m.id} className="p-4 max-[1300px]:p-6 border-l-8 border-primary bg-primary/10 rounded-r-2xl">
+                      <span className="font-black block text-primary uppercase mb-1 text-[18px] max-[1300px]:text-[24px] italic underline">{m.title}</span>
+                      <span className="text-white text-[16px] max-[1300px]:text-[20px] font-bold leading-tight line-clamp-3">{getMessageDisplayContent(m, id => state.teams.find(t => t.id === id)?.name ?? 'Unknown')}</span>
+                      {offerPlayer && (
+                        <Button onClick={(e) => { e.stopPropagation(); setViewingPlayer(offerPlayer); setOpenToTab('contract'); }} variant="outline" size="sm" className="mt-2 h-9 max-[1300px]:h-12 text-[11px] max-[1300px]:text-[16px] font-black uppercase border-primary/50 bg-primary/10 hover:bg-primary/30 text-primary rounded-lg">View contract</Button>
+                      )}
+                    </div>
+                  );
+                }) : <div className="text-center py-12 text-muted-foreground uppercase font-black opacity-40 italic tracking-[0.2em] max-[1300px]:text-xl">Silent week in the football world.</div>}
               </div>
             </div>
           </div>
