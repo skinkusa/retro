@@ -20,6 +20,11 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run test",
     "sim:stats": "npx tsx scripts/sim-stats.ts",
+    "test:sim": "npx tsx tests/season-simulation.ts",
+    "test:finance": "npx tsx tests/financial-stability.ts",
+    "test:fixture": "npx tsx tests/fixture-integrity.ts",
+    "test:bench": "npx tsx tests/engine-bench.ts",
+    "test:all-sim": "npm run test:sim && npm run test:finance && npm run test:fixture && npm run test:bench",
     "test:watch": "vitest"
   },
   "dependencies": {

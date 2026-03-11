@@ -24,8 +24,11 @@ export interface MatchPlayViewProps {
   playbackSpeed: 1 | 2;
   onSpeedToggle: () => void;
   onPause: () => void;
+  onFlashResult: () => void;
   getPlayerName: (id: string) => string;
   allEvents: MatchEvent[];
+  isHalfTime: boolean;
+  onTeamTalk: (talk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE') => void;
 }
 
 export function MatchPlayView({
@@ -46,8 +49,11 @@ export function MatchPlayView({
   playbackSpeed,
   onSpeedToggle,
   onPause,
+  onFlashResult,
   getPlayerName,
   allEvents,
+  isHalfTime,
+  onTeamTalk,
 }: MatchPlayViewProps) {
 
   const filteredFeed = useMemo(() => {
@@ -112,6 +118,13 @@ export function MatchPlayView({
             )}
           >
             ×{playbackSpeed}
+          </Button>
+          <Button
+            onClick={onFlashResult}
+            className="h-11 px-5 rounded-xl bg-accent/10 border-2 border-accent/40 text-accent hover:bg-accent hover:text-accent-foreground font-black transition-all shadow-[0_4px_15px_rgba(38,217,117,0.2)] flex items-center gap-2"
+          >
+            <Zap size={18} fill="currentColor" />
+            <span className="hidden sm:inline uppercase tracking-widest text-[14px]">Flash</span>
           </Button>
           <Button
             onClick={onPause}
@@ -267,6 +280,44 @@ export function MatchPlayView({
             </div>
           </div>
         </div>
+
+      {/* 7. HALF TIME OVERLAY */}
+      {isHalfTime && (
+        <div className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-500">
+          <div className="w-full max-w-lg space-y-8">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-black text-primary tracking-widest uppercase">Half Time Talk</h2>
+              <p className="text-white/60 text-sm font-bold uppercase tracking-widest italic">The lads are waiting in the dressing room...</p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              <Button 
+                onClick={() => onTeamTalk('ENCOURAGE')}
+                className="h-20 bg-primary/10 border-2 border-primary/40 hover:bg-primary hover:text-primary-foreground flex flex-col items-center justify-center gap-1 rounded-2xl group transition-all"
+              >
+                <span className="text-xl font-black uppercase">Encourage</span>
+                <span className="text-[10px] opacity-60 font-bold uppercase group-hover:opacity-100 transition-opacity">&ldquo;You&apos;re doing great, keep it up!&rdquo;</span>
+              </Button>
+              
+              <Button 
+                onClick={() => onTeamTalk('CALM')}
+                className="h-20 bg-white/5 border-2 border-white/20 hover:bg-white hover:text-black flex flex-col items-center justify-center gap-1 rounded-2xl group transition-all"
+              >
+                <span className="text-xl font-black uppercase">Calm</span>
+                <span className="text-[10px] opacity-60 font-bold uppercase group-hover:opacity-100 transition-opacity">&ldquo;Stay focused, stick to the plan.&rdquo;</span>
+              </Button>
+              
+              <Button 
+                onClick={() => onTeamTalk('AGGRESSIVE')}
+                className="h-20 bg-red-500/10 border-2 border-red-500/40 hover:bg-red-500 hover:text-white flex flex-col items-center justify-center gap-1 rounded-2xl group transition-all"
+              >
+                <span className="text-xl font-black uppercase">Aggressive</span>
+                <span className="text-[10px] opacity-60 font-bold uppercase group-hover:opacity-100 transition-opacity">&ldquo;I want more effort in the second half!&rdquo;</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       </div>
     </div>

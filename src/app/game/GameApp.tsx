@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Toaster } from '@/components/ui/toaster';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
-import { LayoutDashboard, Users, Trophy, PlayCircle, Search, Briefcase, DollarSign, UserCircle, Globe2, Save, FileUp, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, PlayCircle, Search, Briefcase, DollarSign, UserCircle, Globe2, Save, FileUp, Settings, LogOut, ShieldAlert, History, FileText } from 'lucide-react';
 import { Team, Player, PlayStyle, ManagerPersonality } from '@/types/game';
 import { formatMoney, cn, getMessageDisplayContent } from '@/lib/utils';
 import { STORAGE_KEY } from '@/lib/constants';
@@ -253,6 +253,28 @@ function GameContent() {
 
   return (
     <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
+      {state.isFired && (
+        <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 animate-in fade-in duration-500">
+          <RetroWindow title="TERMINATION OF CONTRACT" className="max-w-xl w-full border-red-500/50 shadow-[0_0_50px_rgba(239,68,68,0.3)] bg-black/90">
+            <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto border-4 border-red-500 animate-pulse">
+                <ShieldAlert size={40} className="text-red-500" />
+              </div>
+              <h2 className="text-3xl font-black text-red-500 uppercase tracking-tighter italic">You have been sacked!</h2>
+              <p className="text-lg text-white font-bold leading-tight uppercase tracking-tight opacity-90">The board has terminated your contract following a period of unacceptable results.</p>
+              <div className="pt-4 border-t-2 border-white/10">
+                <p className="text-xs text-muted-foreground uppercase mb-4">You must find a new position to continue your career.</p>
+                <Button 
+                  onClick={() => { goToTab('CLUB'); goToClubSubView('MANAGER'); }}
+                  className="w-full h-16 bg-accent text-accent-foreground font-black text-xl uppercase tracking-widest rounded-xl shadow-2xl hover:scale-105 transition-transform"
+                >
+                  Enter Job Market
+                </Button>
+              </div>
+            </div>
+          </RetroWindow>
+        </div>
+      )}
       {showMatchDayScreen && (
         <div className="match-day-overlay fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col items-stretch p-0 animate-in fade-in duration-200">
           <div className="match-day-modal w-full max-w-3xl max-h-[100vh] flex flex-col bg-black/80 border-2 sm:border-4 border-primary/40 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden mx-auto sm:my-auto">
@@ -414,6 +436,10 @@ function GameContent() {
                 <button onClick={() => goToClubSubView('RECORDS')} className="retro-tile flex flex-col items-center justify-center gap-6 max-[1300px]:gap-4 py-16 max-[1300px]:py-10 hover:bg-yellow-500/20 bg-black/40 border-2 border-primary/30 rounded-3xl transition-all shadow-2xl group"><Trophy size={72} className="text-yellow-500 max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-2xl max-[1300px]:text-[22px] font-black uppercase text-white">Legacy & Records</span></button>
                 <button onClick={() => goToClubSubView('SETTINGS')} className="retro-tile flex flex-col items-center justify-center gap-6 max-[1300px]:gap-4 py-16 max-[1300px]:py-10 border-2 border-white/10 hover:bg-white/10 bg-black/40 rounded-3xl transition-all shadow-2xl group"><Settings size={72} className="text-muted-foreground max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-2xl max-[1300px]:text-[22px] font-black uppercase text-white">OS Config</span></button>
                 <button onClick={saveGame} className="retro-tile flex flex-col items-center justify-center gap-6 max-[1300px]:gap-4 py-16 max-[1300px]:py-10 border-4 border-accent/40 bg-accent/5 hover:bg-accent/20 rounded-3xl transition-all shadow-2xl group"><Save size={72} className="text-accent group-hover:animate-bounce max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-2xl max-[1300px]:text-[22px] font-black uppercase text-white">Commit Save</span></button>
+                <Link href="/changelog" className="retro-tile flex flex-col items-center justify-center gap-6 max-[1300px]:gap-4 py-16 max-[1300px]:py-10 border-2 border-primary/20 hover:bg-primary/10 bg-black/40 rounded-3xl transition-all shadow-2xl group">
+                  <History size={72} className="text-primary/60 group-hover:scale-110 transition-transform max-[1300px]:w-14 max-[1300px]:h-14" />
+                  <span className="text-2xl max-[1300px]:text-[22px] font-black uppercase text-white">System Logs</span>
+                </Link>
                 <button onClick={quitToMainMenu} className="retro-tile flex flex-col items-center justify-center gap-6 max-[1300px]:gap-4 py-16 max-[1300px]:py-10 border-2 border-white/20 hover:bg-red-500/20 bg-black/40 rounded-3xl transition-all shadow-2xl group"><LogOut size={72} className="text-white/80 group-hover:text-red-400 transition-colors max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-2xl max-[1300px]:text-[22px] font-black uppercase text-white">Quit to Main Menu</span></button>
               </div>
             ) : (

@@ -58,6 +58,8 @@ export interface Player {
   contractYears: number;
   clubId: string | null;
   condition: number;
+  recentForm: number[];
+  developmentPoints: number;
   status: 'FIT' | 'INJURED' | 'SUSPENDED' | 'TRANSFER_LISTED';
   isListed: boolean;
   isShortlisted?: boolean;
@@ -122,6 +124,11 @@ export interface Team {
     transfersOut: number;
     taxPaid: number;
   };
+  stadiumExpansion?: {
+    targetCapacity: number;
+    weeksRemaining: number;
+    cost: number;
+  } | null;
 }
 
 export interface Fixture {
@@ -146,6 +153,12 @@ export interface Fixture {
     /** Shots on target (subset of shots; goals only from these). */
     homeShotsOnTarget?: number;
     awayShotsOnTarget?: number;
+    homeCorners?: number;
+    awayCorners?: number;
+    homeFouls?: number;
+    awayFouls?: number;
+    homeOffsides?: number;
+    awayOffsides?: number;
     attendance: number;
     events: MatchEvent[];
     /** Player ID per shot taken (for season stats). */
@@ -157,11 +170,17 @@ export interface Fixture {
     cards: Array<{playerId: string, type: 'YELLOW' | 'RED', minute: number}>;
     injuries: Array<{playerId: string, type: string, weeks: number}>;
   };
+  teamTalks?: {
+    home?: TeamTalk;
+    away?: TeamTalk;
+  };
 }
+
+export type TeamTalk = 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE';
 
 export interface MatchEvent {
   minute: number;
-  type: 'GOAL' | 'YELLOW' | 'RED' | 'INJURY' | 'COMMENTARY' | 'PENALTY_SHOOTOUT' | 'SUB';
+  type: 'GOAL' | 'YELLOW' | 'RED' | 'INJURY' | 'COMMENTARY' | 'PENALTY_SHOOTOUT' | 'SUB' | 'CORNER' | 'FOUL' | 'OFFSIDE';
   teamId?: string;
   playerId?: string;
   subPlayerId?: string;

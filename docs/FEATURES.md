@@ -1,138 +1,41 @@
-# Retro Manager – Feature List
+# Retro Manager 1993 - Feature List
 
-A full list of current features by area. (Version 1.9.3.)
+## 🏟️ Match Engine & Tactics
+- **Hybrid Real-Time Simulation**: Watch matches unfold minute-by-minute with a dynamic commentary feed.
+- **Zone Authority System**: Squad performance is calculated via Defense, Midfield, and Attack strengths.
+- **Interactive Management**: 
+  - **Tactical Adjustments**: Change playstyle (Tiki-Taka, Long Ball, etc.) and formation on the fly.
+  - **Substitutions**: Swap players mid-match to refresh tired legs or adapt to injuries/red cards.
+  - **Half-Time Team Talks**: Influence player mentality with Encouraging, Calm, or Aggressive locker room talks.
+- **Flash Result**: Skip to the full-time whistle instantly for faster seasons.
 
----
+## 📈 Player Depth & Evolution
+- **Dynamic Attributes**: Players possess Pace, Stamina, Skill, Shooting, Passing, Heading, and more.
+- **Mental Traits**: Hidden professional personality, consistency, and injury proneness (revealed by scouts).
+- **Recent Form**: Match engine performance modifiers based on the last 5 match ratings.
+- **Aging & Potential**:
+  - **Wonderkids**: Young players (<23) improve rapidly based on potential and staff quality.
+  - **Peak Performance**: Physical prime between 23-30.
+  - **Decline**: Veterans (>31) face physical regression in pace and stamina.
+- **Match Sharpness**: Condition recovers through game time; lack of sharpness penalizes performance.
 
-## Start / Career
+## 🏛️ Club Management
+- **80 Teams / 4 Divisions**: Full league pyramid with promotion, relegation, and cup entrants.
+- **Staff System**: Hire and fire Coaches, Physios, and Scouts to boost recovery, development, and talent identification.
+- **Board Confidence**: Your job security depends on results and financial stability.
+- **Job Market**: Get sacked if confidence drops too low, then apply for new roles to continue your career.
 
-- **New career** – Enter manager name, choose management philosophy (Analyst, Motivator, Economist, Maverick, Celebrity), pick division and club, set season year (Database Editor), then start.
-- **Continue career** – Load saved game from localStorage when a save exists.
-- **Database Editor** – Adjust season year and edit team names before or outside a career.
-- **Manager philosophy** – Each personality has a gameplay effect (e.g. Analyst +5% zone strength, Economist −10% wages, Maverick +15% goal probability).
+## 💸 Economy & Infrastructure
+- **Comprehensive Finances**: Track Gate Receipts, Merchandise, Wages, Transfer Spend, and Taxes.
+- **Dynamic Transfer Market**:
+  - **Negotiations**: Active bidding for players with patience scales and wage demands.
+  - **Transfer Windows**: Strict deadlines restrict movement outside of designated periods.
+  - **Shortlisting**: Track targets and scout potential acquisitions.
+- **Stadium Expansion**: Reinvest profits into Small (+2k), Medium (+6k), or Large (+15k) stadium upgrades to boost long-term revenue.
 
----
-
-## Main navigation (tabs)
-
-- **Dashboard (Hub)** – News, next fixture, league snapshot, play match entry point.
-- **Team (Squad)** – Squad selection and Tactical Hub (pitch + strategy).
-- **World** – Standings, Player Stats, Fixtures (all divisions).
-- **Market** – Transfer database (search, filters, shortlist).
-- **Office (Club)** – Manager profile, Finance, Staff, Records, OS Config, Save, Quit to main menu.
-
----
-
-## Hub (Dashboard)
-
-- **League snapshot** – Top of table for user’s division (team names + points).
-- **Next Fixture Intel** – Current week, home vs away, and **PLAY MATCH** (opens Match Day screen).
-- **Match Day screen** – Overlay listing all fixtures for the current week in your division; your fixture has a **Play** button (requires valid lineup). Back to return to hub.
-- **Weekly Headlines** – Current-week messages (transfers, bids, results, etc.) with “View contract” where relevant.
-
----
-
-## Squad
-
-- **Squad Selection**
-  - Position filter (All, GK, DF, MF, FW, DM).
-  - XI/Subs counts (0/11 XI, 0/5 SUBS), **CLEAR** and **AUTO XI**.
-  - “Assign to” row: empty-slot checkboxes (formation labels + S1–S5) to assign a selected player to a specific slot.
-  - Player table: checkbox to toggle lineup or assign to pinned slot, position, morale, fitness, skill, profile button. Row click swaps two players (when not in match view).
-  - Swap mode hint bar when a swap is in progress.
-  - Players grouped as starters, bench (by lineup order), reserves.
-- **Tactical Hub**
-  - **Pitch** – Formation view with draggable/clickable players; click to swap, profile icon to open player.
-  - **Strategy** – Formation (4-4-2, 4-3-3, 3-5-2, 5-3-2, 4-5-1) and team mentality (Long Ball, Pass to Feet, Counter-Attack, Tiki-Taka, Direct, Park the Bus).
-
----
-
-## World
-
-- **Division selector** – DIV 1–4.
-- **Standings** – League table (P, W, D, L, GD, Pts), form indicators, qualification styling. Team name click opens **Team Roster**.
-- **Player Stats** – Top scorers, best average ratings (min 3 apps), disciplinary table, season stats; row click opens **Player Profile**.
-- **Fixtures** – All division fixtures (week, home, result/v, away). **Play** button on the user’s current-week unplayed fixture when lineup is valid.
-
----
-
-## Market (Transfers)
-
-- **Global Transfer Database** – Search and filters (position, age range, skill).
-- **Shortlist** – Toggle per player; shortlist tab to view and act on shortlisted players.
-- **Scout search** – Timed search with toast when “ready”.
-- **Player rows** – Open **Player Profile** (buy, shortlist, transfer list, contract).
-
----
-
-## Player Profile (modal)
-
-- **Overview** – Name, age, position, value, wage, contract, fitness, morale, attributes (pace, stamina, skill, shooting, passing, heading, influence, goalkeeping, consistency, etc.), season stats (apps, goals, avg rating, cards).
-- **Contract** – Renew (years, wage, patience), transfer list toggle. If there’s an incoming bid: accept/reject. If not your player: **Buy** (when budget allows).
-- **History** – Season-by-season apps, goals, avg rating, club name.
-
----
-
-## Team Roster (modal)
-
-- Lists a selected team’s squad (e.g. from standings click).
-- Position filter, sort by skill.
-- Row click opens **Player Profile**. Dismiss profile / roster actions.
-
----
-
-## Club (Office)
-
-- **Main Office** – Tiles: Manager Profile, Financial Hub, Staff Management, Legacy & Records, OS Config, Commit Save, Quit to Main Menu.
-- **Manager Profile** – Philosophy description, career stats (games, wins, win %), board confidence and expectation, job market (vacancies and apply).
-- **Financial Hub** – Season finances (gate, merchandise, wages, transfers, tax), net balance, board message.
-- **Staff Management** – Current staff (hire/fire), staff applicants (hire with toast).
-- **Legacy & Records** – Biggest win/loss, record transfer in/out.
-- **OS Config (Settings)** – Season year, fast-forward season button, global team name editor.
-- **Commit Save** – Persist career to localStorage.
-- **Quit to Main Menu** – Return to start screen (no save prompt).
-
----
-
-## Match (MatchSim)
-
-- **Pre-match** – Official lineups (home/away), Kick Off.
-- **In-match**
-  - Competition and stadium in header.
-  - Live commentary bar (team-coloured text).
-  - **×1 / ×2** speed toggle and **PAUSE**.
-  - Score and minute; shots and scorers per team; cards (yellow/red) per team.
-  - Zone strength bars (DEF / MID / ATT) for both teams.
-  - Possession bar.
-- **Events**
-  - **Goal** – Flashing goal banner (scorer, minute, team colour), 3s pause, commentary.
-  - **Red card** – Pause and commentary; player removed from sim; card shown in sidebar.
-  - **Injury** – Pause and open **Tactical Command Center** with “Player injured – make a substitution” hint; user can change personnel then **Apply & Resume**.
-- **Pause (Tactical Command Center)** – Tabs: Tactics (pitch + bench, swap players), Strategy (formation, mentality), Personnel (squad list with ratings). **Apply & Resume** to continue.
-- **Half-time / Full-time** – Overlay with score, Man of the Match (full-time), summary ratings for both teams, **Tactical Review** or **Kick Off Second Half** / **Back to Hub**.
-
----
-
-## Match engine (under the hood)
-
-- **Formations** – 4-4-2, 4-3-3, 3-5-2, 5-3-2, 4-5-1 with zone strengths (DEF/MID/ATT).
-- **Play styles** – Affect chance probability and conversion (e.g. Tiki-Taka conversion bonus, Park the Bus defensive mod).
-- **Events** – Goals, yellow/red cards (second yellow = red), injuries (minor/moderate/serious). Red-carded and injured players removed from play.
-- **Outputs** – Goals, shots, shots on target, chances, ratings, scorers, cards, injuries; applied to table and player stats.
-
----
-
-## Data and persistence
-
-- **Save** – Full game state to localStorage (teams, players, fixtures, manager, week, season, messages, transfer market, etc.).
-- **Load** – Restore from save; team name overrides from separate key.
-- **Season flow** – Advance week after match; season summary at end of season; next season with promotions/relegations and roll of honour.
-
----
-
-## UI and polish
-
-- **Retro styling** – Mono font, primary/accent colours, retro windows and buttons.
-- **Toasts** – Feedback for transfers, staff, saves, errors.
-- **Tooltips** – On nav and key controls.
-- **Responsive layout** – Tabs and content adapt to smaller screens.
+## 📱 User Interface
+- **Retro Aesthetic**: Modern functionality with a classic 90s football manager inspired design.
+- **Dense Mobile Optimization**: High-information density layouts optimized for readability on all devices.
+- **News Feed**: Stay updated with league results, sackings, and major transfer news.
+- **Statistical Hub**: Full league tables, top scorers, and team records.
+- **Save System**: Automatic saving with LZ compression to preserve your career across sessions.

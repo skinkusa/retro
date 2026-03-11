@@ -237,11 +237,50 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                         </div>
                       </div>
                     )}
+                    {/* Recent Form Display */}
+                    <div className="bg-black/40 p-2 max-[1300px]:p-3 border border-primary/20 rounded-lg shrink-0 mt-1">
+                      <h4 className="text-[10px] max-[1300px]:text-[14px] font-black text-primary uppercase border-b border-primary/10 pb-1 mb-1.5 flex justify-between items-center">
+                        <div className="flex items-center gap-1.5">
+                          <span>Recent Form</span>
+                          <Tooltip>
+                            <TooltipTrigger><Info size={10} className="text-muted-foreground" /></TooltipTrigger>
+                            <TooltipContent className="max-w-[200px] text-[10px]">Average of the last 5 match ratings. High form provides a morale and performance boost.</TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <TrendingUp size={12} className="opacity-50" />
+                      </h4>
+                      <div className="flex gap-1.5">
+                        {player.recentForm?.length > 0 ? (
+                          player.recentForm.map((rating, i) => (
+                            <div key={i} className={cn(
+                              "flex-1 text-center py-1 rounded text-[11px] font-black",
+                              rating >= 7.5 ? "bg-accent/20 text-accent border border-accent/30" :
+                              rating >= 6.5 ? "bg-primary/20 text-primary border border-primary/30" :
+                              "bg-red-500/20 text-red-500 border border-red-500/30"
+                            )}>
+                              {rating.toFixed(1)}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-[10px] text-muted-foreground italic">No recent matches</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div className="bg-primary/5 border border-primary/20 p-2 max-[1300px]:p-3 rounded-lg shrink-0 lg:shrink flex flex-col gap-2">
                     <h4 className="text-[10px] max-[1300px]:text-[14px] font-black text-primary uppercase border-b border-primary/10 pb-1">Availability</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                       <div className="space-y-0.5"><span className="text-[9px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-bold">Fitness</span><div className="text-base max-[1300px]:text-xl font-black text-white">{player.fitness}%</div></div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-bold">Sharpness</span>
+                          <Tooltip>
+                            <TooltipTrigger><Info size={10} className="text-muted-foreground" /></TooltipTrigger>
+                            <TooltipContent className="max-w-[200px] text-[10px]">Physical readiness for competitive play. Sharpness decays without game time and penalizes attributes if below 80%.</TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <div className={cn("text-base max-[1300px]:text-xl font-black", player.condition >= 80 ? "text-cyan" : "text-orange-500")}>{player.condition}%</div>
+                      </div>
                       <div className="space-y-0.5"><span className="text-[9px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-bold">Status</span><div className={cn("text-base max-[1300px]:text-xl font-black", player.status === 'FIT' ? "text-accent" : "text-red-500")}>{player.status.toUpperCase()}</div></div>
                     </div>
                     {player.injury && (
@@ -388,18 +427,43 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                      <Button onClick={handleNegotiate} disabled={patience <= 0} className="w-full bg-primary text-primary-foreground font-black retro-button h-10 max-[1300px]:h-12 uppercase text-[11px] max-[1300px]:text-[14px] shadow-lg">
                        <Clock size={16} className="mr-1.5 max-[1300px]:w-4 max-[1300px]:h-4" /> SUBMIT OFFER
                      </Button>
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="report" className="mt-0">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 max-[1300px]:gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 max-[1300px]:gap-3">
                   <div className="bg-primary/10 p-3 max-[1300px]:p-4 border border-primary/30 flex flex-col items-center gap-2 max-[1300px]:gap-3 rounded-lg shadow-sm">
                     <div className="text-[11px] max-[1300px]:text-[14px] text-primary font-black uppercase tracking-tight border-b border-primary/10 w-full text-center pb-1">Scout Conclusion</div>
                     <div className="text-base max-[1300px]:text-xl font-black text-white uppercase italic text-center leading-tight">{getPotentialHint()}</div>
                     <div className="bg-black/40 px-3 py-1 max-[1300px]:py-2 text-[10px] max-[1300px]:text-[14px] font-black text-accent uppercase tracking-tighter border border-accent/20 rounded">
                       Best Role: {getPositionLabel(player.position)}
                     </div>
+                  </div>
+
+                  <div className="bg-black/60 p-3 max-[1300px]:p-4 border border-primary/20 space-y-2 max-[1300px]:space-y-3 rounded-lg shadow-inner">
+                    <div className="flex items-center gap-1.5 border-b border-primary/20 pb-1">
+                      <TrendingUp size={18} className="text-primary max-[1300px]:w-5 max-[1300px]:h-5" />
+                      <span className="text-[11px] max-[1300px]:text-[14px] font-black text-primary uppercase tracking-tight">Development</span>
+                    </div>
+                    {scout ? (
+                      <div className="space-y-2 max-[1300px]:space-y-3">
+                         <div className="flex justify-between items-center">
+                            <span className="text-[11px] max-[1300px]:text-[14px] uppercase font-black text-muted-foreground">Progression:</span>
+                            <div className="flex-1 max-w-[100px] h-2 bg-black/40 rounded-full mx-3 overflow-hidden border border-white/5">
+                               <div 
+                                className="h-full bg-accent transition-all duration-500" 
+                                style={{ width: `${Math.min(100, (player.developmentPoints / 150) * 100)}%` }} 
+                               />
+                            </div>
+                            <span className="text-[11px] max-[1300px]:text-[14px] font-black text-white">{Math.min(100, Math.floor((player.developmentPoints / 150) * 100))}%</span>
+                         </div>
+                         <p className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground italic leading-tight uppercase font-black">
+                            {player.age < 23 ? "Great growth potential." : 
+                             player.age >= 31 ? "Physical decline with age." :
+                             "Reached peak performance."}
+                         </p>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] max-[1300px]:text-[14px] text-muted-foreground font-black italic text-center py-4 max-[1300px]:py-6 opacity-40">
+                        HIRE SCOUT
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-black/60 p-3 max-[1300px]:p-4 border border-primary/20 space-y-2 max-[1300px]:space-y-3 rounded-lg shadow-inner">
@@ -427,6 +491,9 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                         HIRE SCOUT
                       </div>
                     )}
+                  </div>
+                </div>
+                 )}
                   </div>
                 </div>
 

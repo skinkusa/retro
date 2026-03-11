@@ -25,6 +25,16 @@ export interface MatchEngineConfig {
   shotProbabilityFromThreat: number;
   /** Probability a shot is on target (rest = miss). */
   sotProbabilityFromShot: number;
+  /** Goal probability multiplier to reach 1.2-1.4 PPG. */
+  goalScoringOverallScale: number;
+
+  // —— Set Pieces, Fouls & Offsides (benchmarks.md: Corners ~5, Fouls ~11, Offsides ~2) ——
+  /** Probability per minute that a corner is awarded. */
+  cornerProbabilityPerMinute: number;
+  /** Probability per minute that a foul (non-card) occurs. */
+  foulProbabilityPerMinute: number;
+  /** Probability per minute that an offside occurs. */
+  offsideProbabilityPerMinute: number;
 
   // —— Cards (stats.md: 2–6 yellows, 3–4 average; reds in ~10–20% of matches) ——
   /** Probability per minute that a disciplinary (card) check occurs. */
@@ -55,13 +65,18 @@ export interface MatchEngineConfig {
 export const DEFAULT_ENGINE_CONFIG: MatchEngineConfig = {
   chanceProbabilityBase: 0.35,
   chanceMidScale: 2500,
-  chanceProbabilityMin: 0.12,
+  chanceProbabilityMin: 0.11,
   chanceProbabilityMax: 0.48,
-  conversionMultiplier: 1.02,
+  conversionMultiplier: 1.05,
   goalProbabilityMin: 0.08,
   goalProbabilityMax: 0.30,
   shotProbabilityFromThreat: 0.72,
   sotProbabilityFromShot: 0.38,
+  goalScoringOverallScale: 1.38,
+
+  cornerProbabilityPerMinute: 0.12,
+  foulProbabilityPerMinute: 0.26,
+  offsideProbabilityPerMinute: 0.11,
 
   cardCheckPerMinute: 0.038,
   directRedProbability: 0.06,
@@ -89,4 +104,7 @@ export const ARCADE_ENGINE_CONFIG: Partial<MatchEngineConfig> = {
   directRedProbability: 0.12,
   injuryCheckPerMinute: 0.001,
   penaltyShootoutConversion: 0.85,
+  cornerProbabilityPerMinute: 0.07,
+  foulProbabilityPerMinute: 0.15,
+  offsideProbabilityPerMinute: 0.03,
 };

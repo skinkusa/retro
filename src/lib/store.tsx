@@ -2,8 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData, LastView } from '@/types/game';
-import { generateInitialData, generateFixtures } from '@/lib/game-data';
-import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes } from '@/lib/game-engine';
+import { generateInitialData, generateFixtures, generatePlayer } from '@/lib/game-data';
+import { performSeasonTransition } from '@/lib/season-logic';
+import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes, getBestSquadForTeam, normalizeLineupForTeam, isTransferWindowOpen, calculateBoardConfidenceDelta } from '@/lib/game-engine';
 import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
@@ -207,77 +208,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state]);
 
-  const getBestSquadForTeam = useCallback((team: Team, allPlayers: Player[]): (string | null)[] => {
-    const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
-    const requirements = getFormationRequirements(team.formation);
-    const sortedAvail = [...healthyPlayers].sort((a, b) => b.attributes.skill - a.attributes.skill);
-    const picked: (string | null)[] = [];
-    const used = new Set<string>();
-
-    requirements.forEach(pos => {
-      const bestMatch = sortedAvail.find(p => (
-        (p.position === pos) ||
-        (p.position === 'MF' && pos === 'FW') ||
-        (p.position === 'DM' && (pos === 'DF' || pos === 'MF'))
-      ) && !used.has(p.id));
-      if (bestMatch) { picked.push(bestMatch.id); used.add(bestMatch.id); }
-    });
-
-    sortedAvail.forEach(p => { if (picked.length < 16 && !used.has(p.id)) { picked.push(p.id); used.add(p.id); } });
-    while (picked.length < 16) picked.push(null);
-    return picked;
-  }, []);
-
-  const canPlay = (p: Player, req: Position) =>
-    p.position === req ||
-    (p.position === 'MF' && req === 'FW') ||
-    (p.position === 'DM' && (req === 'DF' || req === 'MF'));
-
-  const normalizeLineupForTeam = useCallback((team: Team, allPlayers: Player[], selectedIds: (string | null)[]): (string | null)[] => {
-    const pool = selectedIds
-      .filter((id): id is string => id !== null)
-      .map(id => allPlayers.find(p => p.id === id))
-      .filter(Boolean) as Player[];
-    const uniq = new Map(pool.map(p => [p.id, p]));
-    const selected = Array.from(uniq.values());
-
-    const reqs = getFormationRequirements(team.formation);
-    const used = new Set<string>();
-    const starters: string[] = [];
-
-    for (const req of reqs) {
-      const best = selected
-        .filter(p => !used.has(p.id) && canPlay(p, req))
-        .sort((a, b) => b.attributes.skill - a.attributes.skill)[0];
-      if (best) {
-        starters.push(best.id);
-        used.add(best.id);
-      }
-    }
-
-    const remainingBySkill = selected
-      .filter(p => !used.has(p.id))
-      .sort((a, b) => b.attributes.skill - a.attributes.skill);
-
-    while (starters.length < 11 && remainingBySkill.length > 0) {
-      const p = remainingBySkill.shift()!;
-      starters.push(p.id);
-      used.add(p.id);
-    }
-
-    const subs = selected
-      .filter(p => !used.has(p.id))
-      .sort((a, b) => b.attributes.skill - a.attributes.skill)
-      .slice(0, 5)
-      .map(p => p.id);
-
-    const finalLineup: (string | null)[] = [...starters];
-    while (finalLineup.length < 11) finalLineup.push(null);
-    finalLineup.push(...subs);
-    while (finalLineup.length < 16) finalLineup.push(null);
-
-    return finalLineup;
-  }, []);
 
   const togglePlayerLineup = useCallback((pId: string) => {
     setState(s => {
@@ -405,6 +335,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const acceptBid = useCallback((bidId: string) => {
     setState(s => {
+      if (!isTransferWindowOpen(s.currentWeek)) {
+        setTimeout(() => toast({ title: "TRANSFER WINDOW CLOSED", description: "You can only sell players during active windows.", variant: "destructive" }), 0);
+        return s;
+      }
       const bid = s.transferMarket.incomingBids.find(b => b.id === bidId);
       if (!bid) return s;
       const p = s.players.find(x => x.id === bid.playerId);
@@ -450,16 +384,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const startNextSeason = useCallback(() => {
     setState(s => {
-      const yr = s.season + 1;
-      const upTeams = s.teams.map(t => ({ ...t, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0, playedHistory: [] }));
-      const upPlayers = s.players.map(p => ({ 
-        ...p, 
-        age: p.age + 1, 
-        seasonStats: { apps: 0, goals: 0, avgRating: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0, manOfTheMatch: 0 }, 
-        history: [...p.history, { season: s.season, apps: p.seasonStats.apps, goals: p.seasonStats.goals, avgRating: p.seasonStats.avgRating, clubName: s.teams.find(t => t.id === p.clubId)?.name || 'Unknown' }] 
-      }));
-      setTimeout(() => toast({ title: "NEW SEASON", description: `${yr} fixtures generated.` }), 0);
-      return { ...s, currentWeek: 1, season: yr, teams: upTeams, players: upPlayers, fixtures: generateFixtures(upTeams, yr), isSeasonOver: false, seasonSummary: null, currentMatchFixtureId: null };
+      const nextState = performSeasonTransition(s);
+      if (Object.keys(nextState).length === 0) return s;
+      
+      const newYr = nextState.season || s.season;
+      setTimeout(() => toast({ title: "NEW SEASON STARTED", description: `${newYr} fixtures generated.` }), 0);
+      
+      return { ...s, ...nextState };
     });
   }, [toast]);
 
@@ -587,10 +518,24 @@ setState(s => ({
       });
       let allPlayers = s.players.map(p => {
         let up = { ...p };
+        // Find current team for staff bonuses
+        const team = allTeams.find(t => t.id === p.clubId);
+        const coach = team?.staff.find(st => st.role === 'COACH');
+        const physio = team?.staff.find(st => st.role === 'PHYSIO');
+        const coachRating = coach?.rating ?? 5;
+        const physioRating = physio?.rating ?? 5;
+
         if (statsToUpdate[p.id]) {
           const m = statsToUpdate[p.id];
           up.fitness = Math.max(0, up.fitness - m.fitnessLoss);
-          up.morale = Math.min(100, up.morale + (m.rating > 7 ? 5 : -2));
+          up.morale = Math.min(100, up.morale + (m.rating > 7 ? 5 : (m.rating < 6 ? -2 : 0)));
+          
+          // Update Recent Form (last 5)
+          up.recentForm = [...(up.recentForm || []), m.rating].slice(-5);
+          
+          // Match Sharpness (Condition) gain
+          up.condition = Math.min(100, up.condition + 15);
+
           const newAvg = parseFloat(((up.seasonStats.avgRating * up.seasonStats.apps + m.rating) / (up.seasonStats.apps + 1)).toFixed(2));
           const prevShots = up.seasonStats.shots ?? 0;
           const prevSOT = up.seasonStats.shotsOnTarget ?? 0;
@@ -610,7 +555,20 @@ setState(s => ({
             manOfTheMatch: (up.seasonStats.manOfTheMatch ?? 0) + (momCounts[p.id] ?? 0),
           };
           if (newSuspensions.has(p.id)) { up.suspensionWeeks = 3; up.status = 'SUSPENDED'; }
-        } else { up.fitness = Math.min(100, up.fitness + 15); }
+        } else { 
+          // Recovery: Baseline 12 + up to 10 from Physio
+          const recovery = 12 + (physioRating);
+          up.fitness = Math.min(100, up.fitness + recovery); 
+          // Sharpness (Condition) decay if not playing: Baseline -7, mitigated by Coach
+          const decay = Math.max(0, 10 - (coachRating / 2));
+          up.condition = Math.max(0, up.condition - decay);
+        }
+
+        // Development Points Accumulation
+        // Gain based on potential, professionalism, and coach quality
+        const devGain = (up.attributes.potential / 25) * (coachRating / 10) * (up.attributes.professionalism / 20);
+        up.developmentPoints = (up.developmentPoints || 0) + devGain;
+
         if (newInjuries[p.id]) { up.status = 'INJURED'; up.injury = { type: newInjuries[p.id].type, weeksRemaining: newInjuries[p.id].weeks }; }
         else if (up.injury) {
           const newWeeks = up.injury.weeksRemaining - 1;
@@ -624,8 +582,21 @@ setState(s => ({
       const nextMessages = [...s.messages];
       const nextWeek = s.currentWeek + 1;
       
-      // AI Transfer Market Logic
-      if (Math.random() < 0.15) {
+      // Update Stadium Expansion Progress
+      let finalTeams = allTeams.map(t => {
+        if (t.stadiumExpansion) {
+          const nextExp = { ...t.stadiumExpansion, weeksRemaining: t.stadiumExpansion.weeksRemaining - 1 };
+          if (nextExp.weeksRemaining <= 0) {
+            nextMessages.unshift({ id: `stadium-${Date.now()}`, title: 'CONSTRUCTION COMPLETE', content: `The expansion of ${t.stadium} is finished. New capacity: ${nextExp.targetCapacity.toLocaleString()}.`, date: Date.now(), week: nextWeek, read: false, type: 'INFO' });
+            return { ...t, stadiumCapacity: nextExp.targetCapacity, stadiumExpansion: null };
+          }
+          return { ...t, stadiumExpansion: nextExp };
+        }
+        return t;
+      });
+
+      // AI Transfer Market Logic (only during window)
+      if (isTransferWindowOpen(s.currentWeek) && Math.random() < 0.15) {
         const seller = allTeams[Math.floor(Math.random() * allTeams.length)];
         const buyer = allTeams.find(t => t.id !== seller.id && t.division === seller.division);
         if (seller && buyer) {
@@ -638,8 +609,8 @@ setState(s => ({
         }
       }
 
-      // User Team Incoming Bids
-      if (s.userTeamId && Math.random() < 0.1) {
+      // User Team Incoming Bids (only during window)
+      if (s.userTeamId && isTransferWindowOpen(s.currentWeek) && Math.random() < 0.1) {
         const userPlayers = allPlayers.filter(p => p.clubId === s.userTeamId);
         const listedPlayers = userPlayers.filter(p => p.isListed);
         const target = listedPlayers.length > 0 ? listedPlayers[0] : userPlayers[Math.floor(Math.random() * userPlayers.length)];
@@ -674,18 +645,64 @@ setState(s => ({
         };
       });
 
+      // Board Confidence & Sacking Logic
+      let newConfidence = s.boardConfidence;
+      let isFired = s.isFired;
+      let nextJobMarket = [...s.jobMarket];
+      const userTeam = allTeams.find(t => t.id === s.userTeamId);
+      
+      if (userTeam && s.currentWeek <= 38 && !s.isFired) {
+        const standings = updateLeagueTable(allTeams, s.fixtures, userTeam.division);
+        const currentRank = standings.findIndex(t => t.id === s.userTeamId) + 1;
+        const delta = calculateBoardConfidenceDelta(currentRank, s.targetPosition);
+        newConfidence = Math.max(0, Math.min(100, s.boardConfidence + delta));
+
+        if (newConfidence <= 15) {
+          isFired = true;
+          nextJobMarket.push(userTeam.id); // Old job is now vacant
+          nextMessages.unshift({
+            id: `fired-${Date.now()}`,
+            title: 'SACKED',
+            content: `The board has lost patience with your performance. You have been relieved of your duties as manager of ${userTeam.name}.`,
+            date: Date.now(),
+            week: nextWeek,
+            read: false,
+            type: 'BOARD'
+          });
+          setTimeout(() => toast({ title: "SACKED", description: "You have been fired.", variant: "destructive" }), 0);
+        }
+      }
+
+      // Dynamic Job Market Updates (AI Sackings)
+      if (s.currentWeek % 4 === 0 || Math.random() < 0.1) {
+        const allStandings = [1, 2, 3, 4].flatMap(div => updateLeagueTable(allTeams, s.fixtures, div));
+        // Bottom teams might fire managers
+        const candidates = allStandings.filter(t => t.id !== s.userTeamId && t.played >= 4 && t.points / t.played < 0.75 && Math.random() < 0.25);
+        candidates.forEach(c => {
+          if (!nextJobMarket.includes(c.id)) nextJobMarket.push(c.id);
+        });
+        // Occasionally clean up
+        if (nextJobMarket.length > 6 && Math.random() < 0.3) {
+          nextJobMarket.splice(Math.floor(Math.random() * nextJobMarket.length), 1);
+        }
+      }
+
       if (nextWeek > 38) {
         const summary = prepareSeasonSummary({ ...s, teams: allTeams, players: allPlayers });
         setTimeout(() => toast({ title: "SEASON COMPLETE" }), 0);
-        return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, fixtures: slimmedFixtures, isSeasonOver: true, seasonSummary: summary, messages: nextMessages }; 
+        return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, fixtures: slimmedFixtures, isSeasonOver: true, seasonSummary: summary, messages: nextMessages, boardConfidence: newConfidence, isFired, jobMarket: nextJobMarket }; 
       }
-      return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, fixtures: slimmedFixtures, messages: nextMessages, transferMarket: { ...s.transferMarket, incomingBids: [...s.transferMarket.incomingBids, ...nextBids] } };
+      return { ...s, currentWeek: nextWeek, teams: allTeams, players: allPlayers, fixtures: slimmedFixtures, messages: nextMessages, boardConfidence: newConfidence, isFired, jobMarket: nextJobMarket, transferMarket: { ...s.transferMarket, incomingBids: [...s.transferMarket.incomingBids, ...nextBids] } };
     });
   }, [prepareSeasonSummary, toast]);
 
 
   const buyPlayer = useCallback((pId: string) => {
     setState(s => {
+      if (!isTransferWindowOpen(s.currentWeek)) {
+        setTimeout(() => toast({ title: "TRANSFER WINDOW CLOSED", description: "You can only sign players during active windows.", variant: "destructive" }), 0);
+        return s;
+      }
       const p = s.players.find(x => x.id === pId);
       if (!p || !s.userTeamId) return s;
       setTimeout(() => toast({ title: "TRANSFER COMPLETE", description: `Signed ${p.name}.` }), 0);
@@ -795,10 +812,57 @@ setState(s => ({
     togglePlayerLineup, swapPlayers, addPlayerToSlot,
     clearLineup: () => setState(s => ({ ...s, teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, lineup: Array(16).fill(null) } : t) })),
     autoPickLineup,
-    applyForJob: () => {}, resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })),
+    applyForJob: (teamId: string) => {
+      setState(s => {
+        const team = s.teams.find(t => t.id === teamId);
+        if (!team) return s;
+        let targetPos = 10; let expectation = 'Finish in mid-table';
+        if (team.division === 1) {
+          if (team.reputation >= 85) { targetPos = 1; expectation = 'Win the Premier League'; }
+          else if (team.reputation >= 75) { targetPos = 4; expectation = 'Qualify for Champions Cup'; }
+          else { targetPos = 17; expectation = 'Avoid Relegation'; }
+        } else {
+          if (team.reputation >= 60) { targetPos = 3; expectation = 'Challenge for Promotion'; }
+          else { targetPos = 12; expectation = 'Mid-table stability'; }
+        }
+        const nextMessages = [...s.messages];
+        nextMessages.unshift({ id: `welcome-${Date.now()}`, title: 'WELCOME', content: `Welcome to ${team.name.toUpperCase()}. Our expectation is that you ${expectation.toLowerCase()}. Good luck.`, date: Date.now(), week: s.currentWeek, read: false, type: 'BOARD' });
+        setTimeout(() => toast({ title: "NEW JOB", description: `You are now managing ${team.name}.` }), 0);
+        return {
+          ...s, userTeamId: teamId, boardConfidence: 75, boardExpectation: expectation, targetPosition: targetPos, isFired: false, messages: nextMessages, 
+          jobMarket: s.jobMarket.filter(id => id !== teamId),
+          teams: s.teams.map(t => t.isUserTeam ? { ...t, isUserTeam: false } : (t.id === teamId ? { ...t, isUserTeam: true } : t))
+        };
+      });
+    }, 
+    resetFired: () => setState(s => ({ ...s, isFired: false, isGameStarted: false })),
     quitToMainMenu: () => setState(s => ({ ...s, isGameStarted: false, currentMatchFixtureId: null })),
     setLastView: (view: LastView) => setState(s => ({ ...s, lastView: view })),
     acceptBid, rejectBid, updateMidMatchResult, 
+    expandStadium: (tier: 'small' | 'medium' | 'large') => {
+      setState(s => {
+        const team = s.teams.find(t => t.id === s.userTeamId);
+        if (!team || team.stadiumExpansion) return s;
+        
+        let cost = 0; let capacityIncrease = 0; let weeks = 0;
+        if (tier === 'small') { cost = 2500000; capacityIncrease = 2000; weeks = 4; }
+        else if (tier === 'medium') { cost = 7500000; capacityIncrease = 6000; weeks = 8; }
+        else { cost = 20000000; capacityIncrease = 15000; weeks = 14; }
+
+        if (team.budget < cost) {
+          setTimeout(() => toast({ title: "INSUFFICIENT FUNDS", description: `You need ${formatMoney(cost)} for this project.` }), 0);
+          return s;
+        }
+
+        const nextExpansion = { targetCapacity: team.stadiumCapacity + capacityIncrease, weeksRemaining: weeks, cost };
+        setTimeout(() => toast({ title: "PROJECT STARTED", description: `Construction at ${team.stadium} has begun.` }), 0);
+
+        return {
+          ...s,
+          teams: s.teams.map(t => t.id === s.userTeamId ? { ...t, budget: t.budget - cost, stadiumExpansion: nextExpansion } : t)
+        };
+      });
+    },
     updateSeason: (yr: number) => setState(s => ({ ...s, season: yr })), updateTeamName: (id: string, n: string) => setState(s => ({ ...s, teams: s.teams.map(t => t.id === id ? { ...t, name: n } : t) })), fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch
   }), [state, startGame, simulateWeek, advanceWeek, buyPlayer, toggleShortlist, toggleTransferList, hireStaff, fireStaff, acceptBid, rejectBid, updateMidMatchResult, fastForwardSeason, startNextSeason, setEnginePreset, startMatch, clearCurrentMatch, toast, togglePlayerLineup, swapPlayers, addPlayerToSlot, autoPickLineup]);
 

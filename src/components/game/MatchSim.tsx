@@ -24,7 +24,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   awayTeam: Team,
   onFinish: () => void 
 }) {
-  const { state, swapPlayers, setTactics, simulateWeek } = useGame();
+  const { state, swapPlayers, setTactics, simulateWeek, updateMidMatchResult } = useGame();
   const [currentMinute, setCurrentMinute] = useState(0);
   const [showLineups, setShowLineups] = useState(true);
   const [activeAlert, setActiveAlert] = useState<MatchEvent | null>(null);
@@ -38,6 +38,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const [swapSourceId, setSwapSourceId] = useState<string | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
+  const [homeTeamTalk, setHomeTeamTalk] = useState<'ENCOURAGE' | 'CALM' | 'AGGRESSIVE' | null>(null);
   
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
   
@@ -70,8 +71,16 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     const timer = setInterval(() => {
       setCurrentMinute(prev => {
         const nextMin = prev + 1;
-        if (nextMin === 45 && !isHalfTime && prev < 45) { setIsHalfTime(true); setActiveEvent({ minute: 45, type: 'COMMENTARY', text: "HALF TIME WHISTLE BLOWS." }); return 45; }
-        if (nextMin >= 90) { setIsFinished(true); setActiveEvent({ minute: 90, type: 'COMMENTARY', text: "FULL TIME! THAT'S IT." }); return 90; }
+        if (nextMin === 45 && !isHalfTime && prev < 45) { 
+          setIsHalfTime(true); 
+          setActiveEvent({ minute: 45, type: 'COMMENTARY', text: "HALF TIME. THE MANAGER IS HEADING TO THE DRESSING ROOM..." }); 
+          return 45; 
+        }
+        if (nextMin >= 90) { 
+          setIsFinished(true); 
+          setActiveEvent({ minute: 90, type: 'COMMENTARY', text: "FULL TIME! THAT'S IT." }); 
+          return 90; 
+        }
         const minuteEvent = fixture.result!.events.find(e => e.minute === nextMin);
         if (minuteEvent) {
           setActiveEvent(minuteEvent);
@@ -106,6 +115,25 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   }, [activeAlert]);
 
   const handleResume = () => { setIsPaused(false); setSwapSourceId(null); setPausedForInjury(false); setPausedForRedCard(false); };
+  
+  const handleTeamTalk = (talk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE') => {
+    setHomeTeamTalk(talk);
+    setIsHalfTime(false);
+    
+    let text = "";
+    if (talk === 'ENCOURAGE') text = "ENCOURAGING WORDS. THE LADS LOOK INSPIRED!";
+    else if (talk === 'AGGRESSIVE') text = "THE HAIRDRYER TREATMENT! THEY'RE FLYING OUT OF THE TUNNEL.";
+    else text = "CALM AND COLLECTED. TACTICAL ADJUSTMENTS MADE.";
+    
+    setActiveEvent({ minute: 45, type: 'COMMENTARY', text });
+  };
+
+  const handleFlashResult = () => {
+    updateMidMatchResult(fixture.id, currentMinute);
+    setCurrentMinute(90);
+    setIsFinished(true);
+    setActiveEvent({ minute: 90, type: 'COMMENTARY', text: "FULL TIME! (MATCH FLASHED)" });
+  };
   const handleSwapInteraction = (pId: string) => {
     if (!swapSourceId) {
       setSwapSourceId(pId);
@@ -132,6 +160,18 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
       }
     }
   };
+  
+  const handleTeamTalk = (talk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE') => {
+    setHomeTeamTalk(talk);
+    setIsHalfTime(false);
+    
+    let text = "";
+    if (talk === 'ENCOURAGE') text = "ENCOURAGING WORDS. THE LADS LOOK INSPIRED!";
+    else if (talk === 'AGGRESSIVE') text = "THE HAIRDRYER TREATMENT! THEY'RE FLYING OUT OF THE TUNNEL.";
+    else text = "CALM AND COLLECTED. TACTICAL ADJUSTMENTS MADE.";
+    
+    setActiveEvent({ minute: 45, type: 'COMMENTARY', text });
+  };
 
   const currentHomeGoals = fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
   const currentAwayGoals = fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
@@ -140,18 +180,41 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const homeShots = Math.max(currentHomeGoals, rawHomeShots);
   const awayShots = Math.max(currentAwayGoals, rawAwayShots);
 
-  const zones = useMemo(() => ({
-    home: { 
-      DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
-      MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
-      ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', homeTeam.isUserTeam ? state.manager?.personality : undefined) 
-    },
-    away: { 
-      DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
-      MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
-      ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', awayTeam.isUserTeam ? state.manager?.personality : undefined) 
+  const zones = useMemo(() => {
+    const rawZones = {
+      home: {
+        DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
+        MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
+        ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', homeTeam.isUserTeam ? state.manager?.personality : undefined)
+      },
+      away: {
+        DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
+        MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
+        ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', awayTeam.isUserTeam ? state.manager?.personality : undefined)
+      }
+    };
+
+    // Apply Team Talk Modifiers (Mental Buffs)
+    let homeMod = 1.0;
+    if (currentMinute > 45 && homeTeamTalk) {
+      if (homeTeamTalk === 'ENCOURAGE') homeMod = 1.05;
+      else if (homeTeamTalk === 'AGGRESSIVE') homeMod = 1.08;
+      else homeMod = 1.03;
     }
-  }), [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality]);
+
+    return {
+      home: { 
+        DEF: Math.round(rawZones.home.DEF * homeMod), 
+        MID: Math.round(rawZones.home.MID * homeMod), 
+        ATT: Math.round(rawZones.home.ATT * homeMod) 
+      },
+      away: { 
+        DEF: rawZones.away.DEF, 
+        MID: rawZones.away.MID, 
+        ATT: rawZones.away.ATT 
+      }
+    };
+  }, [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality, currentMinute, homeTeamTalk]);
 
   const possession = (zones.home.MID / (zones.home.MID + zones.away.MID || 1)) * 100;
 
@@ -412,7 +475,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           </div>
         )}
 
-        <MatchPlayView
+        <MatchPlayView 
           fixture={fixture}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
@@ -423,15 +486,18 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           currentAwayGoals={currentAwayGoals}
           homeShots={homeShots}
           awayShots={awayShots}
-          possession={possession}
+          possession={50 + (zones.home.MID - (zones.away.MID || 0)) / 2}
           zones={zones}
-          commentaryColor={commentaryColor}
-          activeEventText={activeEvent?.text ?? ''}
+          activeEventText={activeEvent?.text || ""}
+          commentaryColor={activeEvent?.teamId === homeTeam.id ? homeTeam.color : (activeEvent?.teamId === awayTeam.id ? awayKitColor : "#ffffff")}
           playbackSpeed={playbackSpeed}
           onSpeedToggle={() => setPlaybackSpeed(s => s === 1 ? 2 : 1)}
           onPause={() => setIsPaused(true)}
+          onFlashResult={handleFlashResult}
           getPlayerName={getPlayerName}
           allEvents={fixture.result?.events.filter(e => e.minute <= currentMinute) || []}
+          isHalfTime={isHalfTime && isUserHome}
+          onTeamTalk={handleTeamTalk}
         />
 
         {(isHalfTime || isFinished) && !isPaused && (

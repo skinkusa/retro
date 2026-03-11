@@ -22,13 +22,22 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <Link
-          href="/game"
-          className="inline-flex items-center justify-center gap-3 h-16 px-12 bg-amber-500 hover:bg-amber-400 active:bg-amber-400 text-black font-black text-xl uppercase tracking-widest rounded-2xl shadow-[0_8px_0_0_rgba(180,83,9,0.5)] hover:shadow-[0_6px_0_0_rgba(180,83,9,0.5)] hover:translate-y-0.5 transition-all w-full max-w-sm min-h-[48px] max-md:min-h-[48px] max-md:py-4 max-md:rounded-xl md:w-auto md:max-w-none md:min-h-0"
-        >
-          <PlayCircle className="max-md:w-6 max-md:h-6 md:w-7 md:h-7" />
-          Play Game
-        </Link>
+        <div className="flex flex-col items-center gap-4 w-full max-w-sm md:max-w-none">
+          <Link
+            href="/game"
+            className="inline-flex items-center justify-center gap-3 h-16 px-12 bg-amber-500 hover:bg-amber-400 active:bg-amber-400 text-black font-black text-xl uppercase tracking-widest rounded-2xl shadow-[0_8px_0_0_rgba(180,83,9,0.5)] hover:shadow-[0_6px_0_0_rgba(180,83,9,0.5)] hover:translate-y-0.5 transition-all w-full md:w-auto md:min-h-0"
+          >
+            <PlayCircle className="max-md:w-6 max-md:h-6 md:w-7 md:h-7" />
+            Play Game
+          </Link>
+          
+          <Link 
+            href="/changelog"
+            className="text-amber-500/60 hover:text-amber-400 font-black uppercase tracking-widest text-xs transition-colors"
+          >
+            View Changelog
+          </Link>
+        </div>
       </div>
     </div>
   );

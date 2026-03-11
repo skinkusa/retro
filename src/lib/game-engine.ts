@@ -103,6 +103,75 @@ export function getFormationRequirements(formation: string): Position[] {
   return getFormationSlots(formation).map(s => s.pos);
 }
 
+export function canPlay(p: Player, req: Position) {
+  return p.position === req ||
+    (p.position === 'MF' && req === 'FW') ||
+    (p.position === 'DM' && (req === 'DF' || req === 'MF'));
+}
+
+export function getBestSquadForTeam(team: Team, allPlayers: Player[]): (string | null)[] {
+  const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
+  const requirements = getFormationRequirements(team.formation);
+  const sortedAvail = [...healthyPlayers].sort((a, b) => b.attributes.skill - a.attributes.skill);
+  const picked: (string | null)[] = [];
+  const used = new Set<string>();
+
+  requirements.forEach(pos => {
+    const bestMatch = sortedAvail.find(p => canPlay(p, pos) && !used.has(p.id));
+    if (bestMatch) { picked.push(bestMatch.id); used.add(bestMatch.id); }
+  });
+
+  sortedAvail.forEach(p => { if (picked.length < 16 && !used.has(p.id)) { picked.push(p.id); used.add(p.id); } });
+  while (picked.length < 16) picked.push(null);
+  return picked;
+}
+
+export function normalizeLineupForTeam(team: Team, allPlayers: Player[], selectedIds: (string | null)[]): (string | null)[] {
+  const pool = selectedIds
+    .filter((id): id is string => id !== null)
+    .map(id => allPlayers.find(p => p.id === id))
+    .filter(Boolean) as Player[];
+  
+  const uniq = new Map(pool.map(p => [p.id, p]));
+  const selected = Array.from(uniq.values());
+  const reqs = getFormationRequirements(team.formation);
+  const used = new Set<string>();
+  const starters: string[] = [];
+
+  for (const req of reqs) {
+    const best = selected
+      .filter(p => !used.has(p.id) && canPlay(p, req))
+      .sort((a, b) => b.attributes.skill - a.attributes.skill)[0];
+    if (best) {
+      starters.push(best.id);
+      used.add(best.id);
+    }
+  }
+
+  const remainingBySkill = selected
+    .filter(p => !used.has(p.id))
+    .sort((a, b) => b.attributes.skill - a.attributes.skill);
+
+  while (starters.length < 11 && remainingBySkill.length > 0) {
+    const p = remainingBySkill.shift()!;
+    starters.push(p.id);
+    used.add(p.id);
+  }
+
+  const subs = selected
+    .filter(p => !used.has(p.id))
+    .sort((a, b) => b.attributes.skill - a.attributes.skill)
+    .slice(0, 5)
+    .map(p => p.id);
+
+  const finalLineup: (string | null)[] = [...starters];
+  while (finalLineup.length < 11) finalLineup.push(null);
+  finalLineup.push(...subs);
+  while (finalLineup.length < 16) finalLineup.push(null);
+
+  return finalLineup;
+}
+
 function deterministicConsistency(playerId: string, minute: number, consistency: number): number {
   const hash = Math.abs((minute * 31 + playerId.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % 20);
   return hash < consistency ? 1.0 : 0.85;
@@ -136,20 +205,17 @@ export function getZoneStrength(players: Player[], team: Team, zone: 'DEF' | 'MI
       ? deterministicConsistency(p.id, minute, p.attributes.consistency)
       : (Math.random() * 20 < p.attributes.consistency ? 1.0 : 0.85);
 
-    const moraleFactor = 0.9 + (p.morale / 100) * 0.2;
-    const fitnessFactor = 0.5 + (p.fitness / 100) * 0.5;
+    const avgForm = p.recentForm?.length > 0 
+      ? p.recentForm.reduce((a, b) => a + b, 0) / p.recentForm.length 
+      : 7.0;
+    const formFactor = 0.95 + (Math.max(5, Math.min(9, avgForm)) - 5) / 40; // 0.95 to 1.05
     
-    // Position Compatibility logic:
-    // DM is natural in DF and MF.
-    // MF is natural in MF and FW.
-    const isRoleMatch = 
-      (p.position === slot.pos) || 
-      (p.position === 'MF' && slot.pos === 'FW') ||
-      (p.position === 'DM' && (slot.pos === 'DF' || slot.pos === 'MF'));
+    const sharpnessFactor = p.condition < 80 ? 0.9 + (p.condition / 80) * 0.1 : 1.0;
+    const moraleFactor = 0.9 + (p.morale / 100) * 0.1;
+    const fitnessFactor = 0.7 + (p.fitness / 100) * 0.3;
+    const positionPenalty = p.position === slot.pos || (p.position === 'DM' && (slot.pos === 'DF' || slot.pos === 'MF')) ? 1.0 : 0.8;
 
-    const positionPenalty = isRoleMatch ? 1.0 : 0.7;
-    
-    return acc + (attrWeight * consistencyFactor * moraleFactor * fitnessFactor * positionPenalty);
+    return acc + (attrWeight * consistencyFactor * moraleFactor * fitnessFactor * positionPenalty * formFactor * sharpnessFactor);
   }, 0);
 
   const personalityMod = personality === 'Analyst' ? 1.05 : 1.0;
@@ -179,6 +245,12 @@ export function simulateMatch(
   let awayShots = currentResult?.awayShots ?? 0;
   let homeShotsOnTarget = currentResult?.homeShotsOnTarget ?? 0;
   let awayShotsOnTarget = currentResult?.awayShotsOnTarget ?? 0;
+  let homeCorners = currentResult?.homeCorners ?? 0;
+  let awayCorners = currentResult?.awayCorners ?? 0;
+  let homeFouls = currentResult?.homeFouls ?? 0;
+  let awayFouls = currentResult?.awayFouls ?? 0;
+  let homeOffsides = currentResult?.homeOffsides ?? 0;
+  let awayOffsides = currentResult?.awayOffsides ?? 0;
 
   const ratings: Record<string, number> = currentResult ? { ...currentResult.ratings } : {};
   const scorers: Array<{playerId: string, minute: number}> = currentResult ? [...currentResult.scorers] : [];
@@ -233,11 +305,12 @@ export function simulateMatch(
     const homeRedPenalty = homeRedCount === 0 ? 1.0 : homeRedCount === 1 ? 0.90 : 0.75;
     const awayRedPenalty = awayRedCount === 0 ? 1.0 : awayRedCount === 1 ? 0.90 : 0.75;
 
+    const homeAdvantage = 1.35; // 35% boost for home team
     const zones = {
       home: { 
-        DEF: getZoneStrength(currentHome, homeTeam, 'DEF', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty,
-        MID: getZoneStrength(currentHome, homeTeam, 'MID', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty,
-        ATT: getZoneStrength(currentHome, homeTeam, 'ATT', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty
+        DEF: getZoneStrength(currentHome, homeTeam, 'DEF', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty * homeAdvantage,
+        MID: getZoneStrength(currentHome, homeTeam, 'MID', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty * homeAdvantage,
+        ATT: getZoneStrength(currentHome, homeTeam, 'ATT', homeTeam.isUserTeam ? userPersonality : undefined, min) * homeRedPenalty * homeAdvantage
       },
       away: { 
         DEF: getZoneStrength(currentAway, awayTeam, 'DEF', awayTeam.isUserTeam ? userPersonality : undefined, min) * awayRedPenalty,
@@ -271,6 +344,19 @@ export function simulateMatch(
 
     if (Math.random() < chanceProbability) {
       const isHome = Math.random() < (zones.home.MID / (totalMid || 1));
+      
+      // Benchmarks: Corner/Offside check before shot/threat resolution
+      if (Math.random() < cfg.offsideProbabilityPerMinute) {
+        if (isHome) homeOffsides++; else awayOffsides++;
+        events.push({
+          minute: min,
+          type: 'OFFSIDE',
+          teamId: isHome ? homeTeam.id : awayTeam.id,
+          text: getCommentary('OFFSIDE', isHome ? homeTeam : awayTeam, (isHome ? currentHome : currentAway)[Math.floor(Math.random() * (isHome ? currentHome : currentAway).length)])
+        });
+        continue; // Offside ends the chance
+      }
+
       if (isHome) homeChances++; else awayChances++;
       const attackingPlayers = (isHome ? currentHome : currentAway).filter(p => p.position !== 'GK');
       const defendingPlayers = (isHome ? currentAway : currentHome);
@@ -299,7 +385,7 @@ export function simulateMatch(
           const attackingATT = isHome ? zones.home.ATT : zones.away.ATT;
           const conversionStyleMod = attStyle === 'Tiki-Taka' ? 1.03 : 1.0;
           const denom = Math.max(15, defensePower + keeperPower + 10);
-          let goalProbability = (attackPower / denom) * 0.9 * conversionStyleMod * Math.min(1.15, 0.85 + attackingATT / 100) * cfg.conversionMultiplier;
+          let goalProbability = (attackPower / denom) * 0.9 * conversionStyleMod * Math.min(1.15, 0.85 + attackingATT / 100) * cfg.conversionMultiplier * cfg.goalScoringOverallScale;
           goalProbability = Math.max(cfg.goalProbabilityMin, Math.min(cfg.goalProbabilityMax, goalProbability));
 
           if (Math.random() < goalProbability) {
@@ -406,6 +492,26 @@ export function simulateMatch(
           playerId: picked.player.id,
           text: getCommentary('INJURY', picked.team, picked.player),
         });
+      }
+    }
+
+    // Benchmark: Fouls & Corners check (non-card fouls)
+    if (Math.random() < cfg.foulProbabilityPerMinute) {
+      const isHomeFoul = Math.random() < 0.5;
+      if (isHomeFoul) homeFouls++; else awayFouls++;
+      if (Math.random() < 0.15) {
+        const team = isHomeFoul ? homeTeam : awayTeam;
+        const player = (isHomeFoul ? currentHome : currentAway)[Math.floor(Math.random() * (isHomeFoul ? currentHome : currentAway).length)];
+        events.push({ minute: min, type: 'FOUL', teamId: team.id, text: getCommentary('FOUL', team, player) });
+      }
+    }
+
+    if (Math.random() < cfg.cornerProbabilityPerMinute) {
+      const isHomeCorner = Math.random() < (zones.home.ATT / (zones.home.ATT + zones.away.DEF || 1));
+      if (isHomeCorner) homeCorners++; else awayCorners++;
+      if (Math.random() < 0.25) {
+        const team = isHomeCorner ? homeTeam : awayTeam;
+        events.push({ minute: min, type: 'CORNER', teamId: team.id, text: getCommentary('CORNER', team, null as any) });
       }
     }
   }
@@ -555,6 +661,9 @@ export function simulateMatch(
     homeChances, awayChances,
     homeShots, awayShots,
     homeShotsOnTarget, awayShotsOnTarget,
+    homeCorners, awayCorners,
+    homeFouls, awayFouls,
+    homeOffsides, awayOffsides,
     attendance, events, ratings, scorers, cards, injuries,
     shotTakers, sotTakers,
     ...(homePens !== undefined && { homePens, awayPens }),
@@ -682,4 +791,26 @@ export function updateLeagueTable(teams: Team[], fixtures: Fixture[], division: 
     if (b.points !== a.points) return b.points - a.points;
     return (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst);
   });
+}
+
+/**
+ * Summer Window: Weeks 1-4
+ * Winter Window: Weeks 20-22
+ */
+export function isTransferWindowOpen(week: number): boolean {
+  return (week >= 1 && week <= 4) || (week >= 20 && week <= 22);
+}
+
+/**
+ * Calculates how much board confidence should change this week based on league position.
+ */
+export function calculateBoardConfidenceDelta(currentRank: number, targetPosition: number): number {
+  const diff = targetPosition - currentRank;
+  if (diff >= 0) {
+    // Overperforming: slow but steady gain
+    return Math.min(5, 1 + Math.floor(diff / 3));
+  } else {
+    // Underperforming: faster drop
+    return Math.max(-12, Math.floor(diff / 1.5));
+  }
 }

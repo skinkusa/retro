@@ -1,5 +1,7 @@
 "use client"
 
+import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData, LastView } from '@/types/game';
+import { isTransferWindowOpen } from '@/lib/game-engine';
 import { useGame } from '@/lib/store';
 import { RetroWindow } from './RetroWindow';
 import { Progress } from '@/components/ui/progress';
@@ -67,6 +69,12 @@ export function ManagerInfo() {
               </div>
             </div>
             <div className="pt-2">
+              <div className="flex justify-between items-center mb-1 max-[1300px]:mb-3">
+                <span className="text-[10px] max-[1300px]:text-[18px] text-muted-foreground uppercase font-bold">Transfer Window</span>
+                <span className={isTransferWindowOpen(state.currentWeek) ? "text-accent font-black" : "text-red-500 font-black"}>
+                  {isTransferWindowOpen(state.currentWeek) ? "OPEN" : "CLOSED"}
+                </span>
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="space-y-1 cursor-help max-[1300px]:space-y-3">
