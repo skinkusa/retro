@@ -222,6 +222,208 @@ export function getZoneStrength(players: Player[], team: Team, zone: 'DEF' | 'MI
   return Math.round(baseStrength * personalityMod);
 }
 
+/** Zone ratings for UI display (0–100). Same scale for all zones. */
+export interface ZoneRatings {
+  DEF: number;
+  MID: number;
+  ATT: number;
+}
+
+/**
+ * Returns the player IDs currently on the pitch for a team at a given minute.
+ * Uses: starting XI (passed in), minus red cards and injuries (from events), plus subs applied in order.
+ * Bar logic and simulation should both use this as the source of truth for "live" players.
+ */
+export function getLiveOnPitchPlayerIds(
+  fixture: Fixture,
+  teamId: string,
+  currentMinute: number,
+  startingLineupIds: string[]
+): string[] {
+  let current = startingLineupIds.slice(0, 11);
+  const events = (fixture.result?.events ?? []) as MatchEvent[];
+  const teamEvents = events
+    .filter(e => e.teamId === teamId && e.minute <= currentMinute)
+    .sort((a, b) => a.minute - b.minute);
+  for (const e of teamEvents) {
+    if (e.type === 'RED' && e.playerId && current.includes(e.playerId)) {
+      current = current.filter(id => id !== e.playerId);
+    }
+    if (e.type === 'INJURY' && e.playerId && current.includes(e.playerId)) {
+      current = current.filter(id => id !== e.playerId);
+    }
+    if (e.type === 'SUB' && e.playerId != null && e.subPlayerId != null) {
+      const idx = current.indexOf(e.playerId);
+      if (idx >= 0) current = [...current.slice(0, idx), e.subPlayerId, ...current.slice(idx + 1)];
+    }
+  }
+  return current;
+}
+
+/**
+ * Base team shape strength (0–100 per zone). Deterministic, no randomness.
+ * Answers: "How strong is this lineup on paper?"
+ */
+export function getBaseZoneRatings(
+  players: Player[],
+  formation: string,
+  personality?: ManagerPersonality
+): ZoneRatings {
+  const assignments = getTacticalAssignments(formation, players);
+  const personalityMod = personality === 'Analyst' ? 1.05 : 1.0;
+
+  const scoreZone = (zone: 'DEF' | 'MID' | 'ATT'): number => {
+    const zoneAssignments = assignments.filter(a => {
+      if (!a.player) return false;
+      if (zone === 'DEF') return a.slot.pos === 'GK' || a.slot.pos === 'DF';
+      if (zone === 'MID') return a.slot.pos === 'MF';
+      return a.slot.pos === 'FW';
+    });
+    if (zoneAssignments.length === 0) return 0;
+    let sum = 0;
+    for (const { player: p, slot } of zoneAssignments) {
+      if (!p) continue;
+      let attrWeight = 0;
+      if (zone === 'DEF') {
+        attrWeight = (p.attributes.skill + p.attributes.pace + p.attributes.heading + p.attributes.stamina) / 4;
+        if (p.position === 'GK') attrWeight = (p.attributes.goalkeeping * 1.5 + p.attributes.influence) / 2;
+      } else if (zone === 'MID') {
+        attrWeight = (p.attributes.skill + p.attributes.passing * 1.5 + p.attributes.stamina + p.attributes.influence) / 4.5;
+      } else {
+        attrWeight = (p.attributes.skill + p.attributes.shooting * 1.5 + p.attributes.pace + p.attributes.heading) / 4.5;
+      }
+      const positionPenalty = p.position === slot.pos || (p.position === 'DM' && (slot.pos === 'DF' || slot.pos === 'MF')) ? 1.0 : 0.8;
+      const contribution = Math.min(100, (attrWeight / 20) * 100 * positionPenalty);
+      sum += contribution;
+    }
+    return Math.min(100, Math.round((sum / zoneAssignments.length) * personalityMod));
+  };
+
+  return {
+    DEF: Math.max(0, Math.min(100, scoreZone('DEF'))),
+    MID: Math.max(0, Math.min(100, scoreZone('MID'))),
+    ATT: Math.max(0, Math.min(100, scoreZone('ATT'))),
+  };
+}
+
+/** Live modifiers (multipliers) for zone display. */
+export interface LiveZoneModifiers {
+  def: number;
+  mid: number;
+  att: number;
+}
+
+/**
+ * Live modifiers for zone display (multipliers ~0.7–1.15).
+ * Accounts for red cards, injuries (shape impact), team talk, light fatigue.
+ */
+export function getLiveZoneModifiers(
+  fixture: Fixture,
+  teamId: string,
+  currentMinute: number,
+  teamTalk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE' | null,
+  livePlayers: Player[],
+  formation: string,
+  allPlayers: Player[],
+  startingLineupIds: string[]
+): LiveZoneModifiers {
+  const events = (fixture.result?.events ?? []) as MatchEvent[];
+  const cards = fixture.result?.cards ?? [];
+  const redIds = new Set(
+    cards.filter(c => c.type === 'RED' && c.minute <= currentMinute).map(c => c.playerId)
+  );
+  const teamRedIds = new Set(
+    events.filter(e => e.type === 'RED' && e.teamId === teamId && e.minute <= currentMinute).map(e => e.playerId!)
+  );
+  const teamInjuryIds = new Set(
+    events.filter(e => e.type === 'INJURY' && e.teamId === teamId && e.minute <= currentMinute).map(e => e.playerId!)
+  );
+  const leftPitchIds = [...teamRedIds, ...teamInjuryIds];
+  const slots = getFormationSlots(formation);
+  const getPositionOf = (playerId: string): Position | null => {
+    const idx = startingLineupIds.indexOf(playerId);
+    if (idx < 0 || idx >= slots.length) {
+      const p = allPlayers.find(x => x.id === playerId);
+      return p?.position ?? null;
+    }
+    return slots[idx].pos;
+  };
+
+  let defMod = 1.0;
+  let midMod = 1.0;
+  let attMod = 1.0;
+  for (const id of leftPitchIds) {
+    const pos = getPositionOf(id);
+    if (pos === 'GK' || pos === 'DF') {
+      defMod *= 0.72;
+      midMod *= 0.96;
+    } else if (pos === 'MF' || pos === 'DM') {
+      midMod *= 0.70;
+      defMod *= 0.95;
+      attMod *= 0.95;
+    } else if (pos === 'FW') {
+      attMod *= 0.72;
+      midMod *= 0.96;
+    }
+  }
+  if (currentMinute > 45 && teamTalk) {
+    const talkMod = teamTalk === 'ENCOURAGE' ? 1.05 : teamTalk === 'AGGRESSIVE' ? 1.08 : 1.03;
+    defMod *= talkMod;
+    midMod *= talkMod;
+    attMod *= talkMod;
+  }
+  const avgCondition = livePlayers.length > 0
+    ? livePlayers.reduce((s, p) => s + p.condition, 0) / livePlayers.length
+    : 100;
+  if (avgCondition < 75 && currentMinute > 60) {
+    const fatigueMod = 0.92 + (avgCondition / 75) * 0.08;
+    defMod *= fatigueMod;
+    midMod *= fatigueMod;
+    attMod *= fatigueMod;
+  }
+  return {
+    def: Math.max(0.5, Math.min(1.15, defMod)),
+    mid: Math.max(0.5, Math.min(1.15, midMod)),
+    att: Math.max(0.5, Math.min(1.15, attMod)),
+  };
+}
+
+/**
+ * Combines base ratings and live modifiers for final bar display (0–100).
+ */
+export function getDisplayedZoneRatings(base: ZoneRatings, live: LiveZoneModifiers): ZoneRatings {
+  const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
+  return {
+    DEF: clamp(base.DEF * live.def),
+    MID: clamp(base.MID * live.mid),
+    ATT: clamp(base.ATT * live.att),
+  };
+}
+
+/**
+ * Possession from displayed zone ratings (0–100). Not raw MID vs MID.
+ * 50% midfield, 20% passing (mid+def), 15% style, 10% fatigue, 5% game state.
+ */
+export function getPossessionFromDisplayedRatings(
+  home: ZoneRatings,
+  away: ZoneRatings,
+  homeCondition: number,
+  awayCondition: number,
+  homeStyle: PlayStyle,
+  awayStyle: PlayStyle
+): number {
+  const midShare = home.MID / (home.MID + away.MID || 1);
+  const passHome = (home.DEF + home.MID) / 2;
+  const passAway = (away.DEF + away.MID) / 2;
+  const passShare = passHome / (passHome + passAway || 1);
+  const styleBonus = homeStyle === 'Tiki-Taka' ? 0.08 : homeStyle === 'Pass to Feet' ? 0.04 : 0;
+  const styleAway = awayStyle === 'Tiki-Taka' ? 0.08 : awayStyle === 'Pass to Feet' ? 0.04 : 0;
+  const styleShare = 0.5 + (styleBonus - styleAway);
+  const fatigueShare = homeCondition / (homeCondition + awayCondition || 1);
+  const possession = 0.5 * midShare + 0.2 * passShare + 0.15 * styleShare + 0.1 * fatigueShare + 0.05;
+  return Math.max(5, Math.min(95, possession * 100));
+}
+
 export function simulateMatch(
   homeTeam: Team, 
   awayTeam: Team, 

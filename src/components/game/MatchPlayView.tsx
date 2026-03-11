@@ -75,7 +75,7 @@ export function MatchPlayView({
         <div
           className="h-full rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
           style={{ 
-            width: `${Math.min(100, (value / 50) * 100)}%`, 
+            width: `${Math.min(100, value)}%`, 
             backgroundColor: color,
             boxShadow: `0 0 12px ${color}44`
           }}

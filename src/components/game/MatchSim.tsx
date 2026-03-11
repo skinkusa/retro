@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Fixture, Team, Player, MatchEvent, PlayStyle } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/store';
-import { getZoneStrength } from '@/lib/game-engine';
+import { getZoneStrength, getLiveOnPitchPlayerIds, getBaseZoneRatings, getLiveZoneModifiers, getDisplayedZoneRatings, getPossessionFromDisplayedRatings } from '@/lib/game-engine';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipPortal } from '@/components/ui/tooltip';
 import { SquadList } from './SquadList';
@@ -48,8 +48,12 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     }
   }, [fixture.result, simulateWeek]);
 
-  const homeLineup = state.players.filter(p => homeTeam.lineup.slice(0, 11).includes(p.id));
-  const awayLineup = state.players.filter(p => awayTeam.lineup.slice(0, 11).includes(p.id));
+  const homeStartIds = (homeTeam.lineup ?? []).slice(0, 11).filter((id): id is string => id != null);
+  const awayStartIds = (awayTeam.lineup ?? []).slice(0, 11).filter((id): id is string => id != null);
+  const homeLiveIds = fixture.result ? getLiveOnPitchPlayerIds(fixture, homeTeam.id, currentMinute, homeStartIds) : homeStartIds;
+  const awayLiveIds = fixture.result ? getLiveOnPitchPlayerIds(fixture, awayTeam.id, currentMinute, awayStartIds) : awayStartIds;
+  const homeLineup = state.players.filter(p => homeLiveIds.includes(p.id));
+  const awayLineup = state.players.filter(p => awayLiveIds.includes(p.id));
   const isUserHome = homeTeam.id === state.userTeamId;
   const activeUserTeam = isUserHome ? homeTeam : awayTeam;
   const userPlayers = state.players.filter(p => p.clubId === activeUserTeam.id);
@@ -170,42 +174,29 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const awayShots = Math.max(currentAwayGoals, rawAwayShots);
 
   const zones = useMemo(() => {
-    const rawZones = {
-      home: {
-        DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined),
-        MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined),
-        ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', homeTeam.isUserTeam ? state.manager?.personality : undefined)
-      },
-      away: {
-        DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined),
-        MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined),
-        ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', awayTeam.isUserTeam ? state.manager?.personality : undefined)
-      }
-    };
-
-    // Apply Team Talk Modifiers (Mental Buffs)
-    let homeMod = 1.0;
-    if (currentMinute > 45 && homeTeamTalk) {
-      if (homeTeamTalk === 'ENCOURAGE') homeMod = 1.05;
-      else if (homeTeamTalk === 'AGGRESSIVE') homeMod = 1.08;
-      else homeMod = 1.03;
-    }
-
+    const baseHome = getBaseZoneRatings(homeLineup, homeTeam.formation, homeTeam.isUserTeam ? state.manager?.personality : undefined);
+    const baseAway = getBaseZoneRatings(awayLineup, awayTeam.formation, awayTeam.isUserTeam ? state.manager?.personality : undefined);
+    const liveModHome = getLiveZoneModifiers(fixture, homeTeam.id, currentMinute, homeTeamTalk, homeLineup, homeTeam.formation, state.players, homeStartIds);
+    const liveModAway = getLiveZoneModifiers(fixture, awayTeam.id, currentMinute, null, awayLineup, awayTeam.formation, state.players, awayStartIds);
+    const displayedHome = getDisplayedZoneRatings(baseHome, liveModHome);
+    const displayedAway = getDisplayedZoneRatings(baseAway, liveModAway);
     return {
-      home: {
-        DEF: Math.round(rawZones.home.DEF * homeMod),
-        MID: Math.round(rawZones.home.MID * homeMod),
-        ATT: Math.round(rawZones.home.ATT * homeMod)
-      },
-      away: {
-        DEF: rawZones.away.DEF,
-        MID: rawZones.away.MID,
-        ATT: rawZones.away.ATT
-      }
+      home: displayedHome,
+      away: displayedAway,
     };
-  }, [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality, currentMinute, homeTeamTalk]);
+  }, [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality, state.players, currentMinute, homeTeamTalk, fixture, homeStartIds, awayStartIds]);
 
-  const possession = (zones.home.MID / (zones.home.MID + zones.away.MID || 1)) * 100;
+  const possession = useMemo(() => {
+    const avgCondition = (arr: Player[]) => arr.length ? arr.reduce((s, p) => s + p.condition, 0) / arr.length : 100;
+    return getPossessionFromDisplayedRatings(
+      zones.home,
+      zones.away,
+      avgCondition(homeLineup),
+      avgCondition(awayLineup),
+      homeTeam.playStyle,
+      awayTeam.playStyle
+    );
+  }, [zones, homeLineup, awayLineup, homeTeam.playStyle, awayTeam.playStyle]);
 
   const manOfTheMatch = useMemo<{ player: Player; rating: number } | null>(() => {
     if (!fixture.result?.ratings || Object.keys(fixture.result.ratings).length === 0) return null;
@@ -483,7 +474,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           currentAwayGoals={currentAwayGoals}
           homeShots={homeShots}
           awayShots={awayShots}
-          possession={50 + (zones.home.MID - (zones.away.MID || 0)) / 2}
+          possession={possession}
           zones={zones}
           activeEventText={activeEvent?.text || ""}
           commentaryColor={activeEvent?.teamId === homeTeam.id ? homeTeam.color : (activeEvent?.teamId === awayTeam.id ? awayKitColor : "#ffffff")}
