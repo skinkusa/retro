@@ -139,7 +139,7 @@ export function TeamRoster({ team, players, onClose, onPlayerClick }: TeamRoster
                             <span className="text-[12px] max-[1300px]:text-[18px] font-mono font-bold">{p.fitness}%</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center text-[15px] max-[1300px]:text-[22px] font-mono text-primary font-black py-3 max-[1300px]:py-6">{p.attributes.skill}</TableCell>
+                        <TableCell className="text-center text-[15px] max-[1300px]:text-[22px] font-mono text-primary font-black py-3 max-[1300px]:py-6">{Number(p.attributes.skill).toFixed(1)}</TableCell>
                         <TableCell className="text-right font-mono text-[13px] max-[1300px]:text-[18px] font-black py-3 max-[1300px]:py-6 text-accent">{formatMoney(p.value)}</TableCell>
                       </TableRow>
                     );

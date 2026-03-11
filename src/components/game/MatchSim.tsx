@@ -229,15 +229,15 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
       <Table>
         <TableHeader>
           <TableRow className="border-b-2 border-primary/40 bg-primary/25">
-            <TableHead className={cn('uppercase font-black text-white tracking-wide w-12', compact ? 'text-xs max-[1300px]:text-[16px] py-1 max-[1300px]:py-2' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Pos</TableHead>
-            <TableHead className={cn('uppercase font-black text-white tracking-wide', compact ? 'text-xs max-[1300px]:text-[16px] py-1 max-[1300px]:py-2' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Player</TableHead>
+            <TableHead className={cn('uppercase font-black text-white tracking-wide w-12', compact ? 'text-sm max-[1300px]:text-[20px] py-2 max-[1300px]:py-3' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Pos</TableHead>
+            <TableHead className={cn('uppercase font-black text-white tracking-wide', compact ? 'text-sm max-[1300px]:text-[20px] py-2 max-[1300px]:py-3' : 'text-[12px] max-md:text-[10px] py-3 max-md:py-1.5')}>Player</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {teamPlayers.map(p => (
             <TableRow key={p.id} className="border-b border-white/5 hover:bg-white/5">
-              <TableCell className={cn('font-black text-cyan uppercase', compact ? 'py-1 max-[1300px]:py-2 text-[10px] sm:text-[12px] max-[1300px]:text-[16px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px]')}>{p.position}</TableCell>
-              <TableCell className={cn('font-bold uppercase truncate', compact ? 'py-1 max-[1300px]:py-2 text-xs sm:text-sm max-[1300px]:text-[18px] max-w-[80px] sm:max-w-[120px] max-[1300px]:max-w-[200px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px] max-w-[120px]')}>{p.name}</TableCell>
+              <TableCell className={cn('font-black text-cyan uppercase', compact ? 'py-2 max-[1300px]:py-3.5 text-xs sm:text-sm max-[1300px]:text-[20px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px]')}>{p.position}</TableCell>
+              <TableCell className={cn('font-bold uppercase truncate', compact ? 'py-2 max-[1300px]:py-3.5 text-sm sm:text-base max-[1300px]:text-[22px] max-w-[80px] sm:max-w-[140px] max-[1300px]:max-w-[240px]' : 'py-2 max-md:py-1 text-xs max-md:text-[10px] max-w-[120px]')}>{p.name}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -292,7 +292,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                   <TableCell className="py-2 px-3 max-[1300px]:py-4">
                     <div className="flex flex-col">
                       <span className="text-[13px] max-[1300px]:text-[18px] font-black text-white uppercase truncate">{p.name}</span>
-                      <span className="text-[9px] max-[1300px]:text-[14px] font-mono text-cyan uppercase">{p.position} ({p.side}) • SKL: {p.attributes.skill}</span>
+                      <span className="text-[9px] max-[1300px]:text-[14px] font-mono text-cyan uppercase">{p.position} ({p.side}) • SKL: {Number(p.attributes.skill).toFixed(1)}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right py-2 px-3 max-[1300px]:py-4">
@@ -352,7 +352,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                 <div className="text-xl sm:text-3xl md:text-4xl font-black text-accent tracking-tighter italic px-2">VS</div>
                 <span className="text-xs sm:text-sm md:text-base font-black text-white/90 uppercase truncate max-w-[40vw] sm:max-w-none px-4 py-1.5 sm:px-6 sm:py-2 border-b-4 border-white/30" style={{ backgroundColor: awayKitColor, color: awayKitText }}>{awayTeam?.name || awayTeam?.id || 'Away'}</span>
               </div>
-              <div className="grid grid-cols-2 gap-1.5 sm:gap-4 max-[1300px]:gap-6 py-1 sm:py-2 flex-1 min-h-0 overflow-hidden text-sm max-[1300px]:text-[18px]">
+              <div className="grid grid-cols-2 gap-1.5 sm:gap-4 max-[1300px]:gap-6 py-1 sm:py-2 flex-1 min-h-0 overflow-hidden text-base max-[1300px]:text-[20px]">
                 <TeamLineupTable teamPlayers={homeLineup} compact />
                 <TeamLineupTable teamPlayers={awayLineup} compact />
               </div>

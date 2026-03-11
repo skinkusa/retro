@@ -113,17 +113,43 @@ export function getBestSquadForTeam(team: Team, allPlayers: Player[]): (string |
   const healthyPlayers = allPlayers.filter(p => p.clubId === team.id && p.suspensionWeeks === 0 && p.status !== 'INJURED');
   const requirements = getFormationRequirements(team.formation);
   const sortedAvail = [...healthyPlayers].sort((a, b) => b.attributes.skill - a.attributes.skill);
-  const picked: (string | null)[] = [];
   const used = new Set<string>();
 
-  requirements.forEach(pos => {
-    const bestMatch = sortedAvail.find(p => canPlay(p, pos) && !used.has(p.id));
-    if (bestMatch) { picked.push(bestMatch.id); used.add(bestMatch.id); }
-  });
+  const starters: (string | null)[] = new Array(11).fill(null);
+  for (let i = 0; i < 11; i++) {
+    const req = requirements[i];
+    const candidates = sortedAvail
+      .filter(p => !used.has(p.id) && canPlay(p, req))
+      .sort((a, b) => {
+        const aNatural = a.position === req ? 1 : 0;
+        const bNatural = b.position === req ? 1 : 0;
+        if (bNatural !== aNatural) return bNatural - aNatural;
+        return b.attributes.skill - a.attributes.skill;
+      });
+    const best = candidates[0];
+    if (best) {
+      starters[i] = best.id;
+      used.add(best.id);
+    }
+  }
 
-  sortedAvail.forEach(p => { if (picked.length < 16 && !used.has(p.id)) { picked.push(p.id); used.add(p.id); } });
-  while (picked.length < 16) picked.push(null);
-  return picked;
+  const remaining = sortedAvail.filter(p => !used.has(p.id));
+  for (let i = 0; i < 11; i++) {
+    if (starters[i] !== null) continue;
+    const req = requirements[i];
+    const fill = remaining.find(p => canPlay(p, req)) ?? remaining[0];
+    if (fill) {
+      starters[i] = fill.id;
+      used.add(fill.id);
+      const idx = remaining.findIndex(p => p.id === fill.id);
+      if (idx !== -1) remaining.splice(idx, 1);
+    }
+  }
+
+  const subs = sortedAvail.filter(p => !used.has(p.id)).slice(0, 5).map(p => p.id);
+  const result: (string | null)[] = [...starters, ...subs];
+  while (result.length < 16) result.push(null);
+  return result;
 }
 
 export function normalizeLineupForTeam(team: Team, allPlayers: Player[], selectedIds: (string | null)[]): (string | null)[] {
@@ -131,19 +157,27 @@ export function normalizeLineupForTeam(team: Team, allPlayers: Player[], selecte
     .filter((id): id is string => id !== null)
     .map(id => allPlayers.find(p => p.id === id))
     .filter(Boolean) as Player[];
-  
+
   const uniq = new Map(pool.map(p => [p.id, p]));
   const selected = Array.from(uniq.values());
   const reqs = getFormationRequirements(team.formation);
   const used = new Set<string>();
-  const starters: string[] = [];
 
-  for (const req of reqs) {
-    const best = selected
+  // Build starters by slot index so each position is in the right place
+  const starters: (string | null)[] = new Array(11).fill(null);
+  for (let i = 0; i < 11; i++) {
+    const req = reqs[i];
+    const candidates = selected
       .filter(p => !used.has(p.id) && canPlay(p, req))
-      .sort((a, b) => b.attributes.skill - a.attributes.skill)[0];
+      .sort((a, b) => {
+        const aNatural = a.position === req ? 1 : 0;
+        const bNatural = b.position === req ? 1 : 0;
+        if (bNatural !== aNatural) return bNatural - aNatural;
+        return b.attributes.skill - a.attributes.skill;
+      });
+    const best = candidates[0];
     if (best) {
-      starters.push(best.id);
+      starters[i] = best.id;
       used.add(best.id);
     }
   }
@@ -152,10 +186,18 @@ export function normalizeLineupForTeam(team: Team, allPlayers: Player[], selecte
     .filter(p => !used.has(p.id))
     .sort((a, b) => b.attributes.skill - a.attributes.skill);
 
-  while (starters.length < 11 && remainingBySkill.length > 0) {
-    const p = remainingBySkill.shift()!;
-    starters.push(p.id);
-    used.add(p.id);
+  // Fill any still-empty slots with best remaining who can play that slot, then any remaining
+  for (let i = 0; i < 11; i++) {
+    if (starters[i] !== null) continue;
+    const req = reqs[i];
+    const canFill = remainingBySkill.find(p => canPlay(p, req));
+    const fill = canFill ?? remainingBySkill[0];
+    if (fill) {
+      starters[i] = fill.id;
+      used.add(fill.id);
+      const idx = remainingBySkill.findIndex(p => p.id === fill.id);
+      if (idx !== -1) remainingBySkill.splice(idx, 1);
+    }
   }
 
   const subs = selected
@@ -165,7 +207,6 @@ export function normalizeLineupForTeam(team: Team, allPlayers: Player[], selecte
     .map(p => p.id);
 
   const finalLineup: (string | null)[] = [...starters];
-  while (finalLineup.length < 11) finalLineup.push(null);
   finalLineup.push(...subs);
   while (finalLineup.length < 16) finalLineup.push(null);
 

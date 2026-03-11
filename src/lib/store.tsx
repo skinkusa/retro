@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { GameState, Team, Player, Fixture, GameMessage, ManagerProfile, StaffMember, PlayStyle, TeamRecords, Position, Side, TransferOffer, ManagerPersonality, MatchEvent, SeasonSummaryData, LastView } from '@/types/game';
 import { generateInitialData, generateFixtures, generatePlayer } from '@/lib/game-data';
 import { performSeasonTransition } from '@/lib/season-logic';
-import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes, getBestSquadForTeam, normalizeLineupForTeam, isTransferWindowOpen, calculateBoardConfidenceDelta } from '@/lib/game-engine';
+import { simulateMatch, updateLeagueTable, getFormationRequirements, simulateRemainingMinutes, getBestSquadForTeam, isTransferWindowOpen, calculateBoardConfidenceDelta } from '@/lib/game-engine';
 import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
@@ -210,7 +210,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       return s;
     });
-  }, [normalizeLineupForTeam]);
+  }, []);
 
   const addPlayerToSlot = useCallback((playerId: string, slotIndex: number) => {
     setState(s => {
@@ -266,23 +266,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const t = s.teams.find(x => x.id === s.userTeamId);
       if (!t) return s;
 
-      const healthy = s.players.filter(p =>
-        p.clubId === t.id &&
-        p.suspensionWeeks === 0 &&
-        !p.injury &&
-        p.status !== 'INJURED' &&
-        p.status !== 'SUSPENDED'
-      );
-
-      const best16 = [...healthy]
-        .sort((a, b) => b.attributes.skill - a.attributes.skill)
-        .slice(0, 16)
-        .map(p => p.id);
-
-      const next = normalizeLineupForTeam(t, s.players, best16);
+      const next = getBestSquadForTeam(t, s.players);
       return { ...s, teams: s.teams.map(x => x.id === t.id ? { ...x, lineup: next } : x) };
     });
-  }, [normalizeLineupForTeam]);
+  }, []);
 
   const toggleShortlist = useCallback((pId: string) => {
     setState(s => ({ ...s, players: s.players.map(p => p.id === pId ? { ...p, isShortlisted: !p.isShortlisted } : p) }));

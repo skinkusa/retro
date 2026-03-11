@@ -197,7 +197,7 @@ export function PlayerMarket() {
                 {p.position}
               </TableCell>
               <TableCell className="text-center text-[13px] max-[1300px]:text-[18px] font-mono text-primary font-black py-2.5 max-[1300px]:py-5 px-1 max-[1300px]:px-2">
-                {scout ? p.attributes.skill : "?"}
+                {scout ? Number(p.attributes.skill).toFixed(1) : "?"}
               </TableCell>
               <TableCell className="text-center py-2.5 max-[1300px]:py-5 px-1 max-[1300px]:px-2">
                 {scout ? (
