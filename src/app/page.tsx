@@ -17,8 +17,8 @@ export default function LandingPage() {
         </h1>
 
         <div className="w-full bg-black/80 backdrop-blur-sm border-2 border-amber-500/60 rounded-2xl p-6 shadow-2xl max-md:p-4 max-md:rounded-xl">
-          <p className="text-amber-200 text-center text-base sm:text-lg font-bold leading-relaxed max-md:text-sm max-md:leading-snug">
-            This game is designed to be run in a desktop browser and is not yet optimized for mobile. For the best experience, please play on a computer or tablet.
+          <p className="text-amber-200 text-center text-base sm:text-lg font-bold leading-relaxed max-md:text-sm max-md:leading-snug italic">
+            Experience the golden era of football management. Now optimized for desktop, tablet, and mobile browsers.
           </p>
         </div>
 
