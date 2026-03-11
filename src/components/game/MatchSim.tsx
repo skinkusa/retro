@@ -161,17 +161,6 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     }
   };
   
-  const handleTeamTalk = (talk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE') => {
-    setHomeTeamTalk(talk);
-    setIsHalfTime(false);
-    
-    let text = "";
-    if (talk === 'ENCOURAGE') text = "ENCOURAGING WORDS. THE LADS LOOK INSPIRED!";
-    else if (talk === 'AGGRESSIVE') text = "THE HAIRDRYER TREATMENT! THEY'RE FLYING OUT OF THE TUNNEL.";
-    else text = "CALM AND COLLECTED. TACTICAL ADJUSTMENTS MADE.";
-    
-    setActiveEvent({ minute: 45, type: 'COMMENTARY', text });
-  };
 
   const currentHomeGoals = fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
   const currentAwayGoals = fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;

@@ -48,6 +48,7 @@ interface GameContextType {
   clearCurrentMatch: () => void;
   quitToMainMenu: () => void;
   setLastView: (view: LastView) => void;
+  expandStadium: (tier: 'small' | 'medium' | 'large') => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);

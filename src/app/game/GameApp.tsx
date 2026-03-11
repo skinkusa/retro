@@ -252,7 +252,7 @@ function GameContent() {
   const currentWeekFixtures = state.fixtures.filter(f => f.week === state.currentWeek && f.division === userTeam.division).sort((a, b) => a.homeTeamId.localeCompare(b.homeTeamId));
 
   return (
-    <div className="game-app-shell flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
+    <div className="game-app-shell w-full flex flex-col min-h-screen h-screen max-w-screen-2xl mx-auto border-x-4 border-primary/20 bg-transparent font-mono">
       {state.isFired && (
         <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 animate-in fade-in duration-500">
           <RetroWindow title="TERMINATION OF CONTRACT" className="max-w-xl w-full border-red-500/50 shadow-[0_0_50px_rgba(239,68,68,0.3)] bg-black/90">
@@ -451,7 +451,7 @@ function GameContent() {
         )}
       </main>
 
-      <nav className="game-nav fixed bottom-0 left-0 right-0 max-w-screen-2xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 max-[1300px]:h-32 flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
+      <nav className="game-nav w-full fixed bottom-0 left-0 right-0 max-w-screen-2xl mx-auto bg-black/90 backdrop-blur-2xl border-t-4 border-primary/40 h-20 sm:h-24 max-[1300px]:h-32 flex items-stretch z-40 shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
         <TooltipProvider>
           <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('HUB')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'HUB' ? 'text-accent bg-accent/10 border-t-8 max-[1300px]:border-t-[12px] border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><LayoutDashboard size={36} className="max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-[12px] max-[1300px]:text-[18px] uppercase font-black tracking-widest">Dashboard</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">HUB & NEWS</TooltipContent></TooltipPortal></Tooltip>
           <Tooltip><TooltipTrigger asChild><button onClick={() => goToTab('SQUAD')} className={cn("flex-1 flex flex-col items-center justify-center gap-2 transition-all", activeTab === 'SQUAD' ? 'text-accent bg-accent/10 border-t-8 max-[1300px]:border-t-[12px] border-accent' : 'text-white/90 hover:text-primary hover:bg-primary/5')}><Users size={36} className="max-[1300px]:w-14 max-[1300px]:h-14" /><span className="text-[12px] max-[1300px]:text-[18px] uppercase font-black tracking-widest">Team</span></button></TooltipTrigger><TooltipPortal><TooltipContent className="font-black text-lg">SQUAD & TACTICS</TooltipContent></TooltipPortal></Tooltip>
