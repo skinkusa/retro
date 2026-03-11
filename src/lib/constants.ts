@@ -4,6 +4,10 @@ export const OVERRIDES_KEY = 'retro_manager_team_overrides_v1.9.3';
 /** Breakpoints aligned with Tailwind (md: 768px, lg: 1024px). Use for JS/matchMedia and custom CSS. */
 export const BREAKPOINT_MD = 768;
 export const BREAKPOINT_LG = 1024;
+/** Canonical mobile viewport width for E2E/Playwright; must be < BREAKPOINT_MD so layout uses mobile rules. */
+export const MOBILE_VIEWPORT_WIDTH = 375;
+/** Canonical mobile viewport height (e.g. iPhone SE). */
+export const MOBILE_VIEWPORT_HEIGHT = 667;
 /** Media query strings for use in matchMedia or CSS: mobile < 768px, below lg < 1024px. */
 export const MEDIA_MOBILE = `(max-width: ${BREAKPOINT_MD - 1}px)`;
 export const MEDIA_BELOW_LG = `(max-width: ${BREAKPOINT_LG - 1}px)`;

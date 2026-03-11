@@ -20,7 +20,7 @@ export function generateFixtures(teams: Team[], season: number) {
     const roundsPerHalf = N - 1; // N-1 rounds for single round-robin
     for (let week = 1; week <= 38; week++) {
       const r = (week - 1) % roundsPerHalf; // round index 0 .. N-2
-      const swapHomeAway = week > roundsPerHalf; // second half of season: reverse home/away
+      const swapHomeAway = N === 2 ? week % 2 === 0 : week > roundsPerHalf; // second half: reverse; for 2 teams alternate each week
       // Circle method: position 0 = team 0; position j (1..N-1) = team (j-1+r) % (N-1) + 1
       // Pair position i with position N-1-i for i = 0 .. floor(N/2)-1 (each team plays once per round)
       for (let i = 0; i < Math.floor(N / 2); i++) {

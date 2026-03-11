@@ -9,6 +9,7 @@ import { ARCADE_ENGINE_CONFIG } from '@/lib/engine-config';
 import { useToast } from '@/hooks/use-toast';
 import { formatMoney } from '@/lib/utils';
 import { STORAGE_KEY, OVERRIDES_KEY } from '@/lib/constants';
+import { compressedSave, parseStoredSave, slimPlayers, slimFixtures } from '@/lib/save-utils';
 import LZString from 'lz-string';
 import { STAFF_ROLES } from '@/data/staff-config';
 import { NATIONALITY_POOLS } from '@/data/player-names';
@@ -104,49 +105,6 @@ function getInitialState(): GameState {
 // ---------------------------------------------------------------------------
 // Save helpers — keep localStorage well under the ~5MB quota
 // ---------------------------------------------------------------------------
-const KEEP_EVENT_TYPES = new Set(['GOAL', 'RED', 'INJURY', 'SUB', 'PENALTY_SHOOTOUT']);
-
-function slimFixtures(fixtures: Fixture[]): Fixture[] {
-  return fixtures.map(f => {
-    if (!f.result) return f;
-    return {
-      ...f,
-      result: {
-        homeGoals: f.result.homeGoals,
-        awayGoals: f.result.awayGoals,
-        ...(f.result.homePens !== undefined && { homePens: f.result.homePens, awayPens: f.result.awayPens }),
-        attendance: f.result.attendance,
-        scorers: f.result.scorers,
-        cards: f.result.cards,
-        injuries: [],
-        ratings: {},
-        events: f.result.events?.filter(e => KEEP_EVENT_TYPES.has(e.type)) ?? [],
-        shotTakers: undefined,
-        sotTakers: undefined,
-      }
-    };
-  });
-}
-
-function slimPlayers(players: Player[]): Player[] {
-  return players.map(p => ({ ...p, history: p.history ? p.history.slice(-5) : [] }));
-}
-
-function buildSaveable(state: GameState): GameState {
-  return { ...state, fixtures: slimFixtures(state.fixtures), players: slimPlayers(state.players) };
-}
-
-function compressedSave(data: GameState): string {
-  return LZString.compressToUTF16(JSON.stringify(buildSaveable(data)));
-}
-
-function parseStoredSave(raw: string): GameState {
-  // New format: LZ-compressed
-  const decompressed = LZString.decompressFromUTF16(raw);
-  if (decompressed) return JSON.parse(decompressed) as GameState;
-  // Legacy format: plain JSON — parse and we'll re-save as compressed
-  return JSON.parse(raw) as GameState;
-}
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
