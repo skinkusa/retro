@@ -21,7 +21,7 @@ interface PlayerProfileProps {
 
 export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: PlayerProfileProps) {
   const { state, toggleShortlist, toggleTransferList, buyPlayer, renewContract, acceptBid, rejectBid } = useGame();
-  
+
   const userTeam = state.teams.find(t => t.id === state.userTeamId);
   const scout = userTeam?.staff.find(st => st.role === 'SCOUT');
   const isOwnPlayer = player?.clubId === state.userTeamId;
@@ -85,7 +85,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
   };
 
   const getPositionLabel = (pos: Position) => {
-    switch(pos) {
+    switch (pos) {
       case 'GK': return 'GOALKEEPER';
       case 'DF': return 'DEFENDER';
       case 'MF': return 'MIDFIELDER';
@@ -142,49 +142,49 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
 
   return (
     <Dialog open={!!player} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-primary p-0 overflow-hidden w-[95vw] max-w-[1600px] h-[95vh] max-h-[95vh] flex flex-col font-mono rounded-2xl">
+      <DialogContent className="bg-card border-primary p-0 overflow-hidden w-[95vw] max-w-[1600px] h-[90dvh] max-h-[90dvh] flex flex-col font-mono rounded-2xl">
         <DialogHeader className="bg-primary p-2 max-[1300px]:p-2 shrink-0 rounded-t-xl">
           <DialogTitle className="text-primary-foreground uppercase flex justify-between items-center text-lg max-[1300px]:text-lg font-black tracking-tight">
             <div className="flex items-center gap-1.5 max-[1300px]:gap-2">
-                <div className="flex flex-col">
-                  <span className="leading-none">{player.name}</span>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[12px] max-[1300px]:text-[16px] opacity-70 font-black tracking-widest">
-                      {(player.nationality || 'England').toUpperCase()}
-                    </span>
-                    <span className="text-[14px] max-[1300px]:text-[20px]">
-                      {player.nationality === 'France' ? '🇫🇷' : 
-                       player.nationality === 'Germany' ? '🇩🇪' : 
-                       player.nationality === 'Spain' ? '🇪🇸' : 
-                       player.nationality === 'Italy' ? '🇮🇹' : 
-                       player.nationality === 'Brazil' ? '🇧🇷' : 
-                       player.nationality === 'Netherlands' ? '🇳🇱' : '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}
-                    </span>
-                  </div>
+              <div className="flex flex-col">
+                <span className="leading-none">{player.name}</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[12px] max-[1300px]:text-[16px] opacity-70 font-black tracking-widest">
+                    {(player.nationality || 'England').toUpperCase()}
+                  </span>
+                  <span className="text-[14px] max-[1300px]:text-[20px]">
+                    {player.nationality === 'France' ? '🇫🇷' :
+                      player.nationality === 'Germany' ? '🇩🇪' :
+                        player.nationality === 'Spain' ? '🇪🇸' :
+                          player.nationality === 'Italy' ? '🇮🇹' :
+                            player.nationality === 'Brazil' ? '🇧🇷' :
+                              player.nationality === 'Netherlands' ? '🇳🇱' : '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}
+                  </span>
                 </div>
-               <TooltipProvider>
-                 <Tooltip>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                        onClick={() => toggleShortlist(player.id)}
-                        className={cn(
-                          "transition-all active:scale-90 p-1 rounded-full",
-                          player.isShortlisted ? "text-black fill-black" : "text-primary-foreground/50 hover:text-primary-foreground"
-                        )}
+                    <button
+                      onClick={() => toggleShortlist(player.id)}
+                      className={cn(
+                        "transition-all active:scale-90 p-1 rounded-full",
+                        player.isShortlisted ? "text-black fill-black" : "text-primary-foreground/50 hover:text-primary-foreground"
+                      )}
                     >
-                        <Heart size={24} className={cn("max-[1300px]:w-8 max-[1300px]:h-8", player.isShortlisted ? "fill-current" : "")} />
+                      <Heart size={24} className={cn("max-[1300px]:w-8 max-[1300px]:h-8", player.isShortlisted ? "fill-current" : "")} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="font-black">Shortlist</TooltipContent>
-                 </Tooltip>
-               </TooltipProvider>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <span className="text-[12px] max-[1300px]:text-[14px] opacity-70 font-mono tracking-[0.1em] hidden sm:inline">PLAYER PROFILE V.1993</span>
           </DialogTitle>
           <DialogDescription className="sr-only">Detailed player profile for {player.name}.</DialogDescription>
         </DialogHeader>
-        
-        <Tabs defaultValue={defaultTab} className="flex flex-col flex-1 min-h-0">
+
+        <Tabs defaultValue={defaultTab} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <TabsList className="bg-black/40 border-b border-primary/20 h-9 max-[1300px]:h-11 p-0.5 gap-0.5 rounded-none shrink-0">
             <TabsTrigger value="overview" className="flex-1 uppercase font-black tracking-tight text-[10px] max-[1300px]:text-[12px] rounded-md data-[state=active]:bg-primary h-full">
               <UserCircle size={12} className="mr-1 max-[1300px]:w-4 max-[1300px]:h-4" /> Overview
@@ -200,10 +200,10 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 min-h-0 overflow-auto">
-            <div className="p-2 md:p-3">
-              <TabsContent value="overview" className="mt-0 h-full">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 h-full max-h-[calc(95vh-220px)] min-h-0">
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            <div className="p-2 md:p-3 overflow-y-auto overflow-x-hidden flex-1 min-h-0">
+              <TabsContent value="overview" className="mt-0 h-full data-[state=inactive]:hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-3 min-h-0">
                   <div className="flex flex-col gap-2 min-h-0">
                     <div className="grid grid-cols-4 gap-1.5 text-center shrink-0">
                       <div className="bg-black/60 p-2 max-[1300px]:p-2 border border-primary/20 rounded-lg shadow-inner">
@@ -234,7 +234,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                           <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">SOT</div><div className="text-sm max-[1300px]:text-base font-black text-white">{player.seasonStats.shotsOnTarget ?? '—'}</div></div>
                           <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">CS</div><div className="text-sm max-[1300px]:text-base font-black text-white">{player.position === 'GK' ? (player.seasonStats.cleanSheets ?? '—') : '—'}</div></div>
                           <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">Min</div><div className="text-sm max-[1300px]:text-base font-black text-white">{player.seasonStats.minutesPlayed ?? '—'}</div></div>
-                          <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">Rat</div><div className="text-sm max-[1300px]:text-base font-black text-accent">{player.seasonStats.avgRating.toFixed(2)}</div></div>
+                          <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">Rat</div><div className="text-sm max-[1300px]:text-base font-black text-accent">{Number.isFinite(player.seasonStats.avgRating) ? player.seasonStats.avgRating.toFixed(2) : '0.00'}</div></div>
                           <div><div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase font-black">MoM</div><div className="text-sm max-[1300px]:text-base font-black text-primary">{player.seasonStats.manOfTheMatch ?? 0}</div></div>
                         </div>
                       </div>
@@ -259,8 +259,8 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                             <div key={i} className={cn(
                               "flex-1 text-center py-1 rounded text-[11px] font-black",
                               rating >= 7.5 ? "bg-accent/20 text-accent border border-accent/30" :
-                              rating >= 6.5 ? "bg-primary/20 text-primary border border-primary/30" :
-                              "bg-red-500/20 text-red-500 border border-red-500/30"
+                                rating >= 6.5 ? "bg-primary/20 text-primary border border-primary/30" :
+                                  "bg-red-500/20 text-red-500 border border-red-500/30"
                             )}>
                               {rating.toFixed(1)}
                             </div>
@@ -271,7 +271,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                       </div>
                     </div>
                   </div>
-                  <div className="bg-primary/5 border border-primary/20 p-2 max-[1300px]:p-3 rounded-lg shrink-0 lg:shrink flex flex-col gap-2">
+                  <div className="bg-primary/5 border border-primary/20 p-2 max-[1300px]:p-3 rounded-lg min-h-0 flex flex-col gap-2">
                     <h4 className="text-[10px] max-[1300px]:text-[14px] font-black text-primary uppercase border-b border-primary/10 pb-1">Availability</h4>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                       <div className="space-y-0.5"><span className="text-[9px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-bold">Fitness</span><div className="text-base max-[1300px]:text-xl font-black text-white">{player.fitness}%</div></div>
@@ -350,7 +350,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                         <div className="text-[8px] max-[1300px]:text-[10px] text-muted-foreground uppercase">{player.isListed ? 'Listed' : 'Not Listed'}</div>
                       </div>
                     </div>
-                    <Button 
+                    <Button
                       onClick={() => toggleTransferList(player.id)}
                       className={cn(
                         "h-8 max-[1300px]:h-10 px-4 max-[1300px]:px-6 font-black text-[10px] max-[1300px]:text-[14px] uppercase retro-button",
@@ -383,7 +383,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                 )}
 
                 {!isOwnPlayer && (
-                  <Button 
+                  <Button
                     onClick={() => buyPlayer(player.id)}
                     disabled={!canAfford}
                     className="w-full bg-accent text-accent-foreground font-black retro-button h-12 max-[1300px]:h-16 uppercase text-[12px] max-[1300px]:text-[18px] tracking-widest shadow-xl rounded-lg"
@@ -394,45 +394,45 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
 
                 {isOwnPlayer && (
                   <div className="bg-primary/15 border border-primary/20 p-3 max-[1300px]:p-4 space-y-3 max-[1300px]:space-y-4 rounded-lg shadow-inner">
-                     <div className="flex justify-between items-center border-b border-primary/10 pb-1.5 max-[1300px]:pb-2">
-                       <span className="text-[11px] max-[1300px]:text-[14px] font-black text-primary uppercase tracking-tight">Negotiation Console</span>
-                       <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground font-black">Patience:</span>
-                          <div className="flex gap-1 max-[1300px]:gap-2">
-                            {[...Array(3)].map((_, i) => (
-                              <div key={i} className={cn("w-3 h-3 max-[1300px]:w-4 max-[1300px]:h-4 rounded-full", i < patience ? "bg-accent shadow-[0_0_5px_rgba(38,217,117,0.5)]" : "bg-black/40")} />
-                            ))}
-                          </div>
-                       </div>
-                     </div>
+                    <div className="flex justify-between items-center border-b border-primary/10 pb-1.5 max-[1300px]:pb-2">
+                      <span className="text-[11px] max-[1300px]:text-[14px] font-black text-primary uppercase tracking-tight">Negotiation Console</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground font-black">Patience:</span>
+                        <div className="flex gap-1 max-[1300px]:gap-2">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className={cn("w-3 h-3 max-[1300px]:w-4 max-[1300px]:h-4 rounded-full", i < patience ? "bg-accent shadow-[0_0_5px_rgba(38,217,117,0.5)]" : "bg-black/40")} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-                     {feedback && (
-                       <div className="bg-black/80 p-2 max-[1300px]:p-3 border border-accent/20 text-center animate-in fade-in zoom-in duration-300 rounded-lg">
-                          <p className="text-[12px] max-[1300px]:text-[16px] font-black text-accent italic uppercase">{feedback}</p>
-                       </div>
-                     )}
- 
-                     <div className="grid grid-cols-2 gap-4 max-[1300px]:gap-6">
-                        <div className="space-y-1">
-                          <label className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-black">Term (Years)</label>
-                          <div className="flex items-center gap-1.5 max-[1300px]:gap-2">
-                            <Button onClick={() => setOfferedYears(y => Math.max(1, y - 1))} className="h-8 w-8 max-[1300px]:h-10 max-[1300px]:w-10 retro-button bg-black/40"><TrendingDown size={14} className="max-[1300px]:w-4 max-[1300px]:h-4" /></Button>
-                            <span className="flex-1 text-center font-black text-white text-base max-[1300px]:text-xl">{offeredYears}Y</span>
-                            <Button onClick={() => setOfferedYears(y => Math.min(5, y + 1))} className="h-8 w-8 max-[1300px]:h-10 max-[1300px]:w-10 retro-button bg-black/40"><TrendingUp size={14} className="max-[1300px]:w-4 max-[1300px]:h-4" /></Button>
-                          </div>
+                    {feedback && (
+                      <div className="bg-black/80 p-2 max-[1300px]:p-3 border border-accent/20 text-center animate-in fade-in zoom-in duration-300 rounded-lg">
+                        <p className="text-[12px] max-[1300px]:text-[16px] font-black text-accent italic uppercase">{feedback}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 max-[1300px]:gap-6">
+                      <div className="space-y-1">
+                        <label className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-black">Term (Years)</label>
+                        <div className="flex items-center gap-1.5 max-[1300px]:gap-2">
+                          <Button onClick={() => setOfferedYears(y => Math.max(1, y - 1))} className="h-8 w-8 max-[1300px]:h-10 max-[1300px]:w-10 retro-button bg-black/40"><TrendingDown size={14} className="max-[1300px]:w-4 max-[1300px]:h-4" /></Button>
+                          <span className="flex-1 text-center font-black text-white text-base max-[1300px]:text-xl">{offeredYears}Y</span>
+                          <Button onClick={() => setOfferedYears(y => Math.min(5, y + 1))} className="h-8 w-8 max-[1300px]:h-10 max-[1300px]:w-10 retro-button bg-black/40"><TrendingUp size={14} className="max-[1300px]:w-4 max-[1300px]:h-4" /></Button>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-black">Weekly Wage</label>
-                          <div className="relative">
-                            <Input type="number" value={offeredWage} onChange={(e) => setOfferedWage(parseInt(e.target.value) || 0)} className="bg-black/40 border-primary/20 h-8 max-[1300px]:h-10 text-[12px] max-[1300px]:text-[16px] font-black pl-5 max-[1300px]:pl-7 rounded-md" />
-                            <span className="absolute left-2 max-[1300px]:left-2.5 top-2 max-[1300px]:top-2.5 text-[10px] max-[1300px]:text-[14px] text-muted-foreground font-black">£</span>
-                          </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground uppercase font-black">Weekly Wage</label>
+                        <div className="relative">
+                          <Input type="number" value={offeredWage} onChange={(e) => setOfferedWage(parseInt(e.target.value) || 0)} className="bg-black/40 border-primary/20 h-8 max-[1300px]:h-10 text-[12px] max-[1300px]:text-[16px] font-black pl-5 max-[1300px]:pl-7 rounded-md" />
+                          <span className="absolute left-2 max-[1300px]:left-2.5 top-2 max-[1300px]:top-2.5 text-[10px] max-[1300px]:text-[14px] text-muted-foreground font-black">£</span>
                         </div>
-                     </div>
- 
-                     <Button onClick={handleNegotiate} disabled={patience <= 0} className="w-full bg-primary text-primary-foreground font-black retro-button h-10 max-[1300px]:h-12 uppercase text-[11px] max-[1300px]:text-[14px] shadow-lg">
-                       <Clock size={16} className="mr-1.5 max-[1300px]:w-4 max-[1300px]:h-4" /> SUBMIT OFFER
-                     </Button>
+                      </div>
+                    </div>
+
+                    <Button onClick={handleNegotiate} disabled={patience <= 0} className="w-full bg-primary text-primary-foreground font-black retro-button h-10 max-[1300px]:h-12 uppercase text-[11px] max-[1300px]:text-[14px] shadow-lg">
+                      <Clock size={16} className="mr-1.5 max-[1300px]:w-4 max-[1300px]:h-4" /> SUBMIT OFFER
+                    </Button>
                   </div>
                 )}
               </TabsContent>
@@ -454,21 +454,21 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                     </div>
                     {scout ? (
                       <div className="space-y-2 max-[1300px]:space-y-3">
-                         <div className="flex justify-between items-center">
-                            <span className="text-[11px] max-[1300px]:text-[14px] uppercase font-black text-muted-foreground">Progression:</span>
-                            <div className="flex-1 max-w-[100px] h-2 bg-black/40 rounded-full mx-3 overflow-hidden border border-white/5">
-                               <div 
-                                style={{ width: `${Math.min(100, (player.developmentPoints / 150) * 100)}%` }} 
-                                className="h-full bg-accent transition-all duration-500" 
-                               />
-                            </div>
-                            <span className="text-[11px] max-[1300px]:text-[14px] font-black text-white">{Math.min(100, Math.floor((player.developmentPoints / 150) * 100))}%</span>
-                         </div>
-                         <p className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground italic leading-tight uppercase font-black">
-                            {player.age < 23 ? "Great growth potential." : 
-                             player.age >= 31 ? "Physical decline with age." :
-                             "Reached peak performance."}
-                         </p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] max-[1300px]:text-[14px] uppercase font-black text-muted-foreground">Progression:</span>
+                          <div className="flex-1 max-w-[100px] h-2 bg-black/40 rounded-full mx-3 overflow-hidden border border-white/5">
+                            <div
+                              style={{ width: `${Math.min(100, (player.developmentPoints / 150) * 100)}%` }}
+                              className="h-full bg-accent transition-all duration-500"
+                            />
+                          </div>
+                          <span className="text-[11px] max-[1300px]:text-[14px] font-black text-white">{Math.min(100, Math.floor((player.developmentPoints / 150) * 100))}%</span>
+                        </div>
+                        <p className="text-[10px] max-[1300px]:text-[12px] text-muted-foreground italic leading-tight uppercase font-black">
+                          {player.age < 23 ? "Great growth potential." :
+                            player.age >= 31 ? "Physical decline with age." :
+                              "Reached peak performance."}
+                        </p>
                       </div>
                     ) : (
                       <div className="text-[11px] max-[1300px]:text-[14px] text-muted-foreground font-black italic text-center py-4 max-[1300px]:py-6 opacity-40">
@@ -515,7 +515,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
                       <span className="text-muted-foreground uppercase">Current:</span>
                       <span className="text-white">{player.seasonStats.apps}A</span>
                       <span className="text-accent">{player.seasonStats.goals}G</span>
-                      <span className="text-primary">{player.seasonStats.avgRating.toFixed(2)}R</span>
+                      <span className="text-primary">{Number.isFinite(player.seasonStats.avgRating) ? player.seasonStats.avgRating.toFixed(2) : '0.00'}R</span>
                       <span className="text-cyan">{player.seasonStats.shots ?? 0}S</span>
                       {player.position === 'GK' && <span className="text-green-500">{player.seasonStats.cleanSheets ?? 0}CS</span>}
                       <span className="text-primary">{player.seasonStats.manOfTheMatch ?? 0}MoM</span>
@@ -540,7 +540,7 @@ export function PlayerProfile({ player, onClose, defaultTab = 'overview' }: Play
           </div>
 
           <div className="p-1 max-[1300px]:p-1.5 bg-muted/20 border-t border-primary/20 shrink-0">
-            <Button 
+            <Button
               onClick={onClose}
               className="w-full bg-primary text-primary-foreground font-black retro-button h-9 max-[1300px]:h-11 uppercase text-[12px] max-[1300px]:text-[16px] tracking-[0.1em] shadow-xl rounded-xl"
             >

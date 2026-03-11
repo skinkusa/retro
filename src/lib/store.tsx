@@ -464,14 +464,17 @@ setState(s => ({
         if (!f.result) return;
         const hTeam = s.teams.find(t => t.id === f.homeTeamId)!;
         weeklyFinances[hTeam.id].gate += f.result.attendance * (5 - hTeam.division) * 10;
-        Object.keys(f.result.ratings).forEach(pid => { statsToUpdate[pid] = { apps: 1, goals: 0, rating: f.result!.ratings[pid] || 6.0, fitnessLoss: 15 + Math.floor(Math.random() * 10), yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 90 }; });
-        f.result.scorers.forEach(sc => { if (statsToUpdate[sc.playerId]) statsToUpdate[sc.playerId].goals++; });
-        f.result.shotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shots++; });
-        f.result.sotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shotsOnTarget++; });
-        const homeGkId = s.players.find(p => p.clubId === f.homeTeamId && p.position === 'GK' && f.result!.ratings[p.id] != null)?.id;
-        const awayGkId = s.players.find(p => p.clubId === f.awayTeamId && p.position === 'GK' && f.result!.ratings[p.id] != null)?.id;
-        if (f.result!.awayGoals === 0 && homeGkId && statsToUpdate[homeGkId]) statsToUpdate[homeGkId].cleanSheets = 1;
-        if (f.result!.homeGoals === 0 && awayGkId && statsToUpdate[awayGkId]) statsToUpdate[awayGkId].cleanSheets = 1;
+        const ratings = f.result.ratings;
+        if (ratings && typeof ratings === 'object' && Object.keys(ratings).length > 0) {
+          Object.keys(ratings).forEach(pid => { statsToUpdate[pid] = { apps: 1, goals: 0, rating: ratings[pid] ?? 6.0, fitnessLoss: 15 + Math.floor(Math.random() * 10), yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 90 }; });
+          f.result.scorers.forEach(sc => { if (statsToUpdate[sc.playerId]) statsToUpdate[sc.playerId].goals++; });
+          f.result.shotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shots++; });
+          f.result.sotTakers?.forEach(st => { if (statsToUpdate[st.playerId]) statsToUpdate[st.playerId].shotsOnTarget++; });
+          const homeGkId = s.players.find(p => p.clubId === f.homeTeamId && p.position === 'GK' && ratings[p.id] != null)?.id;
+          const awayGkId = s.players.find(p => p.clubId === f.awayTeamId && p.position === 'GK' && ratings[p.id] != null)?.id;
+          if (f.result.awayGoals === 0 && homeGkId && statsToUpdate[homeGkId]) statsToUpdate[homeGkId].cleanSheets = 1;
+          if (f.result.homeGoals === 0 && awayGkId && statsToUpdate[awayGkId]) statsToUpdate[awayGkId].cleanSheets = 1;
+        }
         f.result.cards.forEach(c => {
           if (!statsToUpdate[c.playerId]) statsToUpdate[c.playerId] = { apps: 0, goals: 0, rating: 6.0, fitnessLoss: 0, yellowCards: 0, redCards: 0, shots: 0, shotsOnTarget: 0, cleanSheets: 0, minutesPlayed: 0 };
           if (c.type === 'YELLOW') statsToUpdate[c.playerId].yellowCards++;
@@ -528,23 +531,28 @@ setState(s => ({
 
         if (statsToUpdate[p.id]) {
           const m = statsToUpdate[p.id];
+          const appsThisMatch = m.apps ?? 1;
           up.fitness = Math.max(0, up.fitness - m.fitnessLoss);
           up.morale = Math.min(100, up.morale + (m.rating > 7 ? 5 : (m.rating < 6 ? -2 : 0)));
           
-          // Update Recent Form (last 5)
-          up.recentForm = [...(up.recentForm || []), m.rating].slice(-5);
+          // Update Recent Form (last 5) and sharpness only when player actually played
+          if (appsThisMatch > 0) {
+            up.recentForm = [...(up.recentForm || []), m.rating].slice(-5);
+            up.condition = Math.min(100, up.condition + 15);
+          }
           
-          // Match Sharpness (Condition) gain
-          up.condition = Math.min(100, up.condition + 15);
-
-          const newAvg = parseFloat(((up.seasonStats.avgRating * up.seasonStats.apps + m.rating) / (up.seasonStats.apps + 1)).toFixed(2));
+          const prevApps = up.seasonStats.apps ?? 0;
+          const prevAvg = Number(up.seasonStats.avgRating);
+          const safePrevAvg = Number.isFinite(prevAvg) ? prevAvg : 0;
+          const totalApps = prevApps + appsThisMatch;
+          const newAvg = totalApps > 0 ? parseFloat(((safePrevAvg * prevApps + m.rating * appsThisMatch) / totalApps).toFixed(2)) : m.rating;
           const prevShots = up.seasonStats.shots ?? 0;
           const prevSOT = up.seasonStats.shotsOnTarget ?? 0;
           const prevCS = up.seasonStats.cleanSheets ?? 0;
           const prevMins = up.seasonStats.minutesPlayed ?? 0;
           up.seasonStats = {
             ...up.seasonStats,
-            apps: up.seasonStats.apps + 1,
+            apps: totalApps,
             goals: up.seasonStats.goals + m.goals,
             avgRating: newAvg,
             yellowCards: (up.seasonStats.yellowCards || 0) + m.yellowCards,
