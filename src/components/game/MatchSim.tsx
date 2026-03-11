@@ -18,11 +18,11 @@ import { PlayerProfile } from './PlayerProfile';
 import { MatchOverlayTemplate } from './MatchOverlayTemplate';
 import { MatchPlayView } from './MatchPlayView';
 
-export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: { 
-  fixture: Fixture, 
-  homeTeam: Team, 
+export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
+  fixture: Fixture,
+  homeTeam: Team,
   awayTeam: Team,
-  onFinish: () => void 
+  onFinish: () => void
 }) {
   const { state, swapPlayers, setTactics, simulateWeek, updateMidMatchResult } = useGame();
   const [currentMinute, setCurrentMinute] = useState(0);
@@ -39,9 +39,9 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
   const [viewingPlayer, setViewingPlayer] = useState<Player | null>(null);
   const [homeTeamTalk, setHomeTeamTalk] = useState<'ENCOURAGE' | 'CALM' | 'AGGRESSIVE' | null>(null);
-  
+
   const stadiumOverlay = PlaceHolderImages.find(img => img.id === 'match-action-overlay')?.imageUrl;
-  
+
   useEffect(() => {
     if (!fixture.result) {
       simulateWeek();
@@ -71,15 +71,15 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     const timer = setInterval(() => {
       setCurrentMinute(prev => {
         const nextMin = prev + 1;
-        if (nextMin === 45 && !isHalfTime && prev < 45) { 
-          setIsHalfTime(true); 
-          setActiveEvent({ minute: 45, type: 'COMMENTARY', text: "HALF TIME. THE MANAGER IS HEADING TO THE DRESSING ROOM..." }); 
-          return 45; 
+        if (nextMin === 45 && !isHalfTime && prev < 45) {
+          setIsHalfTime(true);
+          setActiveEvent({ minute: 45, type: 'COMMENTARY', text: "HALF TIME. THE MANAGER IS HEADING TO THE DRESSING ROOM..." });
+          return 45;
         }
-        if (nextMin >= 90) { 
-          setIsFinished(true); 
-          setActiveEvent({ minute: 90, type: 'COMMENTARY', text: "FULL TIME! THAT'S IT." }); 
-          return 90; 
+        if (nextMin >= 90) {
+          setIsFinished(true);
+          setActiveEvent({ minute: 90, type: 'COMMENTARY', text: "FULL TIME! THAT'S IT." });
+          return 90;
         }
         const minuteEvent = fixture.result!.events.find(e => e.minute === nextMin);
         if (minuteEvent) {
@@ -101,7 +101,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
         return nextMin;
       });
     }, tickSpeed);
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer);
   }, [fixture.result, isHalfTime, isFinished, isPaused, isGoalPaused, showLineups, tickSpeed]);
 
   useEffect(() => {
@@ -115,16 +115,16 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   }, [activeAlert]);
 
   const handleResume = () => { setIsPaused(false); setSwapSourceId(null); setPausedForInjury(false); setPausedForRedCard(false); };
-  
+
   const handleTeamTalk = (talk: 'ENCOURAGE' | 'CALM' | 'AGGRESSIVE') => {
     setHomeTeamTalk(talk);
     setIsHalfTime(false);
-    
+
     let text = "";
     if (talk === 'ENCOURAGE') text = "ENCOURAGING WORDS. THE LADS LOOK INSPIRED!";
     else if (talk === 'AGGRESSIVE') text = "THE HAIRDRYER TREATMENT! THEY'RE FLYING OUT OF THE TUNNEL.";
     else text = "CALM AND COLLECTED. TACTICAL ADJUSTMENTS MADE.";
-    
+
     setActiveEvent({ minute: 45, type: 'COMMENTARY', text });
   };
 
@@ -154,13 +154,13 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           fixture.result.events.push(subEvent);
           setActiveEvent(subEvent);
         }
-        
+
         swapPlayers(swapSourceId, pId);
         setSwapSourceId(null);
       }
     }
   };
-  
+
 
   const currentHomeGoals = fixture.result?.scorers.filter(s => homeLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
   const currentAwayGoals = fixture.result?.scorers.filter(s => awayLineup.some(p => p.id === s.playerId) && s.minute <= currentMinute).length || 0;
@@ -172,13 +172,13 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const zones = useMemo(() => {
     const rawZones = {
       home: {
-        DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
-        MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined), 
+        DEF: getZoneStrength(homeLineup, homeTeam, 'DEF', homeTeam.isUserTeam ? state.manager?.personality : undefined),
+        MID: getZoneStrength(homeLineup, homeTeam, 'MID', homeTeam.isUserTeam ? state.manager?.personality : undefined),
         ATT: getZoneStrength(homeLineup, homeTeam, 'ATT', homeTeam.isUserTeam ? state.manager?.personality : undefined)
       },
       away: {
-        DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
-        MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined), 
+        DEF: getZoneStrength(awayLineup, awayTeam, 'DEF', awayTeam.isUserTeam ? state.manager?.personality : undefined),
+        MID: getZoneStrength(awayLineup, awayTeam, 'MID', awayTeam.isUserTeam ? state.manager?.personality : undefined),
         ATT: getZoneStrength(awayLineup, awayTeam, 'ATT', awayTeam.isUserTeam ? state.manager?.personality : undefined)
       }
     };
@@ -192,15 +192,15 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
     }
 
     return {
-      home: { 
-        DEF: Math.round(rawZones.home.DEF * homeMod), 
-        MID: Math.round(rawZones.home.MID * homeMod), 
-        ATT: Math.round(rawZones.home.ATT * homeMod) 
+      home: {
+        DEF: Math.round(rawZones.home.DEF * homeMod),
+        MID: Math.round(rawZones.home.MID * homeMod),
+        ATT: Math.round(rawZones.home.ATT * homeMod)
       },
-      away: { 
-        DEF: rawZones.away.DEF, 
-        MID: rawZones.away.MID, 
-        ATT: rawZones.away.ATT 
+      away: {
+        DEF: rawZones.away.DEF,
+        MID: rawZones.away.MID,
+        ATT: rawZones.away.ATT
       }
     };
   }, [homeLineup, awayLineup, homeTeam, awayTeam, state.manager?.personality, currentMinute, homeTeamTalk]);
@@ -286,8 +286,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           <Table>
             <TableBody>
               {benchPlayers.map(p => (
-                <TableRow 
-                  key={p.id} 
+                <TableRow
+                  key={p.id}
                   onClick={() => handleSwapInteraction(p.id)}
                   className={cn(
                     "border-b border-white/5 hover:bg-primary/10 cursor-pointer transition-all",
@@ -326,8 +326,8 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
   const goalScorerName = activeAlert?.type === 'GOAL' && activeAlert.playerId ? state.players.find(p => p.id === activeAlert.playerId)?.name : null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-1 md:p-2 font-mono z-[100] backdrop-blur-sm">
-      <div className="max-w-screen-2xl w-full max-h-[95vh] bg-black border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl min-h-[85vh]">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 pt-[max(env(safe-area-inset-top,0.5rem),0.5rem)] pb-[max(env(safe-area-inset-bottom,0.5rem),0.5rem)] md:p-2 md:pt-2 md:pb-2 font-mono z-[100] backdrop-blur-sm overflow-y-auto">
+      <div className="max-w-screen-2xl w-full max-h-[100dvh] md:max-h-[95vh] bg-black border-2 md:border-4 border-white/10 relative overflow-hidden flex flex-col shadow-2xl rounded-xl min-h-[85vh] m-auto">
         <div className="absolute inset-0 opacity-25 pointer-events-none mix-blend-overlay bg-cover bg-center" style={{ backgroundImage: stadiumOverlay ? `url("${stadiumOverlay}")` : 'none' }} />
 
         {activeAlert?.type === 'GOAL' && (
@@ -378,7 +378,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
               </div>
               <Button onClick={handleResume} className="bg-accent text-accent-foreground retro-button h-9 sm:h-10 px-6 sm:px-8 text-sm font-black uppercase shadow-xl hover:scale-105 transition-all shrink-0">Apply & Resume</Button>
             </div>
-            
+
             <Tabs defaultValue="pitch" className="flex-1 flex flex-col min-h-0">
               <TabsList className="grid w-full grid-cols-3 bg-black/70 h-10 sm:h-11 max-[1300px]:h-20 mb-2 border border-primary/20 rounded-lg gap-1 p-1 shadow-inner shrink-0">
                 <TabsTrigger value="pitch" className="uppercase font-black tracking-widest text-[12px] sm:text-[13px] max-[1300px]:text-[20px] data-[state=active]:bg-primary py-2"><LayoutDashboard size={16} className="mr-1.5 max-[1300px]:w-6 max-[1300px]:h-6" /> Tactics</TabsTrigger>
@@ -390,11 +390,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                 <TabsContent value="pitch" className="m-0 h-full p-1.5 sm:p-2 overflow-auto">
                   <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 min-h-full items-start">
                     <div className="bg-black/60 p-2 sm:p-3 border border-primary/20 rounded-xl shadow-inner h-full flex items-center justify-center min-h-[40vh] sm:min-h-[420px]">
-                      <TacticsPitch 
-                        team={activeUserTeam} 
-                        players={userPlayers} 
-                        onPlayerClick={(p) => handleSwapInteraction(p.id)} 
-                        onPlayerProfile={(p) => setViewingPlayer(p)} 
+                      <TacticsPitch
+                        team={activeUserTeam}
+                        players={userPlayers}
+                        onPlayerClick={(p) => handleSwapInteraction(p.id)}
+                        onPlayerProfile={(p) => setViewingPlayer(p)}
                         activeSwapId={swapSourceId}
                         matchCards={fixture.result?.cards.filter(c => c.minute <= currentMinute)}
                         matchInjuries={fixture.result?.injuries}
@@ -412,11 +412,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                       </h4>
                       <div className="grid grid-cols-2 gap-2">
                         {['4-4-2', '4-3-3', '3-5-2', '5-3-2', '4-5-1'].map(f => (
-                          <Button 
-                            key={f} 
-                            onClick={() => setTactics(f, activeUserTeam.playStyle)} 
+                          <Button
+                            key={f}
+                            onClick={() => setTactics(f, activeUserTeam.playStyle)}
                             className={cn(
-                              "h-10 text-base font-black rounded-lg transition-all", 
+                              "h-10 text-base font-black rounded-lg transition-all",
                               activeUserTeam.formation === f ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.3)]" : "bg-black/70 text-white border-primary/20 hover:bg-primary/10"
                             )}
                           >
@@ -432,11 +432,11 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
                       </h4>
                       <div className="grid grid-cols-2 gap-2">
                         {(['Long Ball', 'Pass to Feet', 'Counter-Attack', 'Tiki-Taka', 'Direct', 'Park the Bus'] as PlayStyle[]).map(s => (
-                          <Button 
-                            key={s} 
-                            onClick={() => setTactics(activeUserTeam.formation, s)} 
+                          <Button
+                            key={s}
+                            onClick={() => setTactics(activeUserTeam.formation, s)}
                             className={cn(
-                              "h-10 text-[12px] font-black uppercase rounded-lg transition-all leading-tight text-center", 
+                              "h-10 text-[12px] font-black uppercase rounded-lg transition-all leading-tight text-center",
                               activeUserTeam.playStyle === s ? "bg-accent text-accent-foreground border-accent shadow-[0_0_15px_rgba(38,217,117,0.3)]" : "bg-black/70 text-white border-primary/20 hover:bg-primary/10"
                             )}
                           >
@@ -450,10 +450,10 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
 
                 <TabsContent value="personnel" className="m-0 h-full overflow-auto">
                   <div className="bg-black/60 border border-primary/20 p-2 sm:p-3 rounded-xl h-full shadow-inner">
-                    <SquadList 
-                      players={userPlayers} 
-                      currentMatchRatings={fixture.result?.ratings} 
-                      onPlayerSwap={handleSwapInteraction} 
+                    <SquadList
+                      players={userPlayers}
+                      currentMatchRatings={fixture.result?.ratings}
+                      onPlayerSwap={handleSwapInteraction}
                       activeSwapId={swapSourceId}
                       hideReserves={true}
                     />
@@ -464,7 +464,7 @@ export function MatchSim({ fixture, homeTeam, awayTeam, onFinish }: {
           </div>
         )}
 
-        <MatchPlayView 
+        <MatchPlayView
           fixture={fixture}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
